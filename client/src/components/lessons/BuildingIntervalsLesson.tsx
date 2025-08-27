@@ -49,7 +49,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
   const generateExercise = () => {
     const startNote = START_NOTES[Math.floor(Math.random() * START_NOTES.length)];
     const interval = PRACTICE_INTERVALS[Math.floor(Math.random() * PRACTICE_INTERVALS.length)];
-    const direction = 'up'; // Start with up only for simplicity
+    const direction: 'up' | 'down' = 'up'; // Start with up only for simplicity
     const targetNote = buildInterval(startNote, interval, direction);
     
     const exercise = { startNote, interval, direction, targetNote };

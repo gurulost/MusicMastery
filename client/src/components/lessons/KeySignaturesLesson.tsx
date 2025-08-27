@@ -73,7 +73,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
 
   const handleTestAnswer = (answer: number) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
-    const correctAnswer = currentQuestion.sharps || currentQuestion.flats || 0;
+    const correctAnswer = 'sharps' in currentQuestion ? currentQuestion.sharps : currentQuestion.flats;
     const isCorrect = answer === correctAnswer;
     
     if (isCorrect) {
@@ -379,7 +379,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
             <div className="space-y-4">
               <div className="bg-primary/5 p-4 rounded-lg text-center">
                 <p className="text-lg mb-4">
-                  How many {currentQuestion.sharps ? 'sharps' : 'flats'} does <strong>{currentQuestion.key} Major</strong> have?
+                  How many {'sharps' in currentQuestion ? 'sharps' : 'flats'} does <strong>{currentQuestion.key} Major</strong> have?
                 </p>
               </div>
               
