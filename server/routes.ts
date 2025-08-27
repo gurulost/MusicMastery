@@ -72,9 +72,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/learning-progress/:userId', async (req, res) => {
     try {
       const { userId } = req.params;
-      // For now, return empty array since we're using in-memory storage
-      // In a real implementation, this would fetch learning progress from database
-      res.json([]);
+      const progress = await storage.getUserLearningProgress(userId);
+      res.json(progress);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch learning progress' });
     }
@@ -82,10 +81,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/learning-progress', async (req, res) => {
     try {
-      // For now, just return success since we're using in-memory storage
-      // In a real implementation, this would save learning progress to database
-      res.json({ success: true });
+      const progressData = req.body;
+      const result = await storage.updateLearningProgress(progressData);
+      res.json(result);
     } catch (error) {
+      console.error('Learning progress update error:', error);
       res.status(500).json({ error: 'Failed to update learning progress' });
     }
   });

@@ -1,6 +1,17 @@
 import { type User, type InsertUser, type Progress, type InsertProgress, type ExerciseSession, type InsertExerciseSession } from "@shared/schema";
 import { randomUUID } from "crypto";
 
+// Learning journey progress tracking
+export interface LearningProgress {
+  userId: string;
+  stepId: number;
+  section: 'learn' | 'practice' | 'test';
+  isCompleted: boolean;
+  completedAt?: Date;
+  score?: number;
+  attempts?: number;
+}
+
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
@@ -16,17 +27,23 @@ export interface IStorage {
   // Exercise session methods
   createExerciseSession(session: InsertExerciseSession): Promise<ExerciseSession>;
   getUserExerciseSessions(userId: string): Promise<ExerciseSession[]>;
+  
+  // Learning journey progress methods
+  getUserLearningProgress(userId: string): Promise<LearningProgress[]>;
+  updateLearningProgress(progress: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private progress: Map<string, Progress>;
   private exerciseSessions: Map<string, ExerciseSession>;
+  private learningProgress: Map<string, LearningProgress>;
 
   constructor() {
     this.users = new Map();
     this.progress = new Map();
     this.exerciseSessions = new Map();
+    this.learningProgress = new Map();
     
     // Create a default user for demo purposes
     const defaultUser: User = {
@@ -117,6 +134,28 @@ export class MemStorage implements IStorage {
 
   async getUserExerciseSessions(userId: string): Promise<ExerciseSession[]> {
     return Array.from(this.exerciseSessions.values()).filter(s => s.userId === userId);
+  }
+
+  async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
+    return Array.from(this.learningProgress.values()).filter(p => p.userId === userId);
+  }
+
+  async updateLearningProgress(progressData: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress> {
+    const key = `${progressData.userId}-${progressData.stepId}-${progressData.section}`;
+    const existing = this.learningProgress.get(key);
+    
+    const updated: LearningProgress = {
+      userId: progressData.userId,
+      stepId: progressData.stepId,
+      section: progressData.section as 'learn' | 'practice' | 'test',
+      isCompleted: progressData.isCompleted ?? false,
+      completedAt: progressData.isCompleted ? new Date() : existing?.completedAt,
+      score: progressData.score ?? existing?.score,
+      attempts: (existing?.attempts ?? 0) + (progressData.attempts ?? 1),
+    };
+    
+    this.learningProgress.set(key, updated);
+    return updated;
   }
 }
 

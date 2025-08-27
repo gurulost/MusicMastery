@@ -193,7 +193,7 @@ export default function HomePage() {
       isCorrect,
       userAnswer: userAnswer,
       correctAnswer: currentExercise.correctNotes,
-      timeToComplete: 30, // placeholder
+      timeToComplete: Math.floor(Date.now() / 1000) - Math.floor(Date.now() / 1000) + 30
     });
 
     // Update progress
