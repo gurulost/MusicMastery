@@ -15,19 +15,34 @@ interface PianoKeyboardProps {
   octaveRange?: number;
 }
 
-// Expanded keyboard covering 2.5 octaves: half octave below C, two full octaves from C
+// Proper piano keyboard covering 2.5 octaves: A below middle C, then C to C, then C to C, then C to F
 const EXTENDED_WHITE_KEYS: Note[] = [
-  'G', 'A', 'B', // Half octave below C
-  'C', 'D', 'E', 'F', 'G', 'A', 'B', // First full octave
-  'C', 'D', 'E', 'F', 'G', 'A', 'B', // Second full octave  
+  'A', 'B', // Half octave below middle C
+  'C', 'D', 'E', 'F', 'G', 'A', 'B', // Middle C octave
+  'C', 'D', 'E', 'F', 'G', 'A', 'B', // Next octave  
   'C', 'D', 'E', 'F' // Half octave above
 ];
 
-const EXTENDED_BLACK_KEYS: (Note | null)[] = [
-  'G#', 'A#', null, // Half octave below C
-  'C#', 'D#', null, 'F#', 'G#', 'A#', null, // First full octave
-  'C#', 'D#', null, 'F#', 'G#', 'A#', null, // Second full octave
-  'C#', 'D#', null // Half octave above
+// Black keys with their positions relative to white keys
+interface BlackKeyInfo {
+  note: Note;
+  whiteKeyIndex: number; // Index of the white key this black key sits between (left side)
+}
+
+const BLACK_KEY_POSITIONS: BlackKeyInfo[] = [
+  { note: 'A#', whiteKeyIndex: 0 }, // Between A (0) and B (1)
+  { note: 'C#', whiteKeyIndex: 2 }, // Between C (2) and D (3)  
+  { note: 'D#', whiteKeyIndex: 3 }, // Between D (3) and E (4)
+  { note: 'F#', whiteKeyIndex: 5 }, // Between F (5) and G (6)
+  { note: 'G#', whiteKeyIndex: 6 }, // Between G (6) and A (7)
+  { note: 'A#', whiteKeyIndex: 7 }, // Between A (7) and B (8)
+  { note: 'C#', whiteKeyIndex: 9 }, // Between C (9) and D (10)
+  { note: 'D#', whiteKeyIndex: 10 }, // Between D (10) and E (11)
+  { note: 'F#', whiteKeyIndex: 12 }, // Between F (12) and G (13)
+  { note: 'G#', whiteKeyIndex: 13 }, // Between G (13) and A (14)
+  { note: 'A#', whiteKeyIndex: 14 }, // Between A (14) and B (15)
+  { note: 'C#', whiteKeyIndex: 16 }, // Between C (16) and D (17)
+  { note: 'D#', whiteKeyIndex: 17 }, // Between D (17) and E (18)
 ];
 
 export function PianoKeyboard({ 
@@ -99,31 +114,35 @@ export function PianoKeyboard({
           ))}
         </div>
         
-        {/* Black Keys */}
-        <div className="absolute top-0 flex">
-          {EXTENDED_BLACK_KEYS.map((note, index) => {
-            if (!note) {
-              return <div key={`empty-${index}`} className="w-7 h-20 ml-2.5 mr-0.5" />;
-            }
+        {/* Black Keys - Properly centered between white keys */}
+        <div className="absolute top-0 left-0">
+          {BLACK_KEY_POSITIONS.map((blackKey, index) => {
+            const whiteKeyWidth = 42; // 40px width + 2px margin (mr-0.5)
+            const blackKeyWidth = 28; // 7 * 4 = 28px (w-7)
+            // Position black key centered between two white keys
+            const leftPosition = blackKey.whiteKeyIndex * whiteKeyWidth + (whiteKeyWidth - blackKeyWidth / 2);
             
             return (
               <button
-                key={`${note}-black-${index}`}
-                data-testid={`piano-key-${note}-black-${index}`}
+                key={`${blackKey.note}-black-${index}`}
+                data-testid={`piano-key-${blackKey.note}-black-${index}`}
                 className={cn(
-                  "piano-key black-key w-7 h-20 ml-1.5 mr-0.5 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10",
+                  "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
                   "hover:transform hover:translate-y-0.5",
                   {
-                    "bg-yellow-600 text-yellow-100": isSharpInKey(note),
-                    "bg-success text-success-foreground": isPlayed(note),
-                    "bg-blue-400 text-blue-100": isSelected(note),
-                    "transform translate-y-1 shadow-md": isActive(note),
-                    "bg-gray-800": !isSharpInKey(note) && !isPlayed(note) && !isSelected(note),
+                    "bg-yellow-600 text-yellow-100": isSharpInKey(blackKey.note),
+                    "bg-success text-success-foreground": isPlayed(blackKey.note),
+                    "bg-blue-400 text-blue-100": isSelected(blackKey.note),
+                    "transform translate-y-1 shadow-md": isActive(blackKey.note),
+                    "bg-gray-800": !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
-                onClick={() => handleKeyPress(note)}
+                style={{ 
+                  left: `${leftPosition}px`
+                }}
+                onClick={() => handleKeyPress(blackKey.note)}
               >
-                {showLabels && note}
+                {showLabels && blackKey.note}
               </button>
             );
           })}
