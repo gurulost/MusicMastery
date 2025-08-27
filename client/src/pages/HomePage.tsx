@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight, BookOpen, Target, Award, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { ProgressRing } from '@/components/ProgressRing';
-import { MAJOR_SCALES, MINOR_SCALES, INTERVALS, getMajorScale, getMinorScale, buildInterval } from '@/lib/musicTheory';
+import { LearningPathCard } from '@/components/LearningPathCard';
+import { MAJOR_SCALES, MINOR_SCALES, INTERVALS, getMajorScale, getMinorScale, buildInterval, getScalesByDifficulty, getIntervalsByDifficulty } from '@/lib/musicTheory';
 import { Note } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -306,71 +307,84 @@ export default function HomePage() {
           </div>
         </div>
         
-        {/* Navigation Menu */}
+        {/* Learning Navigation Menu */}
         <nav className="flex-1 p-4">
-          <ul className="space-y-2">
-            <li>
-              <Button variant="default" className="w-full justify-start" data-testid="nav-piano-practice">
-                <Keyboard className="mr-3 h-4 w-4" />
-                Piano Practice
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">INTERACTIVE PRACTICE</h3>
+            <Button variant="default" className="w-full justify-start" data-testid="nav-piano-practice">
+              <Keyboard className="mr-3 h-4 w-4" />
+              Piano Practice
+            </Button>
+          </div>
+          
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">SCALES (Foundation)</h3>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/scales">
+                  <Button variant="ghost" className="w-full justify-between" data-testid="nav-major-scales">
+                    <div className="flex items-center">
+                      <Music className="mr-3 h-4 w-4" />
+                      Major Scales
+                    </div>
+                    <span className="bg-success text-success-foreground text-xs px-2 py-1 rounded-full">
+                      {allProgress?.filter(p => p.category === 'major_scales' && p.status === 'mastered').length || 0}/12
+                    </span>
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link href="/scales">
+                  <Button variant="ghost" className="w-full justify-between" data-testid="nav-minor-scales">
+                    <div className="flex items-center">
+                      <Music className="mr-3 h-4 w-4" />
+                      Minor Scales
+                    </div>
+                    <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
+                      {allProgress?.filter(p => p.category === 'minor_scales' && p.status === 'mastered').length || 0}/12
+                    </span>
+                  </Button>
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">INTERVALS (Advanced)</h3>
+            <ul className="space-y-1">
+              <li>
+                <Link href="/intervals">
+                  <Button variant="ghost" className="w-full justify-between" data-testid="nav-intervals">
+                    <div className="flex items-center">
+                      <BookOpen className="mr-3 h-4 w-4" />
+                      Learn Intervals
+                    </div>
+                    <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
+                      {allProgress?.filter(p => p.category === 'intervals' && p.status === 'mastered').length || 0}/13
+                    </span>
+                  </Button>
+                </Link>
+              </li>
+              <li>
+                <Link href="/interval-practice">
+                  <Button variant="ghost" className="w-full justify-start" data-testid="nav-interval-practice">
+                    <Target className="mr-3 h-4 w-4" />
+                    Practice Building
+                  </Button>
+                </Link>
+              </li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">TRACKING</h3>
+            <Link href="/progress">
+              <Button variant="ghost" className="w-full justify-start" data-testid="nav-progress-report">
+                <ChartLine className="mr-3 h-4 w-4" />
+                Progress Report
               </Button>
-            </li>
-            <li>
-              <Link href="/scales">
-                <Button variant="ghost" className="w-full justify-between" data-testid="nav-major-scales">
-                  <div className="flex items-center">
-                    <Music className="mr-3 h-4 w-4" />
-                    Major Scales
-                  </div>
-                  <span className="bg-success text-success-foreground text-xs px-2 py-1 rounded-full">
-                    {allProgress?.filter(p => p.category === 'major_scales' && p.status === 'mastered').length || 0}/12
-                  </span>
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link href="/scales">
-                <Button variant="ghost" className="w-full justify-between" data-testid="nav-minor-scales">
-                  <div className="flex items-center">
-                    <Music className="mr-3 h-4 w-4" />
-                    Minor Scales
-                  </div>
-                  <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
-                    {allProgress?.filter(p => p.category === 'minor_scales' && p.status === 'mastered').length || 0}/12
-                  </span>
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link href="/intervals">
-                <Button variant="ghost" className="w-full justify-between" data-testid="nav-intervals">
-                  <div className="flex items-center">
-                    <CornerLeftUp className="mr-3 h-4 w-4" />
-                    Intervals Overview
-                  </div>
-                  <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
-                    {allProgress?.filter(p => p.category === 'intervals' && p.status === 'mastered').length || 0}/13
-                  </span>
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link href="/interval-practice">
-                <Button variant="ghost" className="w-full justify-start" data-testid="nav-interval-practice">
-                  <CornerLeftUp className="mr-3 h-4 w-4" />
-                  Interval Practice
-                </Button>
-              </Link>
-            </li>
-            <li>
-              <Link href="/progress">
-                <Button variant="ghost" className="w-full justify-start" data-testid="nav-progress-report">
-                  <ChartLine className="mr-3 h-4 w-4" />
-                  Progress Report
-                </Button>
-              </Link>
-            </li>
-          </ul>
+            </Link>
+          </div>
         </nav>
       </div>
 
@@ -381,7 +395,7 @@ export default function HomePage() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold">Interactive Piano Practice</h2>
-              <p className="text-muted-foreground">Practice scales and intervals with visual feedback</p>
+              <p className="text-muted-foreground">Learn and practice scales and intervals with step-by-step guidance</p>
             </div>
             <div className="flex items-center space-x-4">
               <Button 
@@ -458,13 +472,15 @@ export default function HomePage() {
                     )}
                   </div>
                   {currentExercise.mode === 'learn' && (
-                    <div className="text-sm text-muted-foreground">
-                      💡 In Learn Mode: Click keys to select/unselect them. Order doesn't matter.
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                      <p className="text-sm text-blue-800 font-medium mb-1">📚 Learning Mode Active</p>
+                      <p className="text-sm text-blue-700">Click piano keys to select/unselect them. Focus on identifying the correct notes. Order doesn't matter - just find all the right keys!</p>
                     </div>
                   )}
                   {currentExercise.mode === 'practice' && (
-                    <div className="text-sm text-muted-foreground">
-                      🎹 In Practice Mode: Click keys in the correct order as if playing the scale/interval.
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <p className="text-sm text-green-800 font-medium mb-1">🎯 Practice Mode Active</p>
+                      <p className="text-sm text-green-700">Click piano keys in the correct sequence. This simulates actually playing the scale or interval on a real piano.</p>
                     </div>
                   )}
                 </CardContent>

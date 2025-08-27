@@ -54,7 +54,15 @@ export default function ScalesPage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Scale Mastery Progress</h1>
+          <h1 className="text-3xl font-bold mb-4">Scale Mastery Progress</h1>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">📚 Learning Strategy</h3>
+            <p className="text-sm text-blue-700">
+              <strong>Start with Major Scales:</strong> Begin with C Major (no sharps/flats), then G Major (1 sharp), and progress gradually.
+              <br />
+              <strong>Then Minor Scales:</strong> Learn natural minor scales - they share key signatures with their relative majors.
+            </p>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Major Scales */}

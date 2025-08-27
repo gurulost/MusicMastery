@@ -20,6 +20,8 @@ interface IntervalExercise {
   interval: IntervalType;
   targetNote: Note;
   explanation: string;
+  learningTip: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
   mode: 'learn' | 'practice';
 }
 
@@ -35,7 +37,7 @@ export default function IntervalPracticePage() {
 
   // Fetch interval progress
   const { data: intervalProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress/demo-user/intervals'],
+    queryKey: ['/api/progress', DEMO_USER_ID, 'intervals'],
   });
 
   // Update progress mutation
@@ -62,13 +64,15 @@ export default function IntervalPracticePage() {
     const startNote = START_NOTES[Math.floor(Math.random() * START_NOTES.length)];
     const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
     const targetNote = buildInterval(startNote, interval.name, 'up');
-    const explanation = getIntervalExplanation(interval.name);
+    const intervalInfo = getIntervalExplanation(interval.name);
 
     setCurrentExercise({
       startNote,
       interval: interval.name,
       targetNote,
-      explanation,
+      explanation: intervalInfo.explanation,
+      learningTip: intervalInfo.learningTip,
+      difficulty: intervalInfo.difficulty,
       mode: exerciseMode,
     });
 
@@ -259,6 +263,9 @@ export default function IntervalPracticePage() {
                         <p className="text-sm text-blue-700">{currentExercise.explanation}</p>
                         <p className="text-sm text-blue-700 mt-1">
                           From {currentExercise.startNote} to {currentExercise.targetNote} = {currentExercise.interval}
+                        </p>
+                        <p className="text-sm text-blue-700 mt-2 font-medium">
+                          💡 {currentExercise.learningTip}
                         </p>
                       </div>
                     </div>
