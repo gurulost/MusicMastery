@@ -1,0 +1,156 @@
+import { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'wouter';
+import { ArrowLeft, ArrowRight, CheckCircle, Play, RotateCcw, Lightbulb, Target } from 'lucide-react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PianoKeyboard } from '@/components/PianoKeyboard';
+import { MusicalAlphabetLesson } from '@/components/lessons/MusicalAlphabetLesson';
+import { WholeHalfStepsLesson } from '@/components/lessons/WholeHalfStepsLesson';
+import { MajorScalesLesson } from '@/components/lessons/MajorScalesLesson';
+import { MinorScalesLesson } from '@/components/lessons/MinorScalesLesson';
+import { KeySignaturesLesson } from '@/components/lessons/KeySignaturesLesson';
+import { UnderstandingIntervalsLesson } from '@/components/lessons/UnderstandingIntervalsLesson';
+import { BuildingIntervalsLesson } from '@/components/lessons/BuildingIntervalsLesson';
+
+const LESSON_COMPONENTS = {
+  1: {
+    learn: MusicalAlphabetLesson,
+    practice: MusicalAlphabetLesson,
+    test: MusicalAlphabetLesson
+  },
+  2: {
+    learn: WholeHalfStepsLesson,
+    practice: WholeHalfStepsLesson,
+    test: WholeHalfStepsLesson
+  },
+  3: {
+    learn: MajorScalesLesson,
+    practice: MajorScalesLesson,
+    test: MajorScalesLesson
+  },
+  4: {
+    learn: MinorScalesLesson,
+    practice: MinorScalesLesson,
+    test: MinorScalesLesson
+  },
+  5: {
+    learn: KeySignaturesLesson,
+    practice: KeySignaturesLesson,
+    test: KeySignaturesLesson
+  },
+  6: {
+    learn: UnderstandingIntervalsLesson,
+    practice: UnderstandingIntervalsLesson,
+    test: UnderstandingIntervalsLesson
+  },
+  7: {
+    learn: BuildingIntervalsLesson,
+    practice: BuildingIntervalsLesson,
+    test: BuildingIntervalsLesson
+  }
+};
+
+export default function LessonPage() {
+  const params = useParams();
+  const [, navigate] = useLocation();
+  
+  const stepId = parseInt(params.stepId || '1');
+  const section = (params.section as 'learn' | 'practice' | 'test') || 'learn';
+
+  const LessonComponent = LESSON_COMPONENTS[stepId as keyof typeof LESSON_COMPONENTS]?.[section];
+
+  const handleCompleteSection = () => {
+    // Navigate to next section or back to journey
+    if (section === 'learn') {
+      navigate(`/lesson/${stepId}/practice`);
+    } else if (section === 'practice') {
+      navigate(`/lesson/${stepId}/test`);
+    } else {
+      // Test completed, go back to journey or next step
+      if (stepId < 7) {
+        navigate(`/lesson/${stepId + 1}/learn`);
+      } else {
+        navigate('/learning-journey');
+      }
+    }
+  };
+
+  const getSectionTitle = () => {
+    const titles = {
+      learn: 'Learn the Concept',
+      practice: 'Practice the Skill',
+      test: 'Test Your Mastery'
+    };
+    return titles[section];
+  };
+
+  const getSectionIcon = () => {
+    const icons = {
+      learn: <Lightbulb className="h-5 w-5" />,
+      practice: <Target className="h-5 w-5" />,
+      test: <CheckCircle className="h-5 w-5" />
+    };
+    return icons[section];
+  };
+
+  if (!LessonComponent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-bold mb-2">Lesson Not Found</h2>
+            <p className="text-muted-foreground mb-4">This lesson is still being developed.</p>
+            <Link href="/learning-journey">
+              <Button>Back to Learning Journey</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <Link href="/learning-journey">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Journey
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <span>Step {stepId} of 7</span>
+            <span>•</span>
+            <span>{getSectionTitle()}</span>
+          </div>
+        </div>
+
+        {/* Section Header */}
+        <div className="max-w-4xl mx-auto mb-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                {getSectionIcon()}
+                <span className="ml-2">{getSectionTitle()}</span>
+              </CardTitle>
+            </CardHeader>
+          </Card>
+        </div>
+
+        {/* Lesson Content */}
+        <div className="max-w-4xl mx-auto">
+          <LessonComponent 
+            section={section}
+            onComplete={handleCompleteSection}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

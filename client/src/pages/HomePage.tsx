@@ -377,7 +377,13 @@ export default function HomePage() {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2">TRACKING</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">GUIDED LEARNING</h3>
+            <Link href="/learning-journey">
+              <Button variant="secondary" className="w-full justify-start mb-2" data-testid="nav-learning-journey">
+                <BookOpen className="mr-3 h-4 w-4" />
+                Step-by-Step Journey
+              </Button>
+            </Link>
             <Link href="/progress">
               <Button variant="ghost" className="w-full justify-start" data-testid="nav-progress-report">
                 <ChartLine className="mr-3 h-4 w-4" />

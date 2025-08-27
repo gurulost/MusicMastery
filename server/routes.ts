@@ -68,6 +68,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Learning progress routes (for guided journey)
+  app.get('/api/learning-progress/:userId', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      // For now, return empty array since we're using in-memory storage
+      // In a real implementation, this would fetch learning progress from database
+      res.json([]);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch learning progress' });
+    }
+  });
+
+  app.post('/api/learning-progress', async (req, res) => {
+    try {
+      // For now, just return success since we're using in-memory storage
+      // In a real implementation, this would save learning progress to database
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update learning progress' });
+    }
+  });
+
   // Get overall progress summary
   app.get("/api/progress-summary/:userId", async (req, res) => {
     try {

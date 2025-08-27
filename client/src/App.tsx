@@ -8,6 +8,8 @@ import ScalesPage from "@/pages/ScalesPage";
 import IntervalsPage from "@/pages/IntervalsPage";
 import IntervalPracticePage from "@/pages/IntervalPracticePage";
 import ProgressPage from "@/pages/ProgressPage";
+import LearningJourneyPage from "@/pages/LearningJourneyPage";
+import LessonPage from "@/pages/LessonPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +20,8 @@ function Router() {
       <Route path="/intervals" component={IntervalsPage} />
       <Route path="/interval-practice" component={IntervalPracticePage} />
       <Route path="/progress" component={ProgressPage} />
+      <Route path="/learning-journey" component={LearningJourneyPage} />
+      <Route path="/lesson/:stepId/:section" component={LessonPage} />
       <Route component={NotFound} />
     </Switch>
   );
