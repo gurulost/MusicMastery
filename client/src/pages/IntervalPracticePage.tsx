@@ -10,8 +10,7 @@ import { Note, IntervalType } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { audioEngine } from '@/lib/audio';
-
-const DEMO_USER_ID = 'demo-user';
+import { useUser } from '@/contexts/UserContext';
 
 const START_NOTES: Note[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 
@@ -34,10 +33,12 @@ export default function IntervalPracticePage() {
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
 
   // Fetch interval progress
   const { data: intervalProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress', DEMO_USER_ID, 'intervals'],
+    queryKey: ['/api/progress', currentUser?.id, 'intervals'],
+    enabled: !!currentUser?.id,
   });
 
   // Update progress mutation
@@ -126,7 +127,7 @@ export default function IntervalPracticePage() {
 
     // Record the exercise session
     await recordSession.mutateAsync({
-      userId: DEMO_USER_ID,
+      userId: currentUser?.id,
       category: 'intervals',
       itemName: currentExercise.interval,
       isCorrect,
@@ -151,7 +152,7 @@ export default function IntervalPracticePage() {
     }
 
     await updateProgress.mutateAsync({
-      userId: DEMO_USER_ID,
+      userId: currentUser?.id,
       category: 'intervals',
       itemName: currentExercise.interval,
       status: newStatus,

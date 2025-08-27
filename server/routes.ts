@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "This name is already taken" });
       }
 
-      const user = await storage.createUser({ username: username.trim() });
+      const user = await storage.createUser({ username: username.trim(), password: 'no-password' });
       res.json({ id: user.id, username: user.username });
     } catch (error) {
       res.status(500).json({ message: "Failed to create user" });

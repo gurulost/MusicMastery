@@ -15,6 +15,7 @@ import { MinorScalesLesson } from '@/components/lessons/MinorScalesLesson';
 import { KeySignaturesLesson } from '@/components/lessons/KeySignaturesLesson';
 import { UnderstandingIntervalsLesson } from '@/components/lessons/UnderstandingIntervalsLesson';
 import { BuildingIntervalsLesson } from '@/components/lessons/BuildingIntervalsLesson';
+import { useUser } from '@/contexts/UserContext';
 
 const LESSON_COMPONENTS = {
   1: {
@@ -54,13 +55,14 @@ const LESSON_COMPONENTS = {
   }
 };
 
-const DEMO_USER_ID = 'demo-user';
+// Using user context instead of hardcoded ID
 
 export default function LessonPage() {
   const params = useParams();
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
   
   const stepId = parseInt(params.stepId || '1');
   const section = (params.section as 'learn' | 'practice' | 'test') || 'learn';
@@ -71,7 +73,7 @@ export default function LessonPage() {
   const updateProgress = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest('POST', '/api/learning-progress', {
-        userId: DEMO_USER_ID,
+        userId: currentUser?.id,
         stepId,
         section,
         isCompleted: true,
