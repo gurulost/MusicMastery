@@ -132,7 +132,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
 
   const getMasteryLevel = () => {
     const accuracy = correctAnswers / Math.max(attempts, 1);
-    if (accuracy >= 0.95) return { level: 'Interval Builder', icon: Trophy, color: 'text-gold-600' };
+    if (accuracy >= 0.95) return { level: 'Interval Builder', icon: Trophy, color: 'text-yellow-600' };
     if (accuracy >= 0.85) return { level: 'Proficient', icon: Star, color: 'text-green-600' };
     if (accuracy >= 0.70) return { level: 'Developing', icon: Target, color: 'text-blue-600' };
     return { level: 'Learning', icon: Brain, color: 'text-gray-600' };
@@ -552,11 +552,11 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
             <div className="text-center space-y-4">
               {correctAnswers >= 6 ? (
                 <div>
-                  <Trophy className="h-16 w-16 text-gold-500 mx-auto mb-4" />
+                  <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-success">
                     🎉 MASTERY ACHIEVED! Score: {correctAnswers}/{testQuestions.length}
                   </h3>
-                  <Badge className="mb-4 bg-gold-100 text-gold-800">{getMasteryLevel().level} Level</Badge>
+                  <Badge className="mb-4 bg-yellow-100 text-yellow-800">{getMasteryLevel().level} Level</Badge>
                   <p className="text-success mb-4">
                     🎊 Congratulations! You've completed the entire AP Music Theory foundation! 
                     You can now build intervals, construct scales, identify key signatures, and understand the mathematical beauty of music.
@@ -573,7 +573,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                       <li>✓ Interval construction from any starting note</li>
                     </ul>
                   </div>
-                  <Button onClick={onComplete} size="lg" className="bg-gold-600 hover:bg-gold-700">
+                  <Button onClick={onComplete} size="lg" className="bg-yellow-600 hover:bg-yellow-700">
                     Complete Learning Journey 🎵
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>

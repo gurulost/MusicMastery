@@ -19,7 +19,7 @@ export function AchievementBadge({ type, isEarned, size = 'md' }: AchievementBad
       name: 'Scale Expert',
       description: 'Mastered all 24 scales',
       icon: Trophy,
-      color: 'text-gold-600',
+      color: 'text-yellow-600',
       bgColor: isEarned ? 'bg-yellow-200' : 'bg-gray-100',
     },
     interval_beginner: {

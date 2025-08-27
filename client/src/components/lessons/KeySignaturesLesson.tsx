@@ -623,7 +623,10 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
 
               <div className="bg-primary/5 p-6 rounded-lg text-center">
                 <p className="text-lg mb-4">
-                  How many {'sharps' in currentQuestion ? 'sharps' : 'flats'} does <strong>{currentQuestion.key} Major</strong> have?
+                  How many {(() => {
+                    const keyData = KEY_SIGNATURES.find(k => k.key === currentQuestion.key);
+                    return keyData && 'sharps' in keyData && keyData.sharps > 0 ? 'sharps' : 'flats';
+                  })()} does <strong>{currentQuestion.key} Major</strong> have?
                 </p>
                 
                 <div className="mt-4 space-x-2">
