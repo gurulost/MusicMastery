@@ -1,10 +1,23 @@
 # Overview
 
-This is a music theory learning application that helps users practice and master musical scales and intervals. The app features an interactive piano keyboard interface where users can practice identifying and playing major scales, minor scales, and various musical intervals. It tracks user progress, provides real-time feedback, and gamifies the learning experience with completion tracking and mastery indicators.
+This is a comprehensive music theory learning application designed for AP Music Theory exam preparation. The app features an interactive piano keyboard interface covering 2.5 octaves where users can learn and practice major scales, minor scales, and various musical intervals. It includes both learning and practice modes, tracks user progress with detailed analytics, provides real-time feedback, and offers a complete educational experience with explanations, hints, and audio playback.
+
+# Recent Changes
+
+**August 27, 2025:**
+- ✓ Expanded piano keyboard to cover 2.5 octaves (half octave below C, two full octaves from C, half octave above)
+- ✓ Added toggle functionality - users can click keys to select/unselect them
+- ✓ Implemented dual learning modes: "Learn Mode" (select correct notes) and "Practice Mode" (play in sequence)
+- ✓ Enhanced educational design with comprehensive explanations, hints, and musical theory context
+- ✓ Added dedicated interval practice page with detailed interval explanations
+- ✓ Improved progress tracking to handle 37 total items (12 major + 12 minor + 13 intervals)
+- ✓ Enhanced user interface with better visual feedback and educational content
+- ✓ Added audio playbook for intervals and scales
 
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
+Learning Focus: Comprehensive AP Music Theory preparation with both teaching and practice components.
 
 # System Architecture
 

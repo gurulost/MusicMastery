@@ -8,7 +8,7 @@ import { MAJOR_SCALES, MINOR_SCALES } from '@/lib/musicTheory';
 const DEMO_USER_ID = 'demo-user';
 
 export default function ScalesPage() {
-  const { data: allProgress } = useQuery({
+  const { data: allProgress } = useQuery<any[]>({
     queryKey: ['/api/progress', DEMO_USER_ID],
   });
 

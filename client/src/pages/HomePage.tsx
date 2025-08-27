@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { ProgressRing } from '@/components/ProgressRing';
-import { MAJOR_SCALES, MINOR_SCALES, INTERVALS, getMajorScale, getMinorScale } from '@/lib/musicTheory';
+import { MAJOR_SCALES, MINOR_SCALES, INTERVALS, getMajorScale, getMinorScale, buildInterval } from '@/lib/musicTheory';
 import { Note } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { audioEngine } from '@/lib/audio';
 
 const DEMO_USER_ID = 'demo-user';
 
@@ -26,12 +27,19 @@ interface CurrentExercise {
   itemName: string;
   instruction: string;
   correctNotes: Note[];
+  mode: 'learn' | 'practice';
+  explanation?: string;
+  hint?: string;
+  startNote?: Note;
 }
 
 export default function HomePage() {
   const [currentExercise, setCurrentExercise] = useState<CurrentExercise | null>(null);
   const [playedNotes, setPlayedNotes] = useState<Note[]>([]);
+  const [selectedNotes, setSelectedNotes] = useState<Note[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,7 +49,7 @@ export default function HomePage() {
   });
 
   // Fetch all progress
-  const { data: allProgress } = useQuery({
+  const { data: allProgress } = useQuery<any[]>({
     queryKey: ['/api/progress', DEMO_USER_ID],
   });
 
@@ -71,30 +79,64 @@ export default function HomePage() {
 
   // Generate a random exercise
   const generateExercise = () => {
-    const categories = ['major_scales', 'minor_scales'];
-    const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales';
+    const categories = ['major_scales', 'minor_scales', 'intervals'];
+    const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales' | 'intervals';
     
     let itemName: string;
     let correctNotes: Note[];
     let instruction: string;
+    let explanation: string;
+    let hint: string;
+    let startNote: Note | undefined;
 
     if (category === 'major_scales') {
       itemName = MAJOR_SCALES[Math.floor(Math.random() * MAJOR_SCALES.length)];
       const [tonic] = itemName.split(' ');
       const scale = getMajorScale(tonic as Note);
       correctNotes = scale.notes;
-      instruction = `Play the ${itemName} scale. This scale has ${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`;
-    } else {
+      instruction = exerciseMode === 'learn' ? 
+        `Learn the ${itemName} scale by clicking the correct notes:` :
+        `Play the ${itemName} scale by clicking the keys in order:`;
+      explanation = `The ${itemName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. It has ${scale.sharps.length === 0 ? 'no sharps or flats' : `${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`}.`;
+      hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${tonic} and follow the major scale pattern.`;
+    } else if (category === 'minor_scales') {
       itemName = MINOR_SCALES[Math.floor(Math.random() * MINOR_SCALES.length)];
       const [tonic] = itemName.split(' ');
       const scale = getMinorScale(tonic as Note);
       correctNotes = scale.notes;
-      instruction = `Play the ${itemName} scale. This scale has ${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`;
+      instruction = exerciseMode === 'learn' ? 
+        `Learn the ${itemName} scale by clicking the correct notes:` :
+        `Play the ${itemName} scale by clicking the keys in order:`;
+      explanation = `The ${itemName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. It has ${scale.sharps.length === 0 ? 'no sharps or flats' : `${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`}.`;
+      hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${tonic} minor scale has the same key signature as its relative major.`;
+    } else {
+      const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
+      const startNotes: Note[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+      startNote = startNotes[Math.floor(Math.random() * startNotes.length)];
+      const endNote = buildInterval(startNote, interval.name, 'up');
+      itemName = `${interval.name} from ${startNote}`;
+      correctNotes = [startNote, endNote];
+      instruction = exerciseMode === 'learn' ? 
+        `Learn to build a ${interval.name} up from ${startNote}:` :
+        `Build a ${interval.name} up from ${startNote} by clicking both notes:`;
+      explanation = `A ${interval.name} (${interval.shortName}) spans ${interval.semitones} semitones. From ${startNote}, count up ${interval.semitones} half steps to reach ${endNote}.`;
+      hint = `Count the semitones: ${interval.semitones} half steps up from ${startNote} gives you ${endNote}.`;
     }
 
-    setCurrentExercise({ category, itemName, instruction, correctNotes });
+    setCurrentExercise({ 
+      category, 
+      itemName, 
+      instruction, 
+      correctNotes, 
+      mode: exerciseMode,
+      explanation,
+      hint,
+      startNote 
+    });
     setPlayedNotes([]);
+    setSelectedNotes([]);
     setIsCompleted(false);
+    setShowHint(false);
   };
 
   // Initialize first exercise
@@ -104,17 +146,43 @@ export default function HomePage() {
     }
   }, [currentExercise]);
 
-  const handleNoteClick = (note: Note) => {
-    if (isCompleted) return;
+  const handleNoteToggle = (note: Note) => {
+    if (isCompleted && currentExercise?.mode === 'practice') return;
     
-    const newPlayedNotes = [...playedNotes, note];
-    setPlayedNotes(newPlayedNotes);
+    setSelectedNotes(prev => {
+      if (prev.includes(note)) {
+        return prev.filter(n => n !== note);
+      } else {
+        return [...prev, note];
+      }
+    });
+  };
+
+  const handleNoteClick = (note: Note) => {
+    if (isCompleted && currentExercise?.mode === 'practice') return;
+    
+    if (currentExercise?.mode === 'practice') {
+      const newPlayedNotes = [...playedNotes, note];
+      setPlayedNotes(newPlayedNotes);
+    }
   };
 
   const handleCheckAnswer = async () => {
     if (!currentExercise) return;
 
-    const isCorrect = JSON.stringify(playedNotes) === JSON.stringify(currentExercise.correctNotes);
+    let isCorrect: boolean;
+    let userAnswer: Note[];
+
+    if (currentExercise.mode === 'learn') {
+      // In learn mode, check if selected notes match correct notes (order doesn't matter)
+      userAnswer = [...selectedNotes].sort();
+      const correctAnswer = [...currentExercise.correctNotes].sort();
+      isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+    } else {
+      // In practice mode, check sequence order
+      userAnswer = playedNotes;
+      isCorrect = JSON.stringify(playedNotes) === JSON.stringify(currentExercise.correctNotes);
+    }
     
     // Record the exercise session
     await recordSession.mutateAsync({
@@ -122,7 +190,7 @@ export default function HomePage() {
       category: currentExercise.category,
       itemName: currentExercise.itemName,
       isCorrect,
-      userAnswer: playedNotes,
+      userAnswer: userAnswer,
       correctAnswer: currentExercise.correctNotes,
       timeToComplete: 30, // placeholder
     });
@@ -168,7 +236,18 @@ export default function HomePage() {
 
   const handleTryAgain = () => {
     setPlayedNotes([]);
+    setSelectedNotes([]);
     setIsCompleted(false);
+    setShowHint(false);
+  };
+
+  const handleShowHint = () => {
+    setShowHint(true);
+  };
+
+  const handleSwitchMode = () => {
+    setExerciseMode(prev => prev === 'learn' ? 'practice' : 'learn');
+    generateExercise();
   };
 
   const handleNextExercise = () => {
@@ -267,11 +346,19 @@ export default function HomePage() {
                 <Button variant="ghost" className="w-full justify-between" data-testid="nav-intervals">
                   <div className="flex items-center">
                     <CornerLeftUp className="mr-3 h-4 w-4" />
-                    Intervals
+                    Intervals Overview
                   </div>
                   <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
                     {allProgress?.filter(p => p.category === 'intervals' && p.status === 'mastered').length || 0}/13
                   </span>
+                </Button>
+              </Link>
+            </li>
+            <li>
+              <Link href="/interval-practice">
+                <Button variant="ghost" className="w-full justify-start" data-testid="nav-interval-practice">
+                  <CornerLeftUp className="mr-3 h-4 w-4" />
+                  Interval Practice
                 </Button>
               </Link>
             </li>
@@ -305,8 +392,23 @@ export default function HomePage() {
                 <Play className="mr-2 h-4 w-4" />Play Scale
               </Button>
               <Button 
+                variant="outline" 
+                onClick={handleSwitchMode}
+                data-testid="button-switch-mode"
+              >
+                Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode
+              </Button>
+              <Button 
+                variant="secondary" 
+                onClick={handleShowHint}
+                disabled={showHint}
+                data-testid="button-show-hint"
+              >
+                Show Hint
+              </Button>
+              <Button 
                 onClick={handleCheckAnswer} 
-                disabled={playedNotes.length === 0 || isCompleted}
+                disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0) || isCompleted}
                 data-testid="button-check-answer"
               >
                 <Check className="mr-2 h-4 w-4" />Check Answer
@@ -325,19 +427,46 @@ export default function HomePage() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">Current Exercise</h3>
                     <div className="flex items-center space-x-2">
+                      <span className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
+                        {currentExercise.mode === 'learn' ? 'Learning' : 'Practice'} Mode
+                      </span>
                       <span className="px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
                         {currentExercise.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </span>
                     </div>
                   </div>
-                  <div className="bg-muted p-4 rounded-lg">
+                  <div className="bg-muted p-4 rounded-lg mb-4">
                     <p className="text-lg font-medium mb-2" data-testid="exercise-task">
                       Task: {currentExercise.itemName}
                     </p>
-                    <p className="text-muted-foreground" data-testid="exercise-instruction">
+                    <p className="text-muted-foreground mb-3" data-testid="exercise-instruction">
                       {currentExercise.instruction}
                     </p>
+                    {currentExercise.explanation && (
+                      <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
+                        <p className="text-sm text-blue-800">
+                          <strong>Learn:</strong> {currentExercise.explanation}
+                        </p>
+                      </div>
+                    )}
+                    {showHint && currentExercise.hint && (
+                      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3">
+                        <p className="text-sm text-yellow-800">
+                          <strong>Hint:</strong> {currentExercise.hint}
+                        </p>
+                      </div>
+                    )}
                   </div>
+                  {currentExercise.mode === 'learn' && (
+                    <div className="text-sm text-muted-foreground">
+                      💡 In Learn Mode: Click keys to select/unselect them. Order doesn't matter.
+                    </div>
+                  )}
+                  {currentExercise.mode === 'practice' && (
+                    <div className="text-sm text-muted-foreground">
+                      🎹 In Practice Mode: Click keys in the correct order as if playing the scale/interval.
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -351,14 +480,30 @@ export default function HomePage() {
                 <PianoKeyboard
                   highlightedNotes={isCompleted ? highlightedNotes : []}
                   sharpsInKey={keySignature?.sharps || []}
-                  playedNotes={playedNotes}
+                  playedNotes={currentExercise?.mode === 'practice' ? playedNotes : []}
+                  selectedNotes={currentExercise?.mode === 'learn' ? selectedNotes : []}
                   onNoteClick={handleNoteClick}
+                  onNoteToggle={currentExercise?.mode === 'learn' ? handleNoteToggle : undefined}
                 />
                 <div className="mt-4 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Keys highlighted in <span className="text-primary font-medium">blue</span> are correct scale tones.
-                    Keys highlighted in <span className="text-yellow-600 font-medium">yellow</span> are sharps in this key.
-                  </p>
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>
+                      Keys highlighted in <span className="text-primary font-medium">blue</span> show correct answers when completed.
+                    </p>
+                    <p>
+                      Keys highlighted in <span className="text-yellow-600 font-medium">yellow</span> are sharps/flats in this key signature.
+                    </p>
+                    {currentExercise?.mode === 'learn' && (
+                      <p>
+                        Keys with <span className="text-blue-600 font-medium">blue background</span> are your current selections.
+                      </p>
+                    )}
+                    {currentExercise?.mode === 'practice' && (
+                      <p>
+                        Keys highlighted in <span className="text-success font-medium">green</span> show your played sequence.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -369,10 +514,10 @@ export default function HomePage() {
             <Button 
               variant="secondary" 
               onClick={handleTryAgain}
-              disabled={playedNotes.length === 0}
+              disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0)}
               data-testid="button-try-again"
             >
-              <RotateCcw className="mr-2 h-4 w-4" />Try Again
+              <RotateCcw className="mr-2 h-4 w-4" />Reset
             </Button>
             <Button 
               onClick={handleNextExercise}

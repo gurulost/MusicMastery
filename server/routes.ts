@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       const allProgress = await storage.getUserProgress(userId);
       
-      const totalItems = 40; // 12 major + 12 minor + 16 intervals
+      const totalItems = 37; // 12 major + 12 minor + 13 intervals
       const mastered = allProgress.filter(p => p.status === 'mastered').length;
       const inProgress = allProgress.filter(p => p.status === 'in_progress').length;
       const notStarted = totalItems - mastered - inProgress;

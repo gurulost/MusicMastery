@@ -20,11 +20,11 @@ export default function ProgressPage() {
     queryKey: ['/api/progress-summary', DEMO_USER_ID],
   });
 
-  const { data: allProgress } = useQuery({
+  const { data: allProgress } = useQuery<any[]>({
     queryKey: ['/api/progress', DEMO_USER_ID],
   });
 
-  const { data: exerciseSessions } = useQuery({
+  const { data: exerciseSessions } = useQuery<any[]>({
     queryKey: ['/api/exercise-sessions', DEMO_USER_ID],
   });
 

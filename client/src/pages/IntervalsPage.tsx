@@ -8,7 +8,7 @@ import { INTERVALS } from '@/lib/musicTheory';
 const DEMO_USER_ID = 'demo-user';
 
 export default function IntervalsPage() {
-  const { data: allProgress } = useQuery({
+  const { data: allProgress } = useQuery<any[]>({
     queryKey: ['/api/progress', DEMO_USER_ID],
   });
 
@@ -53,7 +53,14 @@ export default function IntervalsPage() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Interval Building Progress</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Interval Building Progress</h1>
+            <Link href="/interval-practice">
+              <Button data-testid="button-start-practice">
+                Start Interval Practice
+              </Button>
+            </Link>
+          </div>
           
           <Card>
             <CardHeader>

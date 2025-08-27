@@ -90,6 +90,9 @@ export class MemStorage implements IStorage {
       const newProgress: Progress = {
         ...insertProgress,
         id,
+        status: insertProgress.status || 'not_started',
+        attempts: insertProgress.attempts || 0,
+        correctAnswers: insertProgress.correctAnswers || 0,
         lastPracticed: new Date(),
         masteredAt: insertProgress.status === 'mastered' ? new Date() : null,
       };
@@ -103,6 +106,9 @@ export class MemStorage implements IStorage {
     const session: ExerciseSession = {
       ...insertSession,
       id,
+      userAnswer: insertSession.userAnswer || null,
+      correctAnswer: insertSession.correctAnswer || null,
+      timeToComplete: insertSession.timeToComplete || null,
       createdAt: new Date(),
     };
     this.exerciseSessions.set(id, session);
