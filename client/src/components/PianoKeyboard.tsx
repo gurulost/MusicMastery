@@ -100,9 +100,9 @@ export function PianoKeyboard({
                 "piano-key white-key w-10 h-32 mr-0.5 flex items-end justify-center pb-2 text-xs font-medium border border-border rounded-b-md transition-all duration-100 select-none cursor-pointer",
                 "hover:transform hover:translate-y-0.5",
                 {
-                  "bg-primary text-primary-foreground": isHighlighted(note),
-                  "bg-success text-success-foreground": isPlayed(note),
-                  "bg-blue-200 border-blue-400 text-blue-800": isSelected(note),
+                  "bg-green-500 text-white border-green-600": isHighlighted(note), // Green for correct answers
+                  "bg-orange-400 text-white border-orange-500": isPlayed(note), // Orange for played sequence
+                  "bg-purple-200 border-purple-400 text-purple-800": isSelected(note), // Purple for current selections
                   "transform translate-y-1 shadow-md": isActive(note),
                   "bg-card": !isHighlighted(note) && !isPlayed(note) && !isSelected(note),
                 }
@@ -130,9 +130,9 @@ export function PianoKeyboard({
                   "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
                   "hover:transform hover:translate-y-0.5",
                   {
-                    "bg-yellow-600 text-yellow-100": isSharpInKey(blackKey.note),
-                    "bg-success text-success-foreground": isPlayed(blackKey.note),
-                    "bg-blue-400 text-blue-100": isSelected(blackKey.note),
+                    "bg-yellow-600 text-yellow-100": isSharpInKey(blackKey.note), // Yellow for sharps in key
+                    "bg-orange-600 text-white": isPlayed(blackKey.note), // Orange for played sequence
+                    "bg-purple-500 text-white": isSelected(blackKey.note), // Purple for current selections
                     "transform translate-y-1 shadow-md": isActive(blackKey.note),
                     "bg-gray-800": !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
