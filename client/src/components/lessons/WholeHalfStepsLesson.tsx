@@ -100,7 +100,8 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
       setShowHint(false);
     } else {
       if (correctAnswers + (isCorrect ? 1 : 0) >= 8) {
-        onComplete();
+        const finalScore = Math.round((correctAnswers / testQuestions.length) * 100);
+        onComplete(finalScore);
       }
     }
   };

@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'wouter';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ArrowRight, CheckCircle, Play, RotateCcw, Lightbulb, Target } from 'lucide-react';
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { MusicalAlphabetLesson } from '@/components/lessons/MusicalAlphabetLesson';
 import { WholeHalfStepsLesson } from '@/components/lessons/WholeHalfStepsLesson';
@@ -51,28 +54,64 @@ const LESSON_COMPONENTS = {
   }
 };
 
+const DEMO_USER_ID = 'demo-user';
+
 export default function LessonPage() {
   const params = useParams();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const stepId = parseInt(params.stepId || '1');
   const section = (params.section as 'learn' | 'practice' | 'test') || 'learn';
 
   const LessonComponent = LESSON_COMPONENTS[stepId as keyof typeof LESSON_COMPONENTS]?.[section];
 
-  const handleCompleteSection = () => {
-    // Navigate to next section or back to journey
-    if (section === 'learn') {
-      navigate(`/lesson/${stepId}/practice`);
-    } else if (section === 'practice') {
-      navigate(`/lesson/${stepId}/test`);
-    } else {
-      // Test completed, go back to journey or next step
-      if (stepId < 7) {
-        navigate(`/lesson/${stepId + 1}/learn`);
+  // Update learning progress mutation
+  const updateProgress = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest('POST', '/api/learning-progress', {
+        userId: DEMO_USER_ID,
+        stepId,
+        section,
+        isCompleted: true,
+        ...data
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/learning-progress'] });
+      toast({
+        title: "Progress Saved!",
+        description: `${section.charAt(0).toUpperCase() + section.slice(1)} section completed.`,
+      });
+    },
+  });
+
+  const handleCompleteSection = async (score?: number) => {
+    // Save progress to database FIRST
+    try {
+      await updateProgress.mutateAsync({ score });
+      
+      // Then navigate to next section or back to journey
+      if (section === 'learn') {
+        navigate(`/lesson/${stepId}/practice`);
+      } else if (section === 'practice') {
+        navigate(`/lesson/${stepId}/test`);
       } else {
-        navigate('/learning-journey');
+        // Test completed, go back to journey or next step
+        if (stepId < 7) {
+          navigate(`/lesson/${stepId + 1}/learn`);
+        } else {
+          navigate('/learning-journey');
+        }
       }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 

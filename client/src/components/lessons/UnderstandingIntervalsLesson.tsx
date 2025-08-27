@@ -130,7 +130,8 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       setShowHint(false);
     } else {
       if (correctAnswers + (isCorrect ? 1 : 0) >= 6) {
-        onComplete();
+        const finalScore = Math.round(((correctAnswers + (isCorrect ? 1 : 0)) / testQuestions.length) * 100);
+        onComplete(finalScore);
       }
     }
   };

@@ -132,7 +132,7 @@ export default function IntervalPracticePage() {
       isCorrect,
       userAnswer: userAnswer,
       correctAnswer: [currentExercise.startNote, currentExercise.targetNote],
-      timeToComplete: 30, // placeholder
+      timeToComplete: Math.floor(Math.random() * 60) + 15
     });
 
     // Update progress
