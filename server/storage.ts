@@ -1,7 +1,18 @@
-import { type User, type InsertUser, type Progress, type InsertProgress, type ExerciseSession, type InsertExerciseSession } from "@shared/schema";
 import { randomUUID } from "crypto";
+import {
+  users,
+  progress,
+  exerciseSessions,
+  type User,
+  type InsertUser,
+  type Progress,
+  type InsertProgress,
+  type ExerciseSession,
+  type InsertExerciseSession,
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
-// Learning journey progress tracking
 export interface LearningProgress {
   userId: string;
   stepId: number;
@@ -17,6 +28,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
   
   // Progress methods
   getUserProgress(userId: string): Promise<Progress[]>;
@@ -33,58 +45,52 @@ export interface IStorage {
   updateLearningProgress(progress: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private progress: Map<string, Progress>;
-  private exerciseSessions: Map<string, ExerciseSession>;
-  private learningProgress: Map<string, LearningProgress>;
-
-  constructor() {
-    this.users = new Map();
-    this.progress = new Map();
-    this.exerciseSessions = new Map();
-    this.learningProgress = new Map();
-    
-    // Create a default user for demo purposes
-    const defaultUser: User = {
-      id: "demo-user",
-      username: "student",
-      password: "password123"
-    };
-    this.users.set(defaultUser.id, defaultUser);
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values({ ...insertUser, password: 'no-password' }) // Simple name-only auth
+      .returning();
     return user;
   }
 
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users);
+  }
+
   async getUserProgress(userId: string): Promise<Progress[]> {
-    return Array.from(this.progress.values()).filter(p => p.userId === userId);
+    return await db.select().from(progress).where(eq(progress.userId, userId));
   }
 
   async getProgressByCategory(userId: string, category: string): Promise<Progress[]> {
-    return Array.from(this.progress.values()).filter(
-      p => p.userId === userId && p.category === category
+    return await db.select().from(progress).where(
+      and(
+        eq(progress.userId, userId), 
+        eq(progress.category, category)
+      )
     );
   }
 
   async getProgressItem(userId: string, category: string, itemName: string): Promise<Progress | undefined> {
-    return Array.from(this.progress.values()).find(
-      p => p.userId === userId && p.category === category && p.itemName === itemName
-    );
+    const [item] = await db.select().from(progress)
+      .where(
+        and(
+          eq(progress.userId, userId),
+          eq(progress.category, category),
+          eq(progress.itemName, itemName)
+        )
+      );
+    return item || undefined;
   }
 
   async upsertProgress(insertProgress: InsertProgress): Promise<Progress> {
@@ -95,46 +101,43 @@ export class MemStorage implements IStorage {
     );
 
     if (existing) {
-      const updated: Progress = {
-        ...existing,
-        ...insertProgress,
-        lastPracticed: new Date(),
-      };
-      this.progress.set(existing.id, updated);
+      const [updated] = await db
+        .update(progress)
+        .set({
+          ...insertProgress,
+          lastPracticed: new Date(),
+          masteredAt: insertProgress.status === 'mastered' ? new Date() : existing.masteredAt
+        })
+        .where(eq(progress.id, existing.id))
+        .returning();
       return updated;
     } else {
-      const id = randomUUID();
-      const newProgress: Progress = {
-        ...insertProgress,
-        id,
-        status: insertProgress.status || 'not_started',
-        attempts: insertProgress.attempts || 0,
-        correctAnswers: insertProgress.correctAnswers || 0,
-        lastPracticed: new Date(),
-        masteredAt: insertProgress.status === 'mastered' ? new Date() : null,
-      };
-      this.progress.set(id, newProgress);
+      const [newProgress] = await db
+        .insert(progress)
+        .values({
+          ...insertProgress,
+          lastPracticed: new Date(),
+          masteredAt: insertProgress.status === 'mastered' ? new Date() : null,
+        })
+        .returning();
       return newProgress;
     }
   }
 
   async createExerciseSession(insertSession: InsertExerciseSession): Promise<ExerciseSession> {
-    const id = randomUUID();
-    const session: ExerciseSession = {
-      ...insertSession,
-      id,
-      userAnswer: insertSession.userAnswer || null,
-      correctAnswer: insertSession.correctAnswer || null,
-      timeToComplete: insertSession.timeToComplete || null,
-      createdAt: new Date(),
-    };
-    this.exerciseSessions.set(id, session);
+    const [session] = await db
+      .insert(exerciseSessions)
+      .values(insertSession)
+      .returning();
     return session;
   }
 
   async getUserExerciseSessions(userId: string): Promise<ExerciseSession[]> {
-    return Array.from(this.exerciseSessions.values()).filter(s => s.userId === userId);
+    return await db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
   }
+
+  // Learning journey progress (stored in memory for now, could be added to database later)
+  private learningProgress: Map<string, LearningProgress> = new Map();
 
   async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
     return Array.from(this.learningProgress.values()).filter(p => p.userId === userId);
@@ -159,4 +162,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

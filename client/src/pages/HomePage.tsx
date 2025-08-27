@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight, BookOpen, Target, Award, TrendingUp } from 'lucide-react';
+import { UserSwitcher } from '@/components/UserSwitcher';
+import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
@@ -13,7 +15,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { audioEngine } from '@/lib/audio';
 
-const DEMO_USER_ID = 'demo-user';
+// Remove hardcoded user ID - now using context
 
 interface ProgressSummary {
   totalItems: number;
@@ -43,15 +45,18 @@ export default function HomePage() {
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
 
   // Fetch progress summary
   const { data: progressSummary, isLoading: summaryLoading } = useQuery<ProgressSummary>({
-    queryKey: ['/api/progress-summary', DEMO_USER_ID],
+    queryKey: ['/api/progress-summary', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   // Fetch all progress
   const { data: allProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress', DEMO_USER_ID],
+    queryKey: ['/api/progress', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   // Record exercise session mutation
@@ -187,7 +192,7 @@ export default function HomePage() {
     
     // Record the exercise session
     await recordSession.mutateAsync({
-      userId: DEMO_USER_ID,
+      userId: currentUser?.id || '',
       category: currentExercise.category,
       itemName: currentExercise.itemName,
       isCorrect,
@@ -212,7 +217,7 @@ export default function HomePage() {
     }
 
     await updateProgress.mutateAsync({
-      userId: DEMO_USER_ID,
+      userId: currentUser?.id || '',
       category: currentExercise.category,
       itemName: currentExercise.itemName,
       status: newStatus,
@@ -404,6 +409,7 @@ export default function HomePage() {
               <p className="text-muted-foreground">Learn and practice scales and intervals with step-by-step guidance</p>
             </div>
             <div className="flex items-center space-x-4">
+              <UserSwitcher />
               <Button 
                 variant="secondary" 
                 onClick={() => keySignature && audioEngine.playScale(keySignature.notes)}

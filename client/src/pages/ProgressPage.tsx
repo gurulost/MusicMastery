@@ -4,8 +4,9 @@ import { ArrowLeft, TrendingUp, Target, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressRing } from '@/components/ProgressRing';
+import { useUser } from '@/contexts/UserContext';
 
-const DEMO_USER_ID = 'demo-user';
+// Use user context instead of hardcoded ID
 
 interface ProgressSummary {
   totalItems: number;
@@ -16,16 +17,21 @@ interface ProgressSummary {
 }
 
 export default function ProgressPage() {
+  const { currentUser } = useUser();
+
   const { data: progressSummary } = useQuery<ProgressSummary>({
-    queryKey: ['/api/progress-summary', DEMO_USER_ID],
+    queryKey: ['/api/progress-summary', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const { data: allProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress', DEMO_USER_ID],
+    queryKey: ['/api/progress', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const { data: exerciseSessions } = useQuery<any[]>({
-    queryKey: ['/api/exercise-sessions', DEMO_USER_ID],
+    queryKey: ['/api/exercise-sessions', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const recentSessions = exerciseSessions?.slice(-10) || [];

@@ -115,6 +115,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User management routes
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/users", async (req, res) => {
+    try {
+      const { username } = req.body;
+      if (!username || username.trim().length === 0) {
+        return res.status(400).json({ message: "Name is required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username.trim());
+      if (existingUser) {
+        return res.status(400).json({ message: "This name is already taken" });
+      }
+
+      const user = await storage.createUser({ username: username.trim() });
+      res.json({ id: user.id, username: user.username });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
