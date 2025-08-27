@@ -72,7 +72,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
       // Only advance if sufficient mastery
       if (correctAnswers >= 10) {
         const finalScore = Math.round((correctAnswers / testQuestions.length) * 100);
-        onComplete(finalScore);
+        onComplete();
       }
     }
   };

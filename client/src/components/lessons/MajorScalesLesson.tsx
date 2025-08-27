@@ -110,7 +110,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
     } else {
       if (correctAnswers + (isCorrect ? 1 : 0) >= 6) {
         const finalScore = Math.round(((correctAnswers + (isCorrect ? 1 : 0)) / testQuestions.length) * 100);
-        onComplete(finalScore);
+        onComplete();
       }
     }
   };
