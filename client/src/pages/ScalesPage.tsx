@@ -1,15 +1,21 @@
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Music, Check, Clock, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MAJOR_SCALES, MINOR_SCALES } from '@/lib/musicTheory';
-
-const DEMO_USER_ID = 'demo-user';
+import { HelpDialog } from '@/components/HelpDialog';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { useUser } from '@/contexts/UserContext';
 
 export default function ScalesPage() {
+  const [showHelp, setShowHelp] = useState(false);
+  const { currentUser } = useUser();
+  
   const { data: allProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress', DEMO_USER_ID],
+    queryKey: ['/api/progress', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const getProgressIcon = (category: string, scaleName: string) => {
@@ -54,7 +60,13 @@ export default function ScalesPage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-4">Scale Mastery Progress</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Scale Mastery Progress</h1>
+            <HelpTooltip 
+              content="Click for detailed instructions on how to practice scales"
+              onClick={() => setShowHelp(true)}
+            />
+          </div>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
             <h3 className="text-sm font-semibold text-blue-800 mb-2">📚 Learning Strategy</h3>
             <p className="text-sm text-blue-700">
@@ -127,6 +139,12 @@ export default function ScalesPage() {
           </div>
         </div>
       </div>
+      
+      <HelpDialog 
+        open={showHelp} 
+        onClose={() => setShowHelp(false)} 
+        topic="scales" 
+      />
     </div>
   );
 }

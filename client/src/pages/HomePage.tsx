@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight, BookOpen, Target, Award, TrendingUp } from 'lucide-react';
 import { UserSwitcher } from '@/components/UserSwitcher';
 import { useUser } from '@/contexts/UserContext';
+import { HelpDialog } from '@/components/HelpDialog';
+import { HelpTooltip } from '@/components/HelpTooltip';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
@@ -43,6 +45,7 @@ export default function HomePage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
+  const [showHelp, setShowHelp] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
@@ -409,6 +412,10 @@ export default function HomePage() {
               <p className="text-muted-foreground">Learn and practice scales and intervals with step-by-step guidance</p>
             </div>
             <div className="flex items-center space-x-4">
+              <HelpTooltip 
+                content="Click for help with the piano interface and getting started"
+                onClick={() => setShowHelp(true)}
+              />
               <UserSwitcher />
               <Button 
                 variant="secondary" 
@@ -556,6 +563,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      
+      <HelpDialog 
+        open={showHelp} 
+        onClose={() => setShowHelp(false)} 
+        topic="piano" 
+      />
     </div>
   );
 }

@@ -7,8 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import { HelpDialog } from '@/components/HelpDialog';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { useUser } from '@/contexts/UserContext';
 
-const DEMO_USER_ID = 'demo-user';
+// Use user context instead of hardcoded ID
 
 // The 7-step learning journey based on the attached guide
 const LEARNING_STEPS = [
@@ -89,19 +92,22 @@ interface LearningProgress {
 export default function LearningJourneyPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [currentSection, setCurrentSection] = useState<'learn' | 'practice' | 'test'>('learn');
+  const [showHelp, setShowHelp] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { currentUser } = useUser();
 
   // Fetch learning progress
   const { data: progress } = useQuery<LearningProgress[]>({
-    queryKey: ['/api/learning-progress', DEMO_USER_ID],
+    queryKey: ['/api/learning-progress', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   // Update progress mutation
   const updateProgress = useMutation({
     mutationFn: async (data: Partial<LearningProgress>) => {
       const response = await apiRequest('POST', '/api/learning-progress', {
-        userId: DEMO_USER_ID,
+        userId: currentUser?.id,
         ...data
       });
       return response.json();
@@ -189,7 +195,13 @@ export default function LearningJourneyPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Your Learning Journey</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-3xl font-bold">Your Learning Journey</h1>
+              <HelpTooltip 
+                content="Click for detailed information about the 7-step learning path"
+                onClick={() => setShowHelp(true)}
+              />
+            </div>
             <p className="text-muted-foreground mb-4">
               Master music theory step by step - from silence to scales to intervals
             </p>
@@ -309,6 +321,12 @@ export default function LearningJourneyPage() {
           )}
         </div>
       </div>
+      
+      <HelpDialog 
+        open={showHelp} 
+        onClose={() => setShowHelp(false)} 
+        topic="learning-journey" 
+      />
     </div>
   );
 }

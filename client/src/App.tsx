@@ -3,9 +3,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useState, useEffect } from "react";
 
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { LoginScreen } from "@/components/LoginScreen";
+import { WelcomeDialog } from "@/components/WelcomeDialog";
 
 import HomePage from "@/pages/HomePage";
 import ScalesPage from "@/pages/ScalesPage";
@@ -18,6 +20,17 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   const { currentUser, isLoadingUser } = useUser();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Check if user has seen welcome screen
+  useEffect(() => {
+    if (currentUser) {
+      const welcomeSeen = localStorage.getItem(`welcome-seen-${currentUser.id}`);
+      if (!welcomeSeen) {
+        setShowWelcome(true);
+      }
+    }
+  }, [currentUser]);
 
   if (isLoadingUser) {
     return (
@@ -35,16 +48,22 @@ function Router() {
   }
 
   return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/scales" component={ScalesPage} />
-      <Route path="/intervals" component={IntervalsPage} />
-      <Route path="/interval-practice" component={IntervalPracticePage} />
-      <Route path="/progress" component={ProgressPage} />
-      <Route path="/learning-journey" component={LearningJourneyPage} />
-      <Route path="/lesson/:stepId/:section" component={LessonPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <WelcomeDialog 
+        open={showWelcome} 
+        onClose={() => setShowWelcome(false)} 
+      />
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/scales" component={ScalesPage} />
+        <Route path="/intervals" component={IntervalsPage} />
+        <Route path="/interval-practice" component={IntervalPracticePage} />
+        <Route path="/progress" component={ProgressPage} />
+        <Route path="/learning-journey" component={LearningJourneyPage} />
+        <Route path="/lesson/:stepId/:section" component={LessonPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 

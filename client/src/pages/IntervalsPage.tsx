@@ -1,15 +1,21 @@
+import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, CornerLeftUp, Check, Clock, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { INTERVALS } from '@/lib/musicTheory';
-
-const DEMO_USER_ID = 'demo-user';
+import { HelpDialog } from '@/components/HelpDialog';
+import { HelpTooltip } from '@/components/HelpTooltip';
+import { useUser } from '@/contexts/UserContext';
 
 export default function IntervalsPage() {
+  const [showHelp, setShowHelp] = useState(false);
+  const { currentUser } = useUser();
+  
   const { data: allProgress } = useQuery<any[]>({
-    queryKey: ['/api/progress', DEMO_USER_ID],
+    queryKey: ['/api/progress', currentUser?.id],
+    enabled: !!currentUser?.id,
   });
 
   const getProgressIcon = (intervalName: string) => {
@@ -54,7 +60,13 @@ export default function IntervalsPage() {
 
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Interval Building Progress</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Interval Building Progress</h1>
+              <HelpTooltip 
+                content="Click for detailed instructions on how to practice intervals"
+                onClick={() => setShowHelp(true)}
+              />
+            </div>
             <Link href="/interval-practice">
               <Button data-testid="button-start-practice">
                 Start Interval Practice
@@ -97,6 +109,12 @@ export default function IntervalsPage() {
           </Card>
         </div>
       </div>
+      
+      <HelpDialog 
+        open={showHelp} 
+        onClose={() => setShowHelp(false)} 
+        topic="intervals" 
+      />
     </div>
   );
 }
