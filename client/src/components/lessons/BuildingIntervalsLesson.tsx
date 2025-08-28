@@ -107,25 +107,15 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
     if (currentExercise) {
       setSelectedNotes([currentExercise.startNote, currentExercise.targetNote]);
       
-      // Educational audio sequence
+      // Play interval with correct octaves
       try {
-        await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
-        setTimeout(async () => {
-          try {
-            await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.8);
-            // Play them together to hear the harmony
-            setTimeout(async () => {
-              try {
-                await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.6);
-                await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.6);
-              } catch (error) {
-                console.warn('Audio playback failed:', error);
-              }
-            }, 800);
-          } catch (error) {
-            console.warn('Audio playback failed:', error);
-          }
-        }, 600);
+        await audioEngine.playInterval(
+          normalizeNote(currentExercise.startNote), 
+          normalizeNote(currentExercise.targetNote), 
+          currentExercise.direction,
+          4, // base octave
+          'both' // play both melodically and harmonically
+        );
       } catch (error) {
         console.warn('Audio playback failed:', error);
       }
@@ -140,16 +130,15 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
     
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
-      // Play success audio - the interval
+      // Play success audio - the correct interval
       try {
-        await audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
-        setTimeout(async () => {
-          try {
-            await audioEngine.playNote(normalizeNote(answer), 0.8);
-          } catch (error) {
-            console.warn('Audio playback failed:', error);
-          }
-        }, 400);
+        await audioEngine.playInterval(
+          normalizeNote(currentQuestion.startNote), 
+          normalizeNote(answer), 
+          currentQuestion.direction,
+          4, // base octave
+          'melodic' // just melodic for success feedback
+        );
       } catch (error) {
         console.warn('Audio playback failed:', error);
       }

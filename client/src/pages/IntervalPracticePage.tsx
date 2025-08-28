@@ -198,14 +198,14 @@ export default function IntervalPracticePage() {
       // Ensure audio is initialized on user interaction
       await audioEngine.initializeAudio();
       
-      await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
-      setTimeout(async () => {
-        try {
-          await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.8);
-        } catch (error) {
-          console.warn('Audio playback failed:', error);
-        }
-      }, 600);
+      // Play interval with correct octaves
+      await audioEngine.playInterval(
+        normalizeNote(currentExercise.startNote), 
+        normalizeNote(currentExercise.targetNote), 
+        'up', // intervals in practice always go up
+        4, // base octave
+        'both' // play both melodically and harmonically
+      );
     } catch (error) {
       console.warn('Audio playback failed:', error);
     }

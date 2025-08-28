@@ -78,29 +78,18 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
     }
     setPracticeCount(prev => prev + 1);
     
-    // Educational audio sequence - play interval harmonically and melodically
+    // Educational audio sequence - play interval with correct octaves
     if (example) {
       const [note1, note2] = example.notes as Note[];
       
-      // Play melodically first (one after the other)
       try {
-        await audioEngine.playNote(normalizeNote(note1), 0.8);
-        setTimeout(async () => {
-          try {
-            await audioEngine.playNote(normalizeNote(note2), 0.8);
-            // Then play harmonically (together) for contrast
-            setTimeout(async () => {
-              try {
-                await audioEngine.playNote(normalizeNote(note1), 0.6);
-                await audioEngine.playNote(normalizeNote(note2), 0.6);
-              } catch (error) {
-                console.warn('Audio playback failed:', error);
-              }
-            }, 800);
-          } catch (error) {
-            console.warn('Audio playback failed:', error);
-          }
-        }, 600);
+        await audioEngine.playInterval(
+          normalizeNote(note1), 
+          normalizeNote(note2), 
+          'up', // assume intervals go up for demonstration
+          4, // base octave
+          'both' // play both melodically and harmonically
+        );
       } catch (error) {
         console.warn('Audio playbook failed:', error);
       }
@@ -134,14 +123,13 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       if (example) {
         const [note1, note2] = example.notes as Note[];
         try {
-          await audioEngine.playNote(normalizeNote(note1), 0.8);
-          setTimeout(async () => {
-            try {
-              await audioEngine.playNote(normalizeNote(note2), 0.8);
-            } catch (error) {
-              console.warn('Audio playback failed:', error);
-            }
-          }, 300);
+          await audioEngine.playInterval(
+            normalizeNote(note1), 
+            normalizeNote(note2), 
+            'up', // assume intervals go up
+            4, // base octave
+            'melodic' // just melodic for success feedback
+          );
         } catch (error) {
           console.warn('Audio playback failed:', error);
         }

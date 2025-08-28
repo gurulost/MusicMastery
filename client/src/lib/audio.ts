@@ -109,6 +109,70 @@ class AudioEngine {
     oscillator.stop(this.audioContext.currentTime + duration);
   }
 
+  // Play an interval with correct octave handling
+  async playInterval(startNote: string, targetNote: string, intervalDirection: 'up' | 'down' = 'up', baseOctave: number = 4, playStyle: 'melodic' | 'harmonic' | 'both' = 'both'): Promise<void> {
+    // Ensure audio context is ready
+    const isReady = await this.ensureAudioContext();
+    if (!isReady || !this.audioContext || !this.gainNode) {
+      console.warn('Audio context not ready');
+      return;
+    }
+
+    // Import getNoteIndex here to avoid circular dependency
+    const { getNoteIndex } = await import('./musicTheory');
+    
+    // Calculate correct octaves for the interval
+    const startIndex = getNoteIndex(startNote as any);
+    const targetIndex = getNoteIndex(targetNote as any);
+    
+    let startOctave = baseOctave;
+    let targetOctave = baseOctave;
+    
+    if (intervalDirection === 'up') {
+      // If target note index is lower than start note index, it's in the next octave
+      if (targetIndex < startIndex) {
+        targetOctave = baseOctave + 1;
+      }
+    } else {
+      // If going down and target note index is higher than start, it's in the previous octave
+      if (targetIndex > startIndex) {
+        targetOctave = baseOctave - 1;
+      }
+    }
+
+    try {
+      if (playStyle === 'melodic' || playStyle === 'both') {
+        // Play melodically (one after the other)
+        await this.playNote(startNote, 0.8, startOctave);
+        setTimeout(async () => {
+          try {
+            await this.playNote(targetNote, 0.8, targetOctave);
+            
+            // If 'both', also play harmonically after melodic
+            if (playStyle === 'both') {
+              setTimeout(async () => {
+                try {
+                  await this.playNote(startNote, 0.6, startOctave);
+                  await this.playNote(targetNote, 0.6, targetOctave);
+                } catch (error) {
+                  console.warn('Harmonic interval playback failed:', error);
+                }
+              }, 800);
+            }
+          } catch (error) {
+            console.warn('Target note playback failed:', error);
+          }
+        }, 600);
+      } else if (playStyle === 'harmonic') {
+        // Play harmonically (both notes together)
+        await this.playNote(startNote, 0.8, startOctave);
+        await this.playNote(targetNote, 0.8, targetOctave);
+      }
+    } catch (error) {
+      console.warn('Interval playback failed:', error);
+    }
+  }
+
   async playScale(notes: string[], tempo: number = 120): Promise<void> {
     // Cancel any currently playing scale to prevent overlap
     this.cancelCurrentScale();
