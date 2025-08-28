@@ -179,9 +179,18 @@ export class InMemoryStorage implements IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private _db: any = null;
+  
   private get db() {
-    const { db } = require("./db");
-    return db;
+    if (!this._db) {
+      try {
+        const { db } = require("./db");
+        this._db = db;
+      } catch (error) {
+        throw new Error(`Database initialization failed: ${error.message}`);
+      }
+    }
+    return this._db;
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -324,8 +333,8 @@ export class DatabaseStorage implements IStorage {
 function createStorage(): IStorage {
   if (process.env.DATABASE_URL) {
     try {
-      // Just test if we can require the db module
-      require("./db");
+      // Return DatabaseStorage which uses lazy loading via private getter
+      // This avoids importing db at module level and allows proper fallback
       return new DatabaseStorage();
     } catch (error) {
       console.warn("Database connection failed, falling back to in-memory storage:", error);
