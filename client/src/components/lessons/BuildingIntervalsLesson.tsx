@@ -499,7 +499,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                 variant={difficultyLevel === 'intermediate' ? 'default' : 'outline'}
                 onClick={() => setDifficultyLevel('intermediate')}
               >
-                Intermediate  
+                Intermediate
               </Button>
               <Button
                 variant={difficultyLevel === 'advanced' ? 'default' : 'outline'}
