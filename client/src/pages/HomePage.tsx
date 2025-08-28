@@ -317,6 +317,23 @@ export default function HomePage() {
         
         {/* Learning Navigation Menu */}
         <nav className="flex-1 p-4">
+          {/* Featured Guided Learning - Moved to Top */}
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-2 border-primary/20 rounded-lg">
+            <h3 className="text-sm font-bold text-primary mb-3 flex items-center">
+              <Award className="mr-2 h-4 w-4" />
+              RECOMMENDED: START HERE
+            </h3>
+            <Link href="/learning-journey">
+              <Button variant="default" className="w-full justify-start mb-2 h-12 text-base shadow-md" data-testid="nav-learning-journey">
+                <BookOpen className="mr-3 h-5 w-5" />
+                7-Step Guided Journey
+              </Button>
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              Follow our structured path from basics to advanced concepts
+            </p>
+          </div>
+
           <div className="mb-4">
             <h3 className="text-sm font-semibold text-muted-foreground mb-2">INTERACTIVE PRACTICE</h3>
             <Button variant="default" className="w-full justify-start" data-testid="nav-piano-practice">
@@ -385,17 +402,11 @@ export default function HomePage() {
           </div>
           
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2">GUIDED LEARNING</h3>
-            <Link href="/learning-journey">
-              <Button variant="secondary" className="w-full justify-start mb-2" data-testid="nav-learning-journey">
-                <BookOpen className="mr-3 h-4 w-4" />
-                Step-by-Step Journey
-              </Button>
-            </Link>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">PROGRESS TRACKING</h3>
             <Link href="/progress">
               <Button variant="ghost" className="w-full justify-start" data-testid="nav-progress-report">
                 <ChartLine className="mr-3 h-4 w-4" />
-                Progress Report
+                Detailed Progress Report
               </Button>
             </Link>
           </div>
