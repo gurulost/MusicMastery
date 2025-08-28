@@ -52,6 +52,7 @@ export function UserSwitcher() {
         description: `Welcome ${newUsername.trim()}! Your progress will be saved.`,
       });
     } catch (error: any) {
+      // Check for 409 Conflict status (name already taken)
       if (error instanceof Error && /409:/.test(error.message)) {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);

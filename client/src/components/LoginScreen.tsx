@@ -38,6 +38,7 @@ export function LoginScreen() {
         description: `Account created for ${newUsername.trim()}. You can now start learning!`,
       });
     } catch (error: any) {
+      // Check for 409 Conflict status (name already taken)  
       if (error instanceof Error && /409:/.test(error.message)) {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);
