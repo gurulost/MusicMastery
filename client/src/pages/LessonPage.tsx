@@ -72,8 +72,12 @@ export default function LessonPage() {
   // Update learning progress mutation
   const updateProgress = useMutation({
     mutationFn: async (data: any) => {
+      if (!currentUser?.id) {
+        throw new Error('No user logged in');
+      }
+      
       const response = await apiRequest('POST', '/api/learning-progress', {
-        userId: currentUser?.id,
+        userId: currentUser.id,
         stepId,
         section,
         isCompleted: true,
@@ -88,9 +92,27 @@ export default function LessonPage() {
         description: `${section.charAt(0).toUpperCase() + section.slice(1)} section completed.`,
       });
     },
+    onError: (error) => {
+      console.error('Learning progress mutation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive"
+      });
+    },
   });
 
   const handleCompleteSection = async (score?: number) => {
+    // Check if user is logged in first
+    if (!currentUser?.id) {
+      toast({
+        title: "Error",
+        description: "Please select a user first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Save progress to database FIRST
     try {
       await updateProgress.mutateAsync({ score });
@@ -109,11 +131,8 @@ export default function LessonPage() {
         }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save progress. Please try again.",
-        variant: "destructive"
-      });
+      console.error('Complete section error:', error);
+      // Don't show additional error toast here since the mutation onError already handles it
     }
   };
 
