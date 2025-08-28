@@ -55,7 +55,7 @@ export function PianoKeyboard({
   className,
   showLabels = true
 }: PianoKeyboardProps) {
-  const [activeKeys, setActiveKeys] = useState<Set<Note>>(new Set());
+  const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
 
   const getOctaveFromIndex = (index: number, isBlackKey: boolean = false): number => {
     if (isBlackKey) {
@@ -74,9 +74,11 @@ export function PianoKeyboard({
   };
 
   const handleKeyPress = async (note: Note, index?: number, isBlackKey: boolean = false) => {
-    setActiveKeys(prev => new Set(prev).add(note));
+    // Create unique key identifier that includes position
+    const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
+    setActiveKeys(prev => new Set(prev).add(keyId));
     
-    // Play audio with correct octave
+    // Play audio with correct octave - only once per actual key press
     const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
     await audioEngine.playNote(note, 0.5, octave);
     
@@ -84,7 +86,7 @@ export function PianoKeyboard({
     setTimeout(() => {
       setActiveKeys(prev => {
         const newSet = new Set(prev);
-        newSet.delete(note);
+        newSet.delete(keyId);
         return newSet;
       });
     }, 150);
@@ -102,7 +104,10 @@ export function PianoKeyboard({
   const isSharpInKey = (note: Note) => sharpsInKey.includes(note);
   const isPlayed = (note: Note) => playedNotes.includes(note);
   const isSelected = (note: Note) => selectedNotes.includes(note);
-  const isActive = (note: Note) => activeKeys.has(note);
+  const isActive = (note: Note, index: number, isBlackKey: boolean = false) => {
+    const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
+    return activeKeys.has(keyId);
+  };
 
   return (
     <div className={cn("flex justify-center overflow-x-auto", className)}>
@@ -120,7 +125,7 @@ export function PianoKeyboard({
                   "bg-green-500 text-white border-green-600": isHighlighted(note), // Green for correct answers
                   "bg-orange-400 text-white border-orange-500": isPlayed(note), // Orange for played sequence
                   "bg-purple-200 border-purple-400 text-purple-800": isSelected(note), // Purple for current selections
-                  "transform translate-y-1 shadow-md": isActive(note),
+                  "transform translate-y-1 shadow-md": isActive(note, index),
                   "bg-card": !isHighlighted(note) && !isPlayed(note) && !isSelected(note),
                 }
               )}
@@ -150,7 +155,7 @@ export function PianoKeyboard({
                     "bg-yellow-600 text-yellow-100": isSharpInKey(blackKey.note), // Yellow for sharps in key
                     "bg-orange-600 text-white": isPlayed(blackKey.note), // Orange for played sequence
                     "bg-purple-500 text-white": isSelected(blackKey.note), // Purple for current selections
-                    "transform translate-y-1 shadow-md": isActive(blackKey.note),
+                    "transform translate-y-1 shadow-md": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
                     "bg-gray-800": !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
