@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, ArrowUp, ArrowDown, Calculator, Lightbulb, Brain, Target, Star, Trophy, Zap, Settings, BookOpen } from 'lucide-react';
 import { Note, IntervalType } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote } from '@/lib/musicTheory';
+import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote, areNotesEnharmonicallyEqual } from '@/lib/musicTheory';
 
 interface BuildingIntervalsLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -135,7 +135,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
   const handleTestAnswer = async (answer: Note) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const correctTarget = buildInterval(currentQuestion.startNote, currentQuestion.interval, currentQuestion.direction);
-    const isCorrect = answer === correctTarget;
+    const isCorrect = areNotesEnharmonicallyEqual(answer, correctTarget);
     setAttempts(prev => prev + 1);
     
     if (isCorrect) {

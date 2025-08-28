@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Hash, Minus, Brain, Target, Star, Trophy } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { normalizeNote } from '@/lib/musicTheory';
+import { normalizeNote, areNotesEnharmonicallyEqual } from '@/lib/musicTheory';
 
 interface MusicalAlphabetLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -60,7 +60,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
 
   const handleTestAnswer = async (answer: string) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
-    const isCorrect = answer === currentQuestion;
+    const isCorrect = areNotesEnharmonicallyEqual(answer as Note, currentQuestion as Note);
     const newAnswers = [...userAnswers, answer];
     setUserAnswers(newAnswers);
     setAttempts(prev => prev + 1);

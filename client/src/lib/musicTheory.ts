@@ -14,11 +14,45 @@ const ENHARMONIC_MAP: { [key: string]: Note } = {
 // Normalize any note (flat or sharp) to canonical sharp form
 export function normalizeNote(note: Note): Note {
   // Type guard to prevent interval names from being passed as notes
-  if (typeof note !== 'string' || note.includes(' ') || note.includes('th') || note.includes('nd') || note.includes('rd')) {
-    console.error(`Invalid note passed to normalizeNote: ${note}. Expected a note like 'C', 'C#', 'Bb', etc.`);
+  const noteStr = note as string;
+  if (typeof noteStr !== 'string' || 
+      noteStr.includes(' ') || 
+      noteStr.includes('th') || 
+      noteStr.includes('nd') || 
+      noteStr.includes('rd') || 
+      noteStr === 'Major' || 
+      noteStr === 'Minor') {
+    console.error(`Invalid note passed to normalizeNote: ${noteStr}. Expected a note like 'C', 'C#', 'Bb', etc.`);
+    console.trace('Call stack for invalid note:'); // Add stack trace to help debug
     return 'C'; // fallback to prevent crashes
   }
-  return ENHARMONIC_MAP[note as keyof typeof ENHARMONIC_MAP] || (note as Note);
+  return ENHARMONIC_MAP[noteStr as keyof typeof ENHARMONIC_MAP] || (noteStr as Note);
+}
+
+// Normalize an array of notes for consistent comparison
+export function normalizeNotes(notes: Note[]): Note[] {
+  return notes.map(note => normalizeNote(note));
+}
+
+// Compare two note arrays with enharmonic normalization
+export function areNotesEqual(notes1: Note[], notes2: Note[], orderMatters = false): boolean {
+  const normalized1 = normalizeNotes(notes1);
+  const normalized2 = normalizeNotes(notes2);
+  
+  if (normalized1.length !== normalized2.length) {
+    return false;
+  }
+  
+  if (orderMatters) {
+    return JSON.stringify(normalized1) === JSON.stringify(normalized2);
+  } else {
+    return JSON.stringify(normalized1.sort()) === JSON.stringify(normalized2.sort());
+  }
+}
+
+// Compare two individual notes with enharmonic normalization
+export function areNotesEnharmonicallyEqual(note1: Note, note2: Note): boolean {
+  return normalizeNote(note1) === normalizeNote(note2);
 }
 
 export const MAJOR_SCALE_PATTERN = [2, 2, 1, 2, 2, 2, 1]; // whole and half steps
@@ -242,6 +276,10 @@ export function getMinorScale(tonic: Note): Scale {
 // Type-safe scale generation with structured input
 export function getScale(definition: ScaleDefinition): Scale {
   // CRITICAL: Normalize the tonic before calling scale functions to handle flat spellings
+  if (!definition || !definition.tonic) {
+    console.error('Invalid scale definition passed to getScale:', definition);
+    return getMajorScale('C'); // fallback
+  }
   const normalizedTonic = normalizeNote(definition.tonic);
   return definition.type === 'major' ? getMajorScale(normalizedTonic) : getMinorScale(normalizedTonic);
 }

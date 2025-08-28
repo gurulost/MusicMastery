@@ -5,7 +5,7 @@ import { ArrowLeft, Music, Play, Check, RotateCcw, ChevronRight, Lightbulb } fro
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
-import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote } from '@/lib/musicTheory';
+import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote, areNotesEqual } from '@/lib/musicTheory';
 import { Note, IntervalType } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -121,12 +121,12 @@ export default function IntervalPracticePage() {
     let userAnswer: Note[];
 
     if (currentExercise.mode === 'learn') {
-      userAnswer = [...selectedNotes].sort();
-      const correctAnswer = [currentExercise.startNote, currentExercise.targetNote].sort();
-      isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+      userAnswer = [...selectedNotes];
+      const correctAnswer = [currentExercise.startNote, currentExercise.targetNote];
+      isCorrect = areNotesEqual(userAnswer, correctAnswer, false); // order doesn't matter in learn mode
     } else {
       userAnswer = playedNotes;
-      isCorrect = JSON.stringify(playedNotes) === JSON.stringify([currentExercise.startNote, currentExercise.targetNote]);
+      isCorrect = areNotesEqual(playedNotes, [currentExercise.startNote, currentExercise.targetNote], true); // order matters in practice mode
     }
 
     // Record the exercise session

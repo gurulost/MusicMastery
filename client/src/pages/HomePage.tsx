@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { ProgressRing } from '@/components/ProgressRing';
 import { LearningPathCard } from '@/components/LearningPathCard';
-import { generateScaleExercise, generateIntervalExercise, getIntervalExplanation, getScalesByDifficulty, getIntervalsByDifficulty, getMajorScale, getMinorScale } from '@/lib/musicTheory';
+import { generateScaleExercise, generateIntervalExercise, getIntervalExplanation, getScalesByDifficulty, getIntervalsByDifficulty, getMajorScale, getMinorScale, areNotesEqual } from '@/lib/musicTheory';
 import { Note, ExerciseData } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -178,13 +178,13 @@ export default function HomePage() {
 
     if (currentExercise.mode === 'learn') {
       // In learn mode, check if selected notes match correct notes (order doesn't matter)
-      userAnswer = [...selectedNotes].sort();
-      const correctAnswer = [...currentExercise.correctNotes].sort();
-      isCorrect = JSON.stringify(userAnswer) === JSON.stringify(correctAnswer);
+      userAnswer = [...selectedNotes];
+      const correctAnswer = [...currentExercise.correctNotes];
+      isCorrect = areNotesEqual(userAnswer, correctAnswer, false); // order doesn't matter in learn mode
     } else {
       // In practice mode, check sequence order
       userAnswer = playedNotes;
-      isCorrect = JSON.stringify(playedNotes) === JSON.stringify(currentExercise.correctNotes);
+      isCorrect = areNotesEqual(playedNotes, currentExercise.correctNotes, true); // order matters in practice mode
     }
     
     // Record the exercise session

@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Zap, Brain, Target, Star, Trophy, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { normalizeNote } from '@/lib/musicTheory';
+import { normalizeNote, areNotesEnharmonicallyEqual } from '@/lib/musicTheory';
 
 interface WholeHalfStepsLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -110,7 +110,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
   const handleTestAnswer = async (answer: Note) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const correctTarget = getNextNote(currentQuestion.startNote, currentQuestion.interval === 'half' ? 1 : 2);
-    const isCorrect = answer === correctTarget;
+    const isCorrect = areNotesEnharmonicallyEqual(answer, correctTarget);
     setAttempts(prev => prev + 1);
     
     if (isCorrect) {
