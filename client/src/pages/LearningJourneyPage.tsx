@@ -202,12 +202,12 @@ export default function LearningJourneyPage() {
             </PageHeader>
             
             {/* Overall Progress */}
-            <div className="bg-card border rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-card border rounded-lg p-4 md:p-6 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                 <span className="text-sm font-medium">Overall Progress</span>
                 <span className="text-sm text-muted-foreground">{overallProgress}/7 Steps Completed</span>
               </div>
-              <Progress value={(overallProgress / 7) * 100} className="h-2 mb-4" />
+              <Progress value={(overallProgress / 7) * 100} className="h-2 mb-6" />
               
               {/* Visual Step Progress */}
               <Stepper
@@ -236,17 +236,20 @@ export default function LearningJourneyPage() {
               
               return (
                 <Card key={step.id} className="transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        {getStepIcon(step.id)}
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h3 className="text-lg font-semibold">{step.title}</h3>
-                            <span className={`inline-flex items-center justify-center text-xs px-2 py-1 rounded-full ${getDifficultyColor(step.difficulty)}`}>
+                  <CardContent className="p-4 md:p-6">
+                    <div className="flex flex-col lg:flex-row gap-4">
+                      {/* Left side: Icon and Content */}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex-shrink-0 mt-1">
+                          {getStepIcon(step.id)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h3 className="text-lg font-semibold truncate">{step.title}</h3>
+                            <span className={`inline-flex items-center justify-center text-xs px-2 py-1 rounded-full whitespace-nowrap ${getDifficultyColor(step.difficulty)}`}>
                               {step.difficulty}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
                               ~{step.duration}
                             </span>
                           </div>
@@ -255,7 +258,8 @@ export default function LearningJourneyPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2">
+                      {/* Right side: Action Buttons */}
+                      <div className="flex flex-wrap lg:flex-col gap-2 lg:flex-shrink-0">
                         {stepProgress.canAccess ? (
                           <>
                             <Button
@@ -263,6 +267,7 @@ export default function LearningJourneyPage() {
                               size="sm"
                               onClick={() => handleStartStep(step.id, 'learn')}
                               disabled={!stepProgress.canAccess}
+                              className="flex-1 lg:flex-none lg:w-24"
                             >
                               <BookOpen className="h-4 w-4 mr-1" />
                               Learn
@@ -272,6 +277,7 @@ export default function LearningJourneyPage() {
                               size="sm"
                               onClick={() => handleStartStep(step.id, 'practice')}
                               disabled={!stepProgress.canAccess}
+                              className="flex-1 lg:flex-none lg:w-24"
                             >
                               <Target className="h-4 w-4 mr-1" />
                               Practice
@@ -281,6 +287,7 @@ export default function LearningJourneyPage() {
                               size="sm"
                               onClick={() => handleStartStep(step.id, 'test')}
                               disabled={!stepProgress.canAccess}
+                              className="flex-1 lg:flex-none lg:w-24"
                             >
                               <Award className="h-4 w-4 mr-1" />
                               Test
@@ -289,7 +296,8 @@ export default function LearningJourneyPage() {
                         ) : (
                           <div className="text-sm text-muted-foreground flex items-center">
                             <Lock className="h-4 w-4 mr-1" />
-                            Complete Step {step.id - 1} First
+                            <span className="hidden sm:inline">Complete Step {step.id - 1} First</span>
+                            <span className="sm:hidden">Locked</span>
                           </div>
                         )}
                       </div>
