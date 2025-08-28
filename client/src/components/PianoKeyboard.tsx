@@ -152,11 +152,12 @@ export function PianoKeyboard({
                   "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
                   "hover:transform hover:translate-y-0.5",
                   {
-                    "bg-yellow-600 text-yellow-100": isSharpInKey(blackKey.note), // Yellow for sharps in key
-                    "bg-orange-600 text-white": isPlayed(blackKey.note), // Orange for played sequence
-                    "bg-purple-500 text-white": isSelected(blackKey.note), // Purple for current selections
+                    "bg-green-500 text-white": isHighlighted(blackKey.note), // Green for highlighted notes (test questions)
+                    "bg-yellow-600 text-yellow-100": !isHighlighted(blackKey.note) && isSharpInKey(blackKey.note), // Yellow for sharps in key
+                    "bg-orange-600 text-white": !isHighlighted(blackKey.note) && isPlayed(blackKey.note), // Orange for played sequence
+                    "bg-purple-500 text-white": !isHighlighted(blackKey.note) && isSelected(blackKey.note), // Purple for current selections
                     "transform translate-y-1 shadow-md": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
-                    "bg-gray-800": !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
+                    "bg-gray-800": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
                 style={{ 
