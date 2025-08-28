@@ -47,6 +47,11 @@ class AudioEngine {
 
     if (!this.audioContext || !this.gainNode) return;
 
+    // Resume audio context if suspended (required for modern browsers)
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
     const oscillator = this.audioContext.createOscillator();
     const noteGain = this.audioContext.createGain();
 

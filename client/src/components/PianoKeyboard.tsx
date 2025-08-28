@@ -112,9 +112,13 @@ export function PianoKeyboard({
     const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
     setActiveKeys(prev => new Set(prev).add(keyId));
     
-    // Play audio with correct octave - only once per actual key press
-    const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
-    await audioEngine.playNote(note, 0.5, octave);
+    try {
+      // Play audio with correct octave - only once per actual key press
+      const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
+      await audioEngine.playNote(note, 0.5, octave);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
     
     // Remove active state after animation
     setTimeout(() => {
