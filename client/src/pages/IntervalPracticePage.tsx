@@ -30,7 +30,7 @@ export default function IntervalPracticePage() {
   const [playedNotes, setPlayedNotes] = useState<Note[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
+  const [completionTime, setCompletionTime] = useState<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -62,9 +62,21 @@ export default function IntervalPracticePage() {
     },
   });
 
-  const generateExercise = () => {
+  const generateExercise = (specificInterval?: string) => {
+    // Check URL parameters for specific interval practice
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlInterval = specificInterval || urlParams.get('interval');
+    
     const startNote = START_NOTES[Math.floor(Math.random() * START_NOTES.length)];
-    const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
+    let interval;
+    
+    if (urlInterval) {
+      // Find specific interval or fallback to random
+      interval = INTERVALS.find(i => i.name === urlInterval) || INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
+    } else {
+      interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
+    }
+    
     const targetNote = buildInterval(startNote, interval.name, 'up');
     const intervalInfo = getIntervalExplanation(interval.name);
 
@@ -75,23 +87,29 @@ export default function IntervalPracticePage() {
       explanation: intervalInfo.explanation,
       learningTip: intervalInfo.learningTip,
       difficulty: intervalInfo.difficulty,
-      mode: exerciseMode,
+      mode: 'learn',
     });
 
     setSelectedNotes([]);
     setPlayedNotes([]);
     setIsCompleted(false);
     setShowExplanation(false);
+    setCompletionTime(null);
     
     // Record exercise start time
     startTimeRef.current = Date.now();
+    
+    // Clear URL parameters after loading specific interval
+    if (urlInterval) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   };
 
   useEffect(() => {
     if (!currentExercise) {
       generateExercise();
     }
-  }, [currentExercise, exerciseMode]);
+  }, [currentExercise]);
 
   const handleNoteToggle = (note: Note) => {
     if (isCompleted && currentExercise?.mode === 'practice') return;
@@ -117,17 +135,13 @@ export default function IntervalPracticePage() {
   const handleCheckAnswer = async () => {
     if (!currentExercise) return;
 
-    let isCorrect: boolean;
-    let userAnswer: Note[];
-
-    if (currentExercise.mode === 'learn') {
-      userAnswer = [...selectedNotes];
-      const correctAnswer = [currentExercise.startNote, currentExercise.targetNote];
-      isCorrect = areNotesEqual(userAnswer, correctAnswer, false); // order doesn't matter in learn mode
-    } else {
-      userAnswer = playedNotes;
-      isCorrect = areNotesEqual(playedNotes, [currentExercise.startNote, currentExercise.targetNote], true); // order matters in practice mode
-    }
+    const userAnswer = [...selectedNotes];
+    const correctAnswer = [currentExercise.startNote, currentExercise.targetNote];
+    const isCorrect = areNotesEqual(userAnswer, correctAnswer, false);
+    
+    // Calculate completion time
+    const timeTaken = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
+    setCompletionTime(timeTaken);
 
     // Record the exercise session
     await recordSession.mutateAsync({
@@ -165,16 +179,22 @@ export default function IntervalPracticePage() {
     });
 
     if (isCorrect) {
+      const timeMessage = timeTaken <= 5 ? 'Lightning fast! ⚡' : timeTaken <= 10 ? 'Great speed! 🚀' : timeTaken <= 15 ? 'Good timing! ⏱️' : 'Keep practicing for speed! 📈';
       toast({
-        title: "Correct!",
-        description: `You identified the ${currentExercise.interval} correctly.`,
+        title: "🎉 Correct!",
+        description: `${timeMessage} You built the ${currentExercise.interval} in ${timeTaken} seconds.`,
       });
       setIsCompleted(true);
       setShowExplanation(true);
+      
+      // Auto-progress to next exercise after a brief delay
+      setTimeout(() => {
+        generateExercise();
+      }, 2500);
     } else {
       toast({
-        title: "Try Again",
-        description: "That's not quite right. Check the interval distance.",
+        title: "Not quite right",
+        description: `Keep trying! Listen to the interval and think about the distance from ${currentExercise.startNote}.`,
         variant: "destructive",
       });
     }
@@ -187,8 +207,12 @@ export default function IntervalPracticePage() {
     setShowExplanation(false);
   };
 
-  const handleSwitchMode = () => {
-    setExerciseMode(prev => prev === 'learn' ? 'practice' : 'learn');
+  const handleNextExercise = () => {
+    generateExercise();
+  };
+  
+  const generateRandomExercise = () => {
+    generateExercise();
   };
 
   const handlePlayInterval = async () => {
@@ -232,15 +256,6 @@ export default function IntervalPracticePage() {
             <h1 className="text-3xl font-bold">Interval Building Practice</h1>
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleSwitchMode}
-                data-testid="button-switch-mode"
-              >
-                <span className="hidden lg:inline">Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
-                <span className="lg:hidden">{exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
-              </Button>
-              <Button 
                 variant="secondary" 
                 size="sm"
                 onClick={handlePlayInterval}
@@ -249,6 +264,16 @@ export default function IntervalPracticePage() {
                 <Play className="mr-2 h-4 w-4" />
                 <span className="hidden sm:inline">Play Interval</span>
                 <span className="sm:hidden">Play</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleNextExercise}
+                data-testid="button-next-exercise"
+              >
+                <RotateCcw className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Next Interval</span>
+                <span className="sm:hidden">Next</span>
               </Button>
             </div>
           </div>
@@ -259,7 +284,7 @@ export default function IntervalPracticePage() {
               <CardTitle className="flex items-center justify-between">
                 <span>Current Exercise</span>
                 <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
-                  {exerciseMode === 'learn' ? 'Learning' : 'Practice'} Mode
+                  Interval Practice
                 </span>
               </CardTitle>
             </CardHeader>
@@ -269,11 +294,18 @@ export default function IntervalPracticePage() {
                   Build a <strong>{currentExercise.interval}</strong> up from <strong>{currentExercise.startNote}</strong>
                 </p>
                 <p className="text-muted-foreground mb-3">
-                  {exerciseMode === 'learn' ? 
-                    'Click both the start note and target note to select them.' :
-                    'Click the start note, then the target note in sequence.'
-                  }
+                  Click both the start note and target note to build this interval. Listen to each note as you click it!
                 </p>
+                {completionTime && isCompleted && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <p className="text-sm text-green-800 font-medium">
+                      ⏱️ Completed in {completionTime} seconds! 
+                      {completionTime <= 5 && ' Amazing speed! ⚡'}
+                      {completionTime > 5 && completionTime <= 10 && ' Great job! 🚀'}
+                      {completionTime > 10 && ' Keep practicing to get faster! 📈'}
+                    </p>
+                  </div>
+                )}
                 
                 {showExplanation && (
                   <div className="bg-blue-50 border-l-4 border-blue-400 p-3">
@@ -294,16 +326,10 @@ export default function IntervalPracticePage() {
                 )}
               </div>
               
-              {exerciseMode === 'learn' && (
-                <div className="text-sm text-muted-foreground mb-4">
-                  💡 In Learn Mode: Click keys to select/unselect them. Order doesn't matter.
-                </div>
-              )}
-              {exerciseMode === 'practice' && (
-                <div className="text-sm text-muted-foreground mb-4">
-                  🎹 In Practice Mode: Click the start note first, then the target note.
-                </div>
-              )}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800 font-medium mb-1">🎹 Interval Building</p>
+                <p className="text-sm text-blue-700">Click piano keys to select both notes that form this interval. Order doesn't matter - just find the right notes!</p>
+              </div>
             </CardContent>
           </Card>
           
@@ -313,26 +339,19 @@ export default function IntervalPracticePage() {
               <h3 className="text-lg font-semibold mb-4">Piano Keyboard</h3>
               <PianoKeyboard
                 highlightedNotes={isCompleted ? [currentExercise.startNote, currentExercise.targetNote] : []}
-                playedNotes={exerciseMode === 'practice' ? playedNotes : []}
-                selectedNotes={exerciseMode === 'learn' ? selectedNotes : []}
+                playedNotes={[]}
+                selectedNotes={selectedNotes}
                 onNoteClick={handleNoteClick}
-                onNoteToggle={exerciseMode === 'learn' ? handleNoteToggle : undefined}
+                onNoteToggle={handleNoteToggle}
               />
               <div className="mt-4 text-center">
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>
                     Keys highlighted in <span className="font-medium" style={{color: 'hsl(142 71% 45%)'}}>green</span> show correct answers when completed.
                   </p>
-                  {exerciseMode === 'learn' && (
-                    <p>
-                      Keys with <span className="font-medium" style={{color: 'hsl(217 91% 60%)'}}>blue background</span> are your current selections.
-                    </p>
-                  )}
-                  {exerciseMode === 'practice' && (
-                    <p>
-                      Keys highlighted in <span className="font-medium" style={{color: 'hsl(32 95% 44%)'}}>orange</span> show your played sequence.
-                    </p>
-                  )}
+                  <p>
+                    Keys with <span className="font-medium" style={{color: 'hsl(217 91% 60%)'}}>blue background</span> are your current selections.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -343,23 +362,17 @@ export default function IntervalPracticePage() {
             <Button 
               variant="secondary" 
               onClick={handleReset}
-              disabled={(exerciseMode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0)}
+              disabled={selectedNotes.length === 0}
               data-testid="button-reset"
             >
               <RotateCcw className="mr-2 h-4 w-4" />Reset
             </Button>
             <Button 
               onClick={handleCheckAnswer} 
-              disabled={(exerciseMode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0) || isCompleted}
+              disabled={selectedNotes.length === 0 || isCompleted}
               data-testid="button-check-answer"
             >
-              <Check className="mr-2 h-4 w-4" />Check Answer
-            </Button>
-            <Button 
-              onClick={generateExercise}
-              data-testid="button-next-exercise"
-            >
-              <ChevronRight className="mr-2 h-4 w-4" />Next Exercise
+              <Check className="mr-2 h-4 w-4" />Check Your Answer
             </Button>
           </div>
         </div>

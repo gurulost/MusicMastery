@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, CornerLeftUp, Check, Clock, Circle } from 'lucide-react';
+import { ArrowLeft, CornerLeftUp, Check, Clock, Circle, Play, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { INTERVALS } from '@/lib/musicTheory';
@@ -105,12 +105,12 @@ export default function IntervalsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {INTERVALS.map((interval) => (
                   <div key={interval.name} className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-1">
                       {getProgressIcon(interval.name)}
-                      <div className="ml-3">
+                      <div className="ml-3 flex-1">
                         <span className="font-medium" data-testid={`interval-${interval.shortName.toLowerCase()}`}>
                           {interval.name}
                         </span>
@@ -119,7 +119,15 @@ export default function IntervalsPage() {
                         </div>
                       </div>
                     </div>
-                    {getProgressBadge(interval.name)}
+                    <div className="flex items-center gap-2">
+                      {getProgressBadge(interval.name)}
+                      <Link href={`/interval-practice?interval=${encodeURIComponent(interval.name)}`}>
+                        <Button size="sm" data-testid={`practice-${interval.shortName.toLowerCase()}`}>
+                          <Target className="h-3 w-3 mr-1" />
+                          Practice
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
                 ))}
               </div>
