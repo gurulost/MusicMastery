@@ -187,7 +187,7 @@ export class DatabaseStorage implements IStorage {
         const { db } = await import("./db.js");
         this._db = db;
       } catch (error) {
-        throw new Error(`Database initialization failed: ${error.message}`);
+        throw new Error(`Database initialization failed: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
     return this._db;
@@ -235,7 +235,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProgressItem(userId: string, category: string, itemName: string): Promise<Progress | undefined> {
-    const [item] = await this.db.select().from(progress)
+    const db = await this.getDb();
+    const [item] = await db.select().from(progress)
       .where(
         and(
           eq(progress.userId, userId),
@@ -253,8 +254,9 @@ export class DatabaseStorage implements IStorage {
       insertProgress.itemName
     );
 
+    const db = await this.getDb();
     if (existing) {
-      const [updated] = await this.db
+      const [updated] = await db
         .update(progress)
         .set({
           ...insertProgress,
@@ -265,7 +267,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updated;
     } else {
-      const [newProgress] = await this.db
+      const [newProgress] = await db
         .insert(progress)
         .values({
           ...insertProgress,
@@ -278,7 +280,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createExerciseSession(insertSession: InsertExerciseSession): Promise<ExerciseSession> {
-    const [session] = await this.db
+    const db = await this.getDb();
+    const [session] = await db
       .insert(exerciseSessions)
       .values(insertSession)
       .returning();
@@ -286,16 +289,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserExerciseSessions(userId: string): Promise<ExerciseSession[]> {
-    return await this.db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
+    const db = await this.getDb();
+    return await db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
   }
 
   // Learning journey progress methods
   async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
-    return await this.db.select().from(learningProgress).where(eq(learningProgress.userId, userId));
+    const db = await this.getDb();
+    return await db.select().from(learningProgress).where(eq(learningProgress.userId, userId));
   }
 
   async updateLearningProgress(progressData: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress> {
-    const existing = await this.db.select().from(learningProgress)
+    const db = await this.getDb();
+    const existing = await db.select().from(learningProgress)
       .where(and(
         eq(learningProgress.userId, progressData.userId),
         eq(learningProgress.stepId, progressData.stepId),
@@ -304,7 +310,7 @@ export class DatabaseStorage implements IStorage {
 
     if (existing.length > 0) {
       // Update existing record
-      const [updated] = await this.db
+      const [updated] = await db
         .update(learningProgress)
         .set({
           isCompleted: progressData.isCompleted ?? existing[0].isCompleted,
@@ -318,7 +324,7 @@ export class DatabaseStorage implements IStorage {
       return updated;
     } else {
       // Create new record
-      const [newProgress] = await this.db
+      const [newProgress] = await db
         .insert(learningProgress)
         .values({
           userId: progressData.userId,
