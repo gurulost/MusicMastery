@@ -686,9 +686,10 @@ export default function HomePage() {
             )}
           </div>
           <div className="flex flex-col gap-4">
-            {/* Mode Toggle */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center bg-muted rounded-lg p-1">
+            {/* Mode Toggle - Prominently displayed */}
+            <div className="flex items-center gap-3 bg-slate-100 p-3 rounded-lg border">
+              <span className="text-sm font-medium text-slate-700">Mode:</span>
+              <div className="flex items-center bg-white rounded-lg p-1 border shadow-sm">
                 <Button
                   variant={practiceMode === 'practice' ? 'default' : 'ghost'}
                   size="sm"
@@ -710,6 +711,9 @@ export default function HomePage() {
                   Show The Key
                 </Button>
               </div>
+              <span className="text-xs text-slate-500">
+                {practiceMode === 'practice' ? 'Test your knowledge' : 'Study the correct notes'}
+              </span>
             </div>
             
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
