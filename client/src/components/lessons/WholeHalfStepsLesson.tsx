@@ -72,29 +72,45 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleExampleClick = (start: Note, interval: 'half' | 'whole') => {
+  const handleExampleClick = async (start: Note, interval: 'half' | 'whole') => {
     const target = getNextNote(start, interval === 'half' ? 1 : 2);
     setSelectedNotes([start, target]);
     setCurrentExample({ start, interval });
     setPracticeCount(prev => prev + 1);
     
     // Play the interval with educational timing
-    audioEngine.playNote(start, 0.8);
-    setTimeout(() => {
-      audioEngine.playNote(target, 0.8);
-      // Play them together for harmonic understanding
-      setTimeout(() => {
-        audioEngine.playNote(start, 0.6);
-        audioEngine.playNote(target, 0.6);
-      }, 800);
-    }, 600);
+    try {
+      await audioEngine.playNote(start, 0.8);
+      setTimeout(async () => {
+        try {
+          await audioEngine.playNote(target, 0.8);
+          // Play them together for harmonic understanding
+          setTimeout(async () => {
+            try {
+              await audioEngine.playNote(start, 0.6);
+              await audioEngine.playNote(target, 0.6);
+            } catch (error) {
+              console.warn('Audio playback failed:', error);
+            }
+          }, 800);
+        } catch (error) {
+          console.warn('Audio playback failed:', error);
+        }
+      }, 600);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleTestAnswer = (answer: Note) => {
+  const handleTestAnswer = async (answer: Note) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const correctTarget = getNextNote(currentQuestion.startNote, currentQuestion.interval === 'half' ? 1 : 2);
     const isCorrect = answer === correctTarget;
@@ -103,8 +119,18 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
       // Play success sound
-      audioEngine.playNote(currentQuestion.startNote, 0.8);
-      setTimeout(() => audioEngine.playNote(answer, 0.8), 400);
+      try {
+        await audioEngine.playNote(currentQuestion.startNote, 0.8);
+        setTimeout(async () => {
+          try {
+            await audioEngine.playNote(answer, 0.8);
+          } catch (error) {
+            console.warn('Audio playback failed:', error);
+          }
+        }, 400);
+      } catch (error) {
+        console.warn('Audio playback failed:', error);
+      }
     }
 
     if (currentQuestionIndex < testQuestions.length - 1) {

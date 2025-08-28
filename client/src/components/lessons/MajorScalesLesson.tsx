@@ -55,11 +55,15 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleScaleDemo = (scaleName: string) => {
+  const handleScaleDemo = async (scaleName: string) => {
     setCurrentScale(scaleName);
     const [tonic] = scaleName.split(' ');
     const scale = getMajorScale(tonic as Note);
@@ -67,19 +71,29 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
     setPracticeCount(prev => prev + 1);
     
     // Educational audio sequence
-    audioEngine.playScale(scale.notes);
-    
-    // Play in melodic then harmonic pattern for better learning
-    setTimeout(() => {
-      // Play as broken chord (1-3-5-8)
-      const chordTones = [scale.notes[0], scale.notes[2], scale.notes[4], scale.notes[7] || scale.notes[0]];
-      chordTones.forEach((note, i) => {
-        setTimeout(() => audioEngine.playNote(note, 0.7), i * 300);
-      });
-    }, 4000);
+    try {
+      await audioEngine.playScale(scale.notes);
+      
+      // Play in melodic then harmonic pattern for better learning
+      setTimeout(() => {
+        // Play as broken chord (1-3-5-8)
+        const chordTones = [scale.notes[0], scale.notes[2], scale.notes[4], scale.notes[7] || scale.notes[0]];
+        chordTones.forEach((note, i) => {
+          setTimeout(async () => {
+            try {
+              await audioEngine.playNote(note, 0.7);
+            } catch (error) {
+              console.warn('Audio playback failed:', error);
+            }
+          }, i * 300);
+        });
+      }, 4000);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleTestAnswer = (answer: string) => {
+  const handleTestAnswer = async (answer: string) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     let isCorrect = false;
     setAttempts(prev => prev + 1);
@@ -101,7 +115,11 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
       // Play success audio
       const [tonic] = currentQuestion.scale.split(' ');
       const scale = getMajorScale(tonic as Note);
-      audioEngine.playScale(scale.notes.slice(0, 3)); // Play first three notes as success
+      try {
+        await audioEngine.playScale(scale.notes.slice(0, 3)); // Play first three notes as success
+      } catch (error) {
+        console.warn('Audio playback failed:', error);
+      }
     }
 
     if (currentQuestionIndex < testQuestions.length - 1) {

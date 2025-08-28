@@ -74,6 +74,17 @@ class AudioEngine {
   }
 
   async playScale(notes: string[], tempo: number = 120): Promise<void> {
+    if (!this.audioContext || !this.gainNode) {
+      await this.initAudio();
+    }
+
+    if (!this.audioContext || !this.gainNode) return;
+
+    // Resume audio context if suspended (required for modern browsers)
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
+
     const noteDuration = 60 / tempo; // quarter note duration in seconds
     
     for (let i = 0; i < notes.length; i++) {

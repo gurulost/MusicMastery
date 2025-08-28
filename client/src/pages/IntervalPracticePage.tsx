@@ -190,10 +190,18 @@ export default function IntervalPracticePage() {
   const handlePlayInterval = async () => {
     if (!currentExercise) return;
     
-    await audioEngine.playNote(currentExercise.startNote, 0.8);
-    setTimeout(async () => {
-      await audioEngine.playNote(currentExercise.targetNote, 0.8);
-    }, 600);
+    try {
+      await audioEngine.playNote(currentExercise.startNote, 0.8);
+      setTimeout(async () => {
+        try {
+          await audioEngine.playNote(currentExercise.targetNote, 0.8);
+        } catch (error) {
+          console.warn('Audio playback failed:', error);
+        }
+      }, 600);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
   if (!currentExercise) {

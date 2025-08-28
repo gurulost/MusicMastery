@@ -430,7 +430,13 @@ export default function HomePage() {
               <UserSwitcher />
               <Button 
                 variant="secondary" 
-                onClick={() => keySignature && audioEngine.playScale(keySignature.notes)}
+                onClick={async () => {
+                  try {
+                    if (keySignature) await audioEngine.playScale(keySignature.notes);
+                  } catch (error) {
+                    console.warn('Audio playback failed:', error);
+                  }
+                }}
                 data-testid="button-play-scale"
               >
                 <Play className="mr-2 h-4 w-4" />Play Scale

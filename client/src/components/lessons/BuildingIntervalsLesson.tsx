@@ -84,8 +84,12 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
   const generateExercise = () => {
@@ -103,24 +107,36 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
     setPracticeCount(prev => prev + 1);
   };
 
-  const showAnswer = () => {
+  const showAnswer = async () => {
     if (currentExercise) {
       setSelectedNotes([currentExercise.startNote, currentExercise.targetNote]);
       
       // Educational audio sequence
-      audioEngine.playNote(currentExercise.startNote, 0.8);
-      setTimeout(() => {
-        audioEngine.playNote(currentExercise.targetNote, 0.8);
-        // Play them together to hear the harmony
-        setTimeout(() => {
-          audioEngine.playNote(currentExercise.startNote, 0.6);
-          audioEngine.playNote(currentExercise.targetNote, 0.6);
-        }, 800);
-      }, 600);
+      try {
+        await audioEngine.playNote(currentExercise.startNote, 0.8);
+        setTimeout(async () => {
+          try {
+            await audioEngine.playNote(currentExercise.targetNote, 0.8);
+            // Play them together to hear the harmony
+            setTimeout(async () => {
+              try {
+                await audioEngine.playNote(currentExercise.startNote, 0.6);
+                await audioEngine.playNote(currentExercise.targetNote, 0.6);
+              } catch (error) {
+                console.warn('Audio playback failed:', error);
+              }
+            }, 800);
+          } catch (error) {
+            console.warn('Audio playback failed:', error);
+          }
+        }, 600);
+      } catch (error) {
+        console.warn('Audio playback failed:', error);
+      }
     }
   };
 
-  const handleTestAnswer = (answer: Note) => {
+  const handleTestAnswer = async (answer: Note) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const correctTarget = buildInterval(currentQuestion.startNote, currentQuestion.interval, currentQuestion.direction);
     const isCorrect = answer === correctTarget;
@@ -129,8 +145,18 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
       // Play success audio - the interval
-      audioEngine.playNote(currentQuestion.startNote, 0.8);
-      setTimeout(() => audioEngine.playNote(answer, 0.8), 400);
+      try {
+        await audioEngine.playNote(currentQuestion.startNote, 0.8);
+        setTimeout(async () => {
+          try {
+            await audioEngine.playNote(answer, 0.8);
+          } catch (error) {
+            console.warn('Audio playback failed:', error);
+          }
+        }, 400);
+      } catch (error) {
+        console.warn('Audio playback failed:', error);
+      }
     }
 
     if (currentQuestionIndex < testQuestions.length - 1) {

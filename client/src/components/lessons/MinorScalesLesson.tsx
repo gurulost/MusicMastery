@@ -56,11 +56,15 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleScaleDemo = (scaleName: string) => {
+  const handleScaleDemo = async (scaleName: string) => {
     setCurrentScale(scaleName);
     const [tonic] = scaleName.split(' ');
     const scale = getMinorScale(tonic as Note);
@@ -68,10 +72,14 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
     setPracticeCount(prev => prev + 1);
     
     // Educational audio sequence - play scale with emotional context
-    audioEngine.playScale(scale.notes);
+    try {
+      await audioEngine.playScale(scale.notes);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleComparisonDemo = (minorScale: string, majorScale: string) => {
+  const handleComparisonDemo = async (minorScale: string, majorScale: string) => {
     const [minorTonic] = minorScale.split(' ');
     const [majorTonic] = majorScale.split(' ');
     const minorNotes = getMinorScale(minorTonic as Note);
@@ -82,15 +90,23 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
     setCurrentScale(`${minorScale} vs ${majorScale}`);
     
     // Play minor scale first (sad sound)
-    audioEngine.playScale(minorNotes.notes);
-    
-    // Then major scale (happy sound) for comparison
-    setTimeout(() => {
-      audioEngine.playScale(majorNotes.notes);
-    }, 3500);
+    try {
+      await audioEngine.playScale(minorNotes.notes);
+      
+      // Then major scale (happy sound) for comparison
+      setTimeout(async () => {
+        try {
+          await audioEngine.playScale(majorNotes.notes);
+        } catch (error) {
+          console.warn('Audio playback failed:', error);
+        }
+      }, 3500);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleTestAnswer = (answer: string) => {
+  const handleTestAnswer = async (answer: string) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     let isCorrect = false;
     setAttempts(prev => prev + 1);
@@ -120,7 +136,11 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
         const [tonic] = currentQuestion.scale.split(' ');
         const scale = currentQuestion.type === 'relative_major' ? 
           getMinorScale(tonic as Note) : getMajorScale(tonic as Note);
-        audioEngine.playScale(scale.notes.slice(0, 3));
+        try {
+          await audioEngine.playScale(scale.notes.slice(0, 3));
+        } catch (error) {
+          console.warn('Audio playback failed:', error);
+        }
       }
     }
 

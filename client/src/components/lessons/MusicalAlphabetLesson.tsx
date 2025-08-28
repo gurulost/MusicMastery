@@ -43,8 +43,12 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
   const [showHint, setShowHint] = useState(false);
   const [celebrationMode, setCelebrationMode] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
     setCurrentNote(note);
     
     // Provide immediate audio feedback for note identification
@@ -57,7 +61,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
     }
   };
 
-  const handleTestAnswer = (answer: string) => {
+  const handleTestAnswer = async (answer: string) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     const isCorrect = answer === currentQuestion;
     const newAnswers = [...userAnswers, answer];
@@ -67,7 +71,11 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
     if (isCorrect) {
       setCorrectAnswers(prev => prev + 1);
       // Provide encouraging feedback
-      audioEngine.playNote(currentQuestion as Note, 0.8);
+      try {
+        await audioEngine.playNote(currentQuestion as Note, 0.8);
+      } catch (error) {
+        console.warn('Audio playback failed:', error);
+      }
     }
 
     if (currentQuestionIndex < testQuestions.length - 1) {

@@ -62,11 +62,15 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = (note: Note) => {
-    audioEngine.playNote(note, 0.8);
+  const handleNoteClick = async (note: Note) => {
+    try {
+      await audioEngine.playNote(note, 0.8);
+    } catch (error) {
+      console.warn('Audio playback failed:', error);
+    }
   };
 
-  const handleIntervalDemo = (intervalName: string) => {
+  const handleIntervalDemo = async (intervalName: string) => {
     const interval = INTERVALS.find(i => i.name === intervalName);
     if (!interval) return;
     
@@ -82,15 +86,27 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       const [note1, note2] = example.notes as Note[];
       
       // Play melodically first (one after the other)
-      audioEngine.playNote(note1, 0.8);
-      setTimeout(() => {
-        audioEngine.playNote(note2, 0.8);
-        // Then play harmonically (together) for contrast
-        setTimeout(() => {
-          audioEngine.playNote(note1, 0.6);
-          audioEngine.playNote(note2, 0.6);
-        }, 800);
-      }, 600);
+      try {
+        await audioEngine.playNote(note1, 0.8);
+        setTimeout(async () => {
+          try {
+            await audioEngine.playNote(note2, 0.8);
+            // Then play harmonically (together) for contrast
+            setTimeout(async () => {
+              try {
+                await audioEngine.playNote(note1, 0.6);
+                await audioEngine.playNote(note2, 0.6);
+              } catch (error) {
+                console.warn('Audio playback failed:', error);
+              }
+            }, 800);
+          } catch (error) {
+            console.warn('Audio playback failed:', error);
+          }
+        }, 600);
+      } catch (error) {
+        console.warn('Audio playbook failed:', error);
+      }
     }
   };
 
@@ -102,7 +118,7 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
     }
   };
 
-  const handleTestAnswer = (answer: string) => {
+  const handleTestAnswer = async (answer: string) => {
     const currentQuestion = testQuestions[currentQuestionIndex];
     let isCorrect = false;
     setAttempts(prev => prev + 1);
@@ -120,8 +136,18 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       const example = INTERVAL_EXAMPLES.find(ex => ex.interval === currentQuestion.interval);
       if (example) {
         const [note1, note2] = example.notes as Note[];
-        audioEngine.playNote(note1, 0.8);
-        setTimeout(() => audioEngine.playNote(note2, 0.8), 300);
+        try {
+          await audioEngine.playNote(note1, 0.8);
+          setTimeout(async () => {
+            try {
+              await audioEngine.playNote(note2, 0.8);
+            } catch (error) {
+              console.warn('Audio playback failed:', error);
+            }
+          }, 300);
+        } catch (error) {
+          console.warn('Audio playback failed:', error);
+        }
       }
     }
 
