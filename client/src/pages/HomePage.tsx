@@ -335,10 +335,12 @@ export default function HomePage() {
                   7-Step Guided Journey
                 </Button>
               </Link>
-              <Button variant="secondary" className="w-full justify-start h-12 text-base" data-testid="nav-piano-practice">
-                <Keyboard className="mr-3 h-5 w-5" />
-                Quick Piano Practice
-              </Button>
+              <Link href="/scales">
+                <Button variant="secondary" className="w-full justify-start h-12 text-base" data-testid="nav-piano-practice">
+                  <Keyboard className="mr-3 h-5 w-5" />
+                  Quick Piano Practice
+                </Button>
+              </Link>
             </div>
             <p className="text-xs text-muted-foreground">
               Follow our structured path from musical alphabet to advanced intervals
