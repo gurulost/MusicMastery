@@ -5,11 +5,11 @@ import { normalizeNote } from '@/lib/musicTheory';
 import { cn } from '@/lib/utils';
 
 interface PianoKeyboardProps {
-  highlightedNotes?: Note[];
-  sharpsInKey?: Note[];
+  highlightedNotes?: string[]; // Accept strings to handle both sharps and flats
+  sharpsInKey?: string[]; // Accept strings to handle both sharps and flats
   onNoteClick?: (note: Note) => void;
-  playedNotes?: Note[];
-  selectedNotes?: Note[];
+  playedNotes?: string[]; // Accept strings to handle both sharps and flats
+  selectedNotes?: string[]; // Accept strings to handle both sharps and flats
   onNoteToggle?: (note: Note) => void;
   className?: string;
   showLabels?: boolean;
@@ -143,10 +143,34 @@ export function PianoKeyboard({
     onNoteClick?.(note);
   };
 
-  const isHighlighted = (note: Note) => highlightedNotes.includes(note);
-  const isSharpInKey = (note: Note) => sharpsInKey.includes(note);
-  const isPlayed = (note: Note) => playedNotes.includes(note);
-  const isSelected = (note: Note) => selectedNotes.includes(note);
+  // Helper functions that normalize note comparisons to handle enharmonic equivalents
+  const normalizeNoteArray = (noteArray: string[]): Note[] => {
+    return noteArray.map(note => normalizeNote(note as Note));
+  };
+
+  const isHighlighted = (note: Note) => {
+    const normalizedHighlighted = normalizeNoteArray(highlightedNotes);
+    const normalizedNote = normalizeNote(note);
+    return normalizedHighlighted.includes(normalizedNote) || highlightedNotes.includes(note);
+  };
+
+  const isSharpInKey = (note: Note) => {
+    const normalizedSharps = normalizeNoteArray(sharpsInKey);
+    const normalizedNote = normalizeNote(note);
+    return normalizedSharps.includes(normalizedNote) || sharpsInKey.includes(note);
+  };
+
+  const isPlayed = (note: Note) => {
+    const normalizedPlayed = normalizeNoteArray(playedNotes);
+    const normalizedNote = normalizeNote(note);
+    return normalizedPlayed.includes(normalizedNote) || playedNotes.includes(note);
+  };
+
+  const isSelected = (note: Note) => {
+    const normalizedSelected = normalizeNoteArray(selectedNotes);
+    const normalizedNote = normalizeNote(note);
+    return normalizedSelected.includes(normalizedNote) || selectedNotes.includes(note);
+  };
   const isActive = (note: Note, index: number, isBlackKey: boolean = false) => {
     const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
     return activeKeys.has(keyId);

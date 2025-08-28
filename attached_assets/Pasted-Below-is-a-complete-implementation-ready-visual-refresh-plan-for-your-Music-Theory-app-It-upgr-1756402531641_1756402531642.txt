@@ -1,0 +1,413 @@
+Below is a **complete, implementation‑ready visual refresh plan** for your Music Theory app. It upgrades the look and polish **without changing any functionality**. I’ve structured it so you can hand it directly to a developer. Where I reference your current codebase, I cite the file/area so the dev can jump straight to it.
+
+---
+
+## 0) What you already have (baseline we’ll build on)
+
+* **Tech & UI stack**: React + TypeScript (Vite), Tailwind, shadcn/ui (Radix), lucide icons, next-themes, framer‑motion, Recharts are already in the project — great foundations.&#x20;
+* **Routing & pages**: Router mounts `HomePage`, `ScalesPage`, `IntervalsPage`, `IntervalPracticePage`, `ProgressPage`, `LearningJourneyPage`, `LessonPage`, `NotFound`.&#x20;
+* **Design tokens & Tailwind mapping**: You’re exposing colors as CSS variables in `index.css` and mapping them in `tailwind.config.ts` (including `success` and `warning`). &#x20;
+* **Dark theme tokens** are present as a second token block.&#x20;
+* **Fonts**: `index.html` loads a very large set of Google Fonts (many families). This hurts performance and visual consistency.&#x20;
+* **Key visual areas**:
+
+  * **PianoKeyboard** uses ad‑hoc colors for states (green/purple/orange/yellow), and absolute positioning for black keys.&#x20;
+  * **ProgressRing** hard‑codes a green stroke rather than using tokens.&#x20;
+  * **Learning Journey** already has a 7‑step structure with section gating; `LessonPage` header shows “Step X of 7”. &#x20;
+  * **Recharts wrapper** exists as `ui/chart.tsx` for themed charts.&#x20;
+  * **Shadcn components** (Navigation Menu, Menubar, Progress, Toast, Skeleton, etc.) are available for richer UI.  &#x20;
+
+---
+
+## 1) Visual Direction & Principles
+
+* **Quiet, musical, precise.** Reduce visual noise; lean on typography, spacing, and restrained color.
+* **Token‑first**: every color, radius, shadow, and motion curve comes from a token. No inline hex/hsl.
+* **State color discipline**: All “correct/current/played/in‑key” piano states use **semantic tokens**, not arbitrary colors.
+* **Motion as feedback**: small, fast, purposeful animations; no decorative movement.
+
+---
+
+## 2) Design System Upgrades (tokens, typography, spacing, shadows)
+
+### 2.1 Color tokens (light/dark) — keep structure, refine values
+
+You already map CSS variables to Tailwind (`primary`, `secondary`, `muted`, `success`, `warning`, etc.). We’ll **add piano‑specific state tokens** and unify component colors to the same system.
+
+**Add these to `client/src/index.css` tokens:**
+
+```css
+/* Piano states (light) */
+:root {
+  --note-correct: 122 39% 49%;        /* maps to success; used when answer revealed */
+  --note-selected: 221 83% 53%;       /* focused/selected key (blue-ish) */
+  --note-played: 27 95% 55%;          /* sequence played (amber) */
+  --note-in-key: 266 55% 52%;         /* notes that are valid in the current key (violet) */
+  --key-shadow: 220 9% 46% / 0.25;    /* depth for keys */
+}
+
+/* Piano states (dark) match but tuned for contrast */
+.dark {
+  --note-correct: 122 39% 49%;
+  --note-selected: 210 83% 62%;
+  --note-played: 30 96% 62%;
+  --note-in-key: 266 60% 62%;
+  --key-shadow: 0 0% 0% / 0.5;
+}
+```
+
+Rationale: use **semantic** piano tokens instead of hard‑coding green/purple/orange in the keyboard. Today those colors are spread in class conditions.&#x20;
+Your tailwind config already exposes `success`/`warning`, so these complement – not replace – the global palette.&#x20;
+
+> Keep existing global tokens (primary, secondary, success, warning) but ensure all ad‑hoc colors reference tokens so the dark theme stays coherent. &#x20;
+
+### 2.2 Typography — simplify to **two families**
+
+You currently ship a large Google Fonts payload. Replace with **one geometric sans + one elegant serif** (e.g., Plus Jakarta Sans + Source Serif 4), loaded in two weights each.
+
+* **In `index.html`**: remove unused families; load only the two chosen families (wght 400/600).&#x20;
+* **In `index.css`**: set variables:
+
+```css
+:root {
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+```
+
+* Your Tailwind config already maps `fontFamily.sans/serif/mono` to CSS variables; this change cascades across components.&#x20;
+
+**Type scale** (Tailwind utilities; no custom CSS needed):
+
+* Display (`text-4xl md:text-5xl` / `tracking-tight`)
+* H1 `text-3xl font-semibold`
+* H2 `text-2xl font-semibold`
+* H3 `text-xl font-semibold`
+* Body `text-base text-muted-foreground`
+* Small `text-sm`
+
+### 2.3 Radius & shadows
+
+You already have `--radius` and a custom shadow scale in tokens. Bump `--radius` from `0.5rem` to `0.75rem` for a softer, modern feel, and use your existing shadow tokens sparingly on interactive surfaces (buttons hovered, keys pressed).&#x20;
+
+---
+
+## 3) App‑Level Layout & Navigation
+
+### 3.1 Introduce an **AppShell**
+
+Create `components/AppShell.tsx` that provides a consistent top bar + optional left sidebar. Use existing shadcn components (`navigation-menu`, `menubar`, `sidebar`) to keep accessibility right. &#x20;
+
+**AppShell responsibilities:**
+
+* **TopBar**: brand (wordmark), quick links, `ThemeToggle`, user switcher, and a global **Practice** CTA.
+* **Left Sidebar (md+)**: “Start here” (7‑step Journey), “Practice” (Scales/Intervals), “Progress” link.
+  You already emphasize “Start Here” on Home; make that persistent.&#x20;
+* **Content area**: unified container (`max-w-6xl mx-auto px-6`) and a `PageHeader` slot.
+
+**Wire‐in**: Wrap `<Router />` with `AppShell` inside `App.tsx`. Don’t alter routes.&#x20;
+
+### 3.2 Theme switch
+
+You have `next-themes` installed. Add `ThemeProvider` at the top level; place a `ThemeToggle` button (Sun/Moon lucide icons) in TopBar.&#x20;
+
+---
+
+## 4) Page‑Level Design Patterns
+
+### 4.1 **HomePage**
+
+* **Hero**: Replace bare header with a subtle gradient surface, serif display headline, and two primary CTAs: **“7‑Step Guided Journey”** and **“Practice Now”**; show overall progress with `ProgressRing`. Current Home already computes progress summaries and offers the Journey CTA; we’re upgrading composition and visuals only. &#x20;
+* **Learning quick‑links**: Use your `LearningPathCard` component style for consistency (title, difficulty pill, small list).&#x20;
+
+### 4.2 **Learning Journey & Lesson**
+
+* Add a **Stepper** component (3 segments per step: Learn → Practice → Test) above the lesson card; it visually mirrors your unlock logic but doesn’t change it. `LessonPage` already shows “Step X of 7”. &#x20;
+* Use `Progress` (shadcn) for intra‑lesson progress with semantic colors.&#x20;
+
+### 4.3 **Scales & Intervals pages**
+
+* Convert the list into a **segmented list** with consistent status pills (Not Started / In Progress / Mastered) using your `success`/`warning` tokens instead of raw gray/green/yellow. You already compute and display these states; this is purely visual polish. &#x20;
+
+### 4.4 **Progress page**
+
+* Use the `ui/chart.tsx` container to theme Recharts so axes, grid, tooltip, and series adopt the token colors automatically (no inline styling).&#x20;
+* Replace the hardcoded `ProgressRing` stroke color with `hsl(var(--success))`.&#x20;
+
+---
+
+## 5) Component‑Level Polish (non‑breaking)
+
+### 5.1 **PianoKeyboard** visual revamp (CSS‑only)
+
+Goal: make keys feel tactile, with clear states, **no logic changes**.
+
+**Before**: keys conditionally use `bg-green-500`, `bg-purple-500`, `bg-orange-600`, etc.&#x20;
+**After**: map to tokens with a tiny helper.
+
+Implementation sketch (inside `PianoKeyboard` render):
+
+```tsx
+// helpers (visual only)
+const colorFor = (state: "correct"|"selected"|"played"|"inKey"|"idle") =>
+  state === "correct"  ? `hsl(var(--note-correct))`  :
+  state === "selected" ? `hsl(var(--note-selected))` :
+  state === "played"   ? `hsl(var(--note-played))`   :
+  state === "inKey"    ? `hsl(var(--note-in-key))`   :
+                         undefined;
+
+// example key style application
+<button
+  className={cn(
+    "piano-key black-key w-7 h-20 text-xs flex items-end justify-center pb-1 rounded-b-md transition-all duration-100 select-none cursor-pointer z-10 absolute",
+    isActive(...) && "translate-y-0.5 shadow-md"
+  )}
+  style={{
+    left: `${leftPosition}px`,
+    backgroundColor:
+      isHighlighted(note) ? colorFor("correct") :
+      isSelected(note)    ? colorFor("selected") :
+      isPlayed(note)      ? colorFor("played")   :
+      isSharpInKey(note)  ? colorFor("inKey")    :
+      undefined
+  }}
+/>
+```
+
+* Add a **subtle top highlight** on white keys and a **soft drop shadow** (`--key-shadow`) on black keys for depth.
+* Respect current labels and layout — we’re only restyling.&#x20;
+
+### 5.2 **ProgressRing** tokenization
+
+Current:
+
+```tsx
+<circle ... stroke="hsl(122 39% 49%)" ... />
+```
+
+Change to:
+
+```tsx
+<circle ... stroke={`hsl(var(--success))`} ... />
+```
+
+(Keep the same logic and animation.)&#x20;
+
+### 5.3 **Buttons** & **Badges**
+
+Use shadcn defaults; for status indicators (Mastered/In Progress/Not Started), switch to **outline badges** in neutral, with a small status dot colored via tokens. This reduces color blocks while preserving meaning. You already pass statuses through components like `LearningPathCard`.&#x20;
+
+### 5.4 **Help affordances**
+
+You already have `HelpTooltip` and `HelpDialog`. Standardize the icon, size, and placement (top‑right of cards) and use the same copy pattern and hover/focus states everywhere.&#x20;
+
+---
+
+## 6) Motion & Micro‑interactions (tasteful, fast)
+
+* **Buttons & keys**: 1.02 scale on hover/focus (`transition-transform duration-100`), 0.97 on active; drop‑shadow intensifies briefly.
+* **Success**: A tiny confetti burst or checkmark pop using framer‑motion when a scale/interval is marked correct. (Keep it subtle; <300ms.) You already have framer‑motion installed.&#x20;
+* **Toasts**: unify spacing and edge animation using your existing shadcn `toast` primitives.&#x20;
+
+All above are **visual only**; they wrap the existing events that are already firing.
+
+---
+
+## 7) Accessibility & Responsiveness
+
+* **Contrast**: Verify all text against tokens (AA minimum). Prefer neutral backgrounds with tokenized foregrounds (`text-foreground`, `text-muted-foreground`).&#x20;
+* **Focus rings**: Ensure everything has `focus-visible:ring-2 ring-ring ring-offset-2`. You already use `ring` token; enforce it across interactive controls.&#x20;
+* **Keyboarding the keyboard (visual only)**: Add `tabIndex` to keys to show focus outlines (no new behavior required; just visuals).
+* **Reduced motion**: Respect `prefers-reduced-motion` with Tailwind’s media queries (skip scale/transition where set).
+
+Mobile:
+
+* Use the **sidebar as a bottom bar** on small screens; keep the Hero minimal; make the piano **horizontally scrollable** with clear gradients on edges to hint scroll.
+
+---
+
+## 8) Theming (optional but quick win)
+
+Offer three curated themes by swapping token blocks (no component code change):
+
+1. **Classic Light** (your current light tokens, tightened)&#x20;
+2. **Nocturne (Dark)** (your dark set, tuned for higher legibility)&#x20;
+3. **High Contrast** (boosted `foreground`, simplified accents)
+
+Use `next-themes` `ThemeProvider` and a simple `ThemeToggle` in TopBar.&#x20;
+
+---
+
+## 9) Concrete file‑by‑file change list
+
+> **Zero functional changes** — CSS/tokens/markup only.
+
+1. **`client/src/index.css`**
+
+   * Keep existing palette; **add piano state tokens** (`--note-*`, `--key-shadow`) and bump `--radius` to `0.75rem`. &#x20;
+   * (Optional) tighten dark set for contrast.&#x20;
+
+2. **`tailwind.config.ts`**
+
+   * Confirm `success`/`warning` are mapped (they are). Add a small doc comment encouraging devs to use semantic tokens only.&#x20;
+
+3. **`client/index.html`**
+
+   * Replace the massive Google Fonts import with two families + `display=swap`.&#x20;
+
+4. **`client/src/App.tsx`**
+
+   * Wrap `<Router />` in new `<AppShell>` and `<ThemeProvider>`; leave routes untouched.&#x20;
+
+5. **New**: `client/src/components/AppShell.tsx`, `TopBar.tsx`, `SideNav.tsx`, `PageHeader.tsx`, `ThemeToggle.tsx`
+
+   * Composition only, using existing shadcn components. &#x20;
+
+6. **`client/src/components/PianoKeyboard.tsx`**
+
+   * Replace inline class color conditions with `style={{ backgroundColor: … }}` using **`--note-*` tokens** as shown above. Keep all event handlers and logic intact.&#x20;
+
+7. **`client/src/components/ProgressRing.tsx`**
+
+   * Swap hard‑coded stroke color to `hsl(var(--success))`.&#x20;
+
+8. **`client/src/pages/*`**
+
+   * **Home**: add Hero composition and reuse `LearningPathCard` cards.&#x20;
+   * **Scales/Intervals**: switch status visuals to tokenized badges; preserve data. &#x20;
+   * **Progress**: render charts via `ui/chart.tsx` container so all styles come from tokens.&#x20;
+   * **Learning Journey/Lesson**: insert Stepper + `PageHeader`. Logic unchanged. &#x20;
+
+---
+
+## 10) Example snippets your dev can paste
+
+### 10.1 `ThemeToggle.tsx`
+
+```tsx
+import { useTheme } from "next-themes";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+export function ThemeToggle() {
+  const { theme, setTheme } = useTheme();
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+      {theme === "dark" ? <Sun /> : <Moon />}
+    </Button>
+  );
+}
+```
+
+(next-themes already in deps.)&#x20;
+
+### 10.2 `PageHeader.tsx`
+
+```tsx
+export function PageHeader({
+  title, subtitle, actions
+}: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+  return (
+    <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+      </div>
+      {actions}
+    </div>
+  );
+}
+```
+
+### 10.3 Token‑driven Recharts (using your `ChartContainer`)
+
+```tsx
+<ChartContainer
+  config={{
+    progress: { label: "Progress", color: "hsl(var(--primary))" },
+    accuracy: { label: "Accuracy", color: "hsl(var(--success))" }
+  }}
+>
+  <AreaChart data={data}>
+    {/* axes, grid, tooltip, areas */}
+  </AreaChart>
+</ChartContainer>
+```
+
+(Uses existing `ui/chart.tsx` pattern.)&#x20;
+
+---
+
+## 11) QA & Acceptance Criteria
+
+* **Token compliance**: No hardcoded hex/hsl in components (exceptions: transient debugging).
+* **Dark mode parity**: All pages are legible and aesthetically consistent in dark mode. Toggle verified.
+* **Keyboard**:
+
+  * States: “correct/current/played/in‑key” colors use tokens; labels remain readable over these fills.
+  * Press/active visual affordance works on both white/black keys; no layout shifts.
+* **Performance**:
+
+  * Google Fonts reduced to ≤2 families, ≤2 weights each; Largest Contentful Paint improves.&#x20;
+* **A11y**:
+
+  * Text contrast AA; focus rings visible; tooltip/drawer/dialog all trap focus correctly (Radix already handles this; verify usage).&#x20;
+* **No functionality change**:
+
+  * All routes and interactions behave exactly as before; we’ve only altered presentation.&#x20;
+
+---
+
+## 12) Suggested work plan (two short sprints)
+
+### Sprint 1 — System & Shell (foundation)
+
+1. Tokens: add piano tokens, update radius; audit `ProgressRing` and any hardcoded colors.&#x20;
+2. Fonts: trim to two families; verify FOUT/FOIT.&#x20;
+3. AppShell + ThemeProvider + ThemeToggle; drop into `App.tsx`.&#x20;
+4. PianoKeyboard CSS refactor to `--note-*` tokens only (no logic changes).&#x20;
+
+**Demo check**: dark/light parity, Home header, keyboard visuals.
+
+### Sprint 2 — Page polish
+
+1. Home hero + LearningPath cards; consistent `PageHeader`.&#x20;
+2. Scales/Intervals: segmented list styles, badges, density. &#x20;
+3. Progress charts themed through `ChartContainer`.&#x20;
+4. Learning Journey: visual stepper + headers (no gating changes). &#x20;
+
+---
+
+## 13) Risks & mitigations
+
+* **Risk**: Inline style replacement in PianoKeyboard might accidentally change specificity.
+  **Mitigation**: Keep Tailwind structural classes; apply only backgroundColor via inline style and test each state.&#x20;
+* **Risk**: Font changes shift metrics.
+  **Mitigation**: Lock line‑heights and measure key headers after swap.&#x20;
+* **Risk**: Theme edge cases.
+  **Mitigation**: Visual regression pass for light/dark on every page.
+
+---
+
+## 14) “Done” looks like
+
+* The app feels cohesive: same type, same spacing rules, consistent badges and toasts.
+* Piano keys are **obviously** interactable and stateful, and the palette harmonizes across dark/light.
+* No console errors, no changed routes, and progress data/logic untouched.
+
+---
+
+### Quick wins (if you need a same‑day bump)
+
+* Swap `ProgressRing` stroke to token and bump card radii.&#x20;
+* Trim Google Fonts to 2 families.&#x20;
+* Add ThemeToggle; set dark by OS preference.&#x20;
+
+---
+
+**Confidence**: **High** on the plan’s feasibility and the specific file‑by‑file steps (rooted in your current structure). **Medium‑High** on exact palette values (you may want a designer’s final pass on hue/saturation for the piano state tokens, but the semantics and token approach are sound).

@@ -5,6 +5,7 @@ class AudioEngine {
   private audioContext: AudioContext | null = null;
   private gainNode: GainNode | null = null;
   private isInitialized = false;
+  private currentScaleTimeouts: NodeJS.Timeout[] = []; // Track active scale timeouts
 
   constructor() {
     // Don't initialize audio immediately - wait for user interaction
@@ -109,6 +110,9 @@ class AudioEngine {
   }
 
   async playScale(notes: string[], tempo: number = 120): Promise<void> {
+    // Cancel any currently playing scale to prevent overlap
+    this.cancelCurrentScale();
+    
     // Ensure audio context is ready
     const isReady = await this.ensureAudioContext();
     if (!isReady || !this.audioContext || !this.gainNode) {
@@ -118,11 +122,20 @@ class AudioEngine {
 
     const noteDuration = 60 / tempo; // quarter note duration in seconds
     
+    // Schedule scale playback with cancellation tracking
     for (let i = 0; i < notes.length; i++) {
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         this.playNote(normalizeNote(notes[i]), noteDuration * 0.8);
       }, i * noteDuration * 1000);
+      
+      this.currentScaleTimeouts.push(timeout);
     }
+  }
+
+  // Cancel currently playing scale to prevent overlapping audio
+  private cancelCurrentScale(): void {
+    this.currentScaleTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.currentScaleTimeouts = [];
   }
 }
 
