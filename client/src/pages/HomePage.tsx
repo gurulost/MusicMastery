@@ -457,11 +457,19 @@ export default function HomePage() {
   
   const handlePlayScaleAscending = async () => {
     if (!currentExercise) return;
+    
+    console.log(`Playing ${currentExercise.itemName} scale:`, currentExercise.correctNotes);
+    
     try {
       await audioEngine.initializeAudio();
-      await audioEngine.playScale(currentExercise.correctNotes);
+      await audioEngine.playScale(currentExercise.correctNotes, 100); // Slightly slower tempo for clarity
     } catch (error) {
       console.warn('Scale playback failed:', error);
+      toast({
+        title: "Audio Error",
+        description: "Unable to play scale audio. Please check your sound settings.",
+        variant: "destructive"
+      });
     }
   };
 

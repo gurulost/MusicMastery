@@ -252,12 +252,16 @@ class AudioEngine {
       return;
     }
 
+    console.log(`Playing scale with ${notes.length} notes at tempo ${tempo}:`, notes);
+
     const noteDuration = 60 / tempo; // quarter note duration in seconds
     
     // Schedule scale playback with cancellation tracking
     for (let i = 0; i < notes.length; i++) {
       const timeout = setTimeout(() => {
-        this.playNote(normalizeNote(notes[i] as any), noteDuration * 0.8);
+        const normalizedNote = normalizeNote(notes[i] as any);
+        console.log(`Playing note ${i + 1}/${notes.length}: ${notes[i]} -> ${normalizedNote}`);
+        this.playNote(normalizedNote, noteDuration * 0.8);
       }, i * noteDuration * 1000);
       
       this.currentScaleTimeouts.push(timeout);
