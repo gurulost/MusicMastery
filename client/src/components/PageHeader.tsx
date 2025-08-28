@@ -17,7 +17,7 @@ export function PageHeader({ title, subtitle, children }: PageHeaderProps) {
           )}
         </div>
         {children && (
-          <div className="flex flex-wrap items-center gap-3 md:flex-nowrap">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {children}
           </div>
         )}

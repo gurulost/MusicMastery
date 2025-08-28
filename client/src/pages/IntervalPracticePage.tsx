@@ -228,22 +228,27 @@ export default function IntervalPracticePage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
             <h1 className="text-3xl font-bold">Interval Building Practice</h1>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <Button 
                 variant="outline" 
+                size="sm"
                 onClick={handleSwitchMode}
                 data-testid="button-switch-mode"
               >
-                Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode
+                <span className="hidden lg:inline">Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
+                <span className="lg:hidden">{exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
               </Button>
               <Button 
                 variant="secondary" 
+                size="sm"
                 onClick={handlePlayInterval}
                 data-testid="button-play-interval"
               >
-                <Play className="mr-2 h-4 w-4" />Play Interval
+                <Play className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Play Interval</span>
+                <span className="sm:hidden">Play</span>
               </Button>
             </div>
           </div>

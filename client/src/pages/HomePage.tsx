@@ -446,7 +446,7 @@ export default function HomePage() {
           title="Interactive Piano Practice"
           subtitle="Learn and practice scales and intervals with step-by-step guidance"
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <HelpTooltip 
               content="Click for help with the piano interface and getting started"
               onClick={() => setShowHelp(true)}
@@ -466,7 +466,8 @@ export default function HomePage() {
               data-testid="button-play-scale"
             >
               <Play className="mr-2 h-4 w-4" />
-              Play Scale
+              <span className="hidden sm:inline">Play Scale</span>
+              <span className="sm:hidden">Play</span>
             </Button>
             <Button 
               variant="outline" 
@@ -474,7 +475,8 @@ export default function HomePage() {
               onClick={handleSwitchMode}
               data-testid="button-switch-mode"
             >
-              Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode
+              <span className="hidden lg:inline">Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
+              <span className="lg:hidden">{exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
             </Button>
             <Button 
               variant="secondary" 
@@ -483,7 +485,8 @@ export default function HomePage() {
               disabled={showHint}
               data-testid="button-show-hint"
             >
-              Show Hint
+              <span className="hidden sm:inline">Show Hint</span>
+              <span className="sm:hidden">Hint</span>
             </Button>
             <Button 
               size="sm"
@@ -492,7 +495,8 @@ export default function HomePage() {
               data-testid="button-check-answer"
             >
               <Check className="mr-2 h-4 w-4" />
-              Check Answer
+              <span className="hidden sm:inline">Check Answer</span>
+              <span className="sm:hidden">Check</span>
             </Button>
           </div>
         </PageHeader>
@@ -504,9 +508,9 @@ export default function HomePage() {
             <div className="mb-6">
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                     <h3 className="text-xl font-semibold">Current Exercise</h3>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
                         {currentExercise.mode === 'learn' ? 'Learning' : 'Practice'} Mode
                       </span>
