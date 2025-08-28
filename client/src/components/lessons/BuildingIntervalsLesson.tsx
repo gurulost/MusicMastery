@@ -21,6 +21,18 @@ const ADVANCED_INTERVALS: IntervalType[] = ['Minor 7th', 'Major 7th', 'Minor 6th
 // Starting notes for exercises
 const PRACTICE_NOTES: Note[] = ['C', 'D', 'E', 'F', 'G', 'A'];
 
+// Helper function to get enharmonic equivalent display for buttons
+const getEnharmonicDisplay = (note: string): string => {
+  const enharmonics: Record<string, string> = {
+    'C#': 'C#/Db',
+    'D#': 'D#/Eb', 
+    'F#': 'F#/Gb',
+    'G#': 'G#/Ab',
+    'A#': 'A#/Bb'
+  };
+  return enharmonics[note] || note;
+};
+
 // Interval construction strategies
 const CONSTRUCTION_STRATEGIES = {
   'Perfect Unison': 'Same note - no counting needed, 0 half steps',
@@ -628,6 +640,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                   <PianoKeyboard
                     highlightedNotes={[currentQuestion.startNote]}
                     onNoteClick={() => {}}
+                    showLabels={false} // Hide labels during tests to avoid giving away answers
                   />
                   <p className="text-xs text-muted-foreground mt-2">Starting note highlighted</p>
                 </div>
@@ -678,7 +691,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                     onClick={() => handleTestAnswer(note as Note)}
                     className="h-12 text-sm"
                   >
-                    {note}
+                    {getEnharmonicDisplay(note)}
                   </Button>
                 ))}
               </div>

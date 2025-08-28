@@ -45,6 +45,18 @@ const BLACK_KEY_POSITIONS: BlackKeyInfo[] = [
   { note: 'D#', whiteKeyIndex: 17 }, // Between D (17) and E (18)
 ];
 
+// Helper function to get enharmonic equivalent display
+const getEnharmonicDisplay = (note: Note): string => {
+  const enharmonics: Record<string, string> = {
+    'C#': 'C#/Db',
+    'D#': 'D#/Eb', 
+    'F#': 'F#/Gb',
+    'G#': 'G#/Ab',
+    'A#': 'A#/Bb'
+  };
+  return enharmonics[note] || note;
+};
+
 export function PianoKeyboard({ 
   highlightedNotes = [], 
   sharpsInKey = [],
@@ -131,7 +143,7 @@ export function PianoKeyboard({
               )}
               onClick={() => handleKeyPress(note, index)}
             >
-              {showLabels && note}
+              {showLabels && getEnharmonicDisplay(note)}
             </button>
           ))}
         </div>
@@ -165,7 +177,7 @@ export function PianoKeyboard({
                 }}
                 onClick={() => handleKeyPress(blackKey.note, blackKey.whiteKeyIndex, true)}
               >
-                {showLabels && blackKey.note}
+                {showLabels && getEnharmonicDisplay(blackKey.note)}
               </button>
             );
           })}

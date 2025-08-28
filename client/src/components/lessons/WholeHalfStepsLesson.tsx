@@ -14,6 +14,18 @@ interface WholeHalfStepsLessonProps {
 
 const CHROMATIC_NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+// Helper function to get enharmonic equivalent display for buttons
+const getEnharmonicDisplay = (note: Note): string => {
+  const enharmonics: Record<string, string> = {
+    'C#': 'C#/Db',
+    'D#': 'D#/Eb', 
+    'F#': 'F#/Gb',
+    'G#': 'G#/Ab',
+    'A#': 'A#/Bb'
+  };
+  return enharmonics[note] || note;
+};
+
 // Helper function to get the next note by half steps
 function getNextNote(note: Note, halfSteps: number): Note {
   const index = CHROMATIC_NOTES.indexOf(note);
@@ -505,6 +517,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
                 <PianoKeyboard
                   highlightedNotes={[currentQuestion.startNote]}
                   onNoteClick={() => {}} // Disabled during test
+                  showLabels={false} // Hide labels during tests to avoid giving away answers
                 />
                 <div className="mt-4 space-x-2">
                   <Button
@@ -567,9 +580,9 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
                     key={note}
                     variant="outline"
                     onClick={() => handleTestAnswer(note)}
-                    className="h-12"
+                    className="h-12 text-sm"
                   >
-                    {note}
+                    {getEnharmonicDisplay(note)}
                   </Button>
                 ))}
               </div>

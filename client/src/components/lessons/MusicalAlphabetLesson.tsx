@@ -15,6 +15,18 @@ interface MusicalAlphabetLessonProps {
 const NATURAL_NOTES: Note[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const SHARP_NOTES: Note[] = ['C#', 'D#', 'F#', 'G#', 'A#'];
 
+// Helper function to get enharmonic equivalent display for buttons
+const getEnharmonicDisplay = (note: Note): string => {
+  const enharmonics: Record<string, string> = {
+    'C#': 'C#/Db',
+    'D#': 'D#/Eb', 
+    'F#': 'F#/Gb',
+    'G#': 'G#/Ab',
+    'A#': 'A#/Bb'
+  };
+  return enharmonics[note] || note;
+};
+
 export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLessonProps) {
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -415,6 +427,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
                 <PianoKeyboard
                   highlightedNotes={currentQuestion ? [currentQuestion] : []}
                   onNoteClick={() => {}} // Disabled during test
+                  showLabels={false} // Hide labels during tests to avoid giving away answers
                 />
                 <div className="mt-4">
                   <Button
@@ -445,9 +458,9 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
                     key={note}
                     variant="outline"
                     onClick={() => handleTestAnswer(note)}
-                    className="h-12"
+                    className="h-12 text-sm"
                   >
-                    {note}
+                    {getEnharmonicDisplay(note)}
                   </Button>
                 ))}
               </div>
