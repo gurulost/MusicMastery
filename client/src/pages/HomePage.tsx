@@ -168,10 +168,26 @@ export default function HomePage() {
     }
   };
 
-  // Generate a random scale exercise (major or minor only)
+  // Generate a random scale exercise with progressive difficulty
   const generateRandomScale = () => {
     const categories = ['major_scales', 'minor_scales'];
     const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales';
+    
+    // Use progressive difficulty based on user performance
+    const { easy, medium, hard } = getScalesByDifficulty();
+    let availableScales;
+    
+    if (difficultyLevel === 'easy') {
+      availableScales = easy;
+    } else if (difficultyLevel === 'medium') {
+      availableScales = [...easy, ...medium];
+    } else {
+      availableScales = [...easy, ...medium, ...hard];
+    }
+    
+    // Generate scale from appropriate difficulty level
+    const randomScale = availableScales[Math.floor(Math.random() * availableScales.length)];
+    const scale = getScale(randomScale);
     
     let exerciseData: ExerciseData;
     let instruction: string;
@@ -179,16 +195,46 @@ export default function HomePage() {
     let hint: string;
 
     if (category === 'major_scales') {
-      exerciseData = generateScaleExercise('major_scales');
-      const scale = getMajorScale(exerciseData.tonic);
+      // Only include major scales from available scales
+      const majorScales = availableScales.filter(s => s.type === 'major');
+      if (majorScales.length > 0) {
+        const selectedScale = majorScales[Math.floor(Math.random() * majorScales.length)];
+        const scaleData = getScale(selectedScale);
+        exerciseData = {
+          category: 'major_scales',
+          tonic: selectedScale.tonic,
+          type: selectedScale.type,
+          displayName: scaleData.name,
+          correctNotes: scaleData.notes
+        };
+      } else {
+        // Fallback to random major scale
+        exerciseData = generateScaleExercise('major_scales');
+      }
+      const scaleInfo = getMajorScale(exerciseData.tonic);
       instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
-      explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
+      explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale has ${scaleInfo.sharps.length > 0 ? `${scaleInfo.sharps.length} sharp${scaleInfo.sharps.length > 1 ? 's' : ''}: ${scaleInfo.sharps.join(', ')}` : scaleInfo.flats.length > 0 ? `${scaleInfo.flats.length} flat${scaleInfo.flats.length > 1 ? 's' : ''}: ${scaleInfo.flats.join(', ')}` : 'no sharps or flats'}.`;
       hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${exerciseData.tonic} and follow the major scale pattern.`;
     } else {
-      exerciseData = generateScaleExercise('minor_scales');
-      const scale = getMinorScale(exerciseData.tonic);
+      // Only include minor scales from available scales  
+      const minorScales = availableScales.filter(s => s.type === 'natural_minor');
+      if (minorScales.length > 0) {
+        const selectedScale = minorScales[Math.floor(Math.random() * minorScales.length)];
+        const scaleData = getScale(selectedScale);
+        exerciseData = {
+          category: 'minor_scales',
+          tonic: selectedScale.tonic,
+          type: selectedScale.type,
+          displayName: scaleData.name,
+          correctNotes: scaleData.notes
+        };
+      } else {
+        // Fallback to random minor scale
+        exerciseData = generateScaleExercise('minor_scales');
+      }
+      const scaleInfo = getMinorScale(exerciseData.tonic);
       instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
-      explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
+      explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale has ${scaleInfo.sharps.length > 0 ? `${scaleInfo.sharps.length} sharp${scaleInfo.sharps.length > 1 ? 's' : ''}: ${scaleInfo.sharps.join(', ')}` : scaleInfo.flats.length > 0 ? `${scaleInfo.flats.length} flat${scaleInfo.flats.length > 1 ? 's' : ''}: ${scaleInfo.flats.join(', ')}` : 'no sharps or flats'}.`;
       hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
     }
 
