@@ -131,7 +131,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
       if (currentQuestion.type.includes('relative')) {
         const [tonic] = currentQuestion.scale.split(' ');
         const scale = currentQuestion.type === 'relative_major' ? 
-          getMinorScale(tonic as Note) : getMajorScale(tonic as Note);
+          getMajorScale(tonic as Note) : getMinorScale(tonic as Note);
         try {
           await audioEngine.playScale(scale.notes.slice(0, 3));
         } catch (error) {

@@ -1,4 +1,6 @@
 // Audio synthesis using Web Audio API
+import { normalizeNote } from './musicTheory';
+
 class AudioEngine {
   private audioContext: AudioContext | null = null;
   private gainNode: GainNode | null = null;
@@ -118,7 +120,7 @@ class AudioEngine {
     
     for (let i = 0; i < notes.length; i++) {
       setTimeout(() => {
-        this.playNote(notes[i], noteDuration * 0.8);
+        this.playNote(normalizeNote(notes[i]), noteDuration * 0.8);
       }, i * noteDuration * 1000);
     }
   }
