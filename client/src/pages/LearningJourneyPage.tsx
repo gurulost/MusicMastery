@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'wouter';
-import { ArrowLeft, CheckCircle, Lock, Play, BookOpen, Target, Award, ChevronRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Lock, BookOpen, Target, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -90,8 +90,6 @@ interface LearningProgress {
 }
 
 export default function LearningJourneyPage() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [currentSection, setCurrentSection] = useState<'learn' | 'practice' | 'test'>('learn');
   const [showHelp, setShowHelp] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -135,9 +133,6 @@ export default function LearningJourneyPage() {
     };
   };
 
-  const getCurrentStepInfo = () => {
-    return LEARNING_STEPS.find(step => step.id === currentStep) || LEARNING_STEPS[0];
-  };
 
   const handleStartStep = (stepId: number, section: 'learn' | 'practice' | 'test') => {
     const stepProgress = getStepProgress(stepId);
@@ -150,8 +145,8 @@ export default function LearningJourneyPage() {
       return;
     }
     
-    setCurrentStep(stepId);
-    setCurrentSection(section);
+    // Navigate directly to the lesson page
+    window.location.href = `/lesson/${stepId}/${section}`;
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -174,7 +169,6 @@ export default function LearningJourneyPage() {
     }
   };
 
-  const currentStepInfo = getCurrentStepInfo();
   const overallProgress = LEARNING_STEPS.reduce((acc, step) => {
     const stepProgress = getStepProgress(step.id);
     return acc + (stepProgress.isCompleted ? 1 : 0);
@@ -220,10 +214,9 @@ export default function LearningJourneyPage() {
           <div className="grid gap-4">
             {LEARNING_STEPS.map((step, index) => {
               const stepProgress = getStepProgress(step.id);
-              const isActive = currentStep === step.id;
               
               return (
-                <Card key={step.id} className={`transition-all ${isActive ? 'ring-2 ring-primary' : ''}`}>
+                <Card key={step.id} className="transition-all">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
@@ -300,25 +293,6 @@ export default function LearningJourneyPage() {
             })}
           </div>
 
-          {/* Current Lesson Preview */}
-          {currentStep && currentSection && (
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Current Lesson: {currentStepInfo.title} - {currentSection.charAt(0).toUpperCase() + currentSection.slice(1)}</span>
-                  <Link href={`/lesson/${currentStep}/${currentSection}`}>
-                    <Button>
-                      Start Lesson
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </Link>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{currentStepInfo.description}</p>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
       
