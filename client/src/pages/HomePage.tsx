@@ -558,6 +558,50 @@ export default function HomePage() {
             </div>
           )}
           
+          {/* Key Signature Information */}
+          {keySignature && (keySignature.sharps.length > 0 || keySignature.flats.length > 0) && (
+            <div className="mb-4">
+              <Card className="border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                        <Music className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100">
+                          Key Signature: {keySignature.name}
+                        </h3>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                          {keySignature.sharps.length > 0 
+                            ? `${keySignature.sharps.length} sharp${keySignature.sharps.length > 1 ? 's' : ''}: ${keySignature.sharps.join(', ')}`
+                            : `${keySignature.flats.length} flat${keySignature.flats.length > 1 ? 's' : ''}: ${keySignature.flats.join(', ')}`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-xs text-purple-600 dark:text-purple-400 text-right">
+                      <p>Purple keys on piano →</p>
+                      <p>show these accidentals</p>
+                    </div>
+                  </div>
+                  
+                  {/* Key signature memory tips */}
+                  <div className="mt-3 p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                    <div className="text-xs text-purple-800 dark:text-purple-200">
+                      <strong>💡 Memory Tip:</strong> {' '}
+                      {keySignature.sharps.length > 0 ? (
+                        <>Sharp keys follow "Father Charles Goes Down And Ends Battle" (F#-C#-G#-D#-A#-E#-B#)</>
+                      ) : (
+                        <>Flat keys follow "Battle Ends And Down Goes Charles's Father" (Bb-Eb-Ab-Db-Gb-Cb-Fb)</>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           {/* Piano Keyboard */}
           <div className="mb-6">
             <Card>
@@ -576,9 +620,11 @@ export default function HomePage() {
                     <p>
                       Keys highlighted in <span className="font-medium" style={{color: 'hsl(142 71% 45%)'}}>green</span> show correct answers when completed.
                     </p>
-                    <p>
-                      Keys highlighted in <span className="font-medium" style={{color: 'hsl(262 83% 58%)'}}>purple</span> are sharps/flats in this key signature.
-                    </p>
+                    {keySignature && (keySignature.sharps.length > 0 || keySignature.flats.length > 0) && (
+                      <p>
+                        Keys highlighted in <span className="font-medium" style={{color: 'hsl(262 83% 58%)'}}>purple</span> are the {keySignature.sharps.length > 0 ? 'sharps' : 'flats'} in {keySignature.name} key signature.
+                      </p>
+                    )}
                     {currentExercise?.mode === 'learn' && (
                       <p>
                         Keys with <span className="font-medium" style={{color: 'hsl(217 91% 60%)'}}>blue background</span> are your current selections.
