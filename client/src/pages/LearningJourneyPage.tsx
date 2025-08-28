@@ -243,7 +243,7 @@ export default function LearningJourneyPage() {
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="text-lg font-semibold">{step.title}</h3>
-                            <span className={`text-xs px-2 py-1 rounded-full ${getDifficultyColor(step.difficulty)}`}>
+                            <span className={`inline-flex items-center justify-center text-xs px-2 py-1 rounded-full ${getDifficultyColor(step.difficulty)}`}>
                               {step.difficulty}
                             </span>
                             <span className="text-xs text-muted-foreground">

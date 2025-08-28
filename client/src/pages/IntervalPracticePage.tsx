@@ -253,7 +253,7 @@ export default function IntervalPracticePage() {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Current Exercise</span>
-                <span className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
+                <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
                   {exerciseMode === 'learn' ? 'Learning' : 'Practice'} Mode
                 </span>
               </CardTitle>

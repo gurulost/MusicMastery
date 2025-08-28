@@ -25,7 +25,7 @@ export function HelpDialog({ open, onClose, topic }: HelpDialogProps) {
           <Card>
             <CardContent className="pt-4">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
-                <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm">Learn Mode</span>
+                <span className="inline-flex items-center justify-center bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm">Learn Mode</span>
                 Select the Correct Notes
               </h4>
               <ul className="space-y-1 text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export function HelpDialog({ open, onClose, topic }: HelpDialogProps) {
           <Card>
             <CardContent className="pt-4">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
-                <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-sm">Practice Mode</span>
+                <span className="inline-flex items-center justify-center bg-orange-100 text-orange-700 px-2 py-1 rounded text-sm">Practice Mode</span>
                 Play in Sequence
               </h4>
               <ul className="space-y-1 text-sm text-muted-foreground">

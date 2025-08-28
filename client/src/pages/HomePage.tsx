@@ -379,7 +379,7 @@ export default function HomePage() {
                       <Music className="mr-3 h-4 w-4" />
                       Major Scales
                     </div>
-                    <span className="border border-success/20 text-success text-xs px-2 py-1 rounded-full">
+                    <span className="inline-flex items-center justify-center border border-success/20 text-success text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'major_scales' && p.status === 'mastered').length || 0}/12
                     </span>
                   </Button>
@@ -392,7 +392,7 @@ export default function HomePage() {
                       <Music className="mr-3 h-4 w-4" />
                       Minor Scales
                     </div>
-                    <span className="border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
+                    <span className="inline-flex items-center justify-center border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'minor_scales' && p.status === 'mastered').length || 0}/12
                     </span>
                   </Button>
@@ -411,7 +411,7 @@ export default function HomePage() {
                       <BookOpen className="mr-3 h-4 w-4" />
                       Learn Intervals
                     </div>
-                    <span className="border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
+                    <span className="inline-flex items-center justify-center border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'intervals' && p.status === 'mastered').length || 0}/13
                     </span>
                   </Button>
@@ -507,10 +507,10 @@ export default function HomePage() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-xl font-semibold">Current Exercise</h3>
                     <div className="flex items-center space-x-2">
-                      <span className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
+                      <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
                         {currentExercise.mode === 'learn' ? 'Learning' : 'Practice'} Mode
                       </span>
-                      <span className="px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
+                      <span className="inline-flex items-center justify-center px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
                         {currentExercise.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </span>
                     </div>
