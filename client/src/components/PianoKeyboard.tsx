@@ -176,6 +176,38 @@ export function PianoKeyboard({
     return activeKeys.has(keyId);
   };
 
+  // Helper to get semantic colors for key states
+  const getKeyColors = (note: Note, isBlackKey: boolean = false) => {
+    if (isHighlighted(note)) {
+      return {
+        backgroundColor: `hsl(var(--note-correct))`,
+        color: 'white',
+        borderColor: isBlackKey ? undefined : `hsl(var(--note-correct))`
+      };
+    }
+    if (isPlayed(note)) {
+      return {
+        backgroundColor: `hsl(var(--note-played))`,
+        color: 'white',
+        borderColor: isBlackKey ? undefined : `hsl(var(--note-played))`
+      };
+    }
+    if (isSelected(note)) {
+      return {
+        backgroundColor: `hsl(var(--note-selected))`,
+        color: 'white',
+        borderColor: isBlackKey ? undefined : `hsl(var(--note-selected))`
+      };
+    }
+    if (isBlackKey && isSharpInKey(note)) {
+      return {
+        backgroundColor: `hsl(var(--note-in-key))`,
+        color: 'white'
+      };
+    }
+    return {};
+  };
+
   return (
     <div className={cn("flex justify-center overflow-x-auto", className)}>
       <div className="relative min-w-fit">
@@ -187,15 +219,16 @@ export function PianoKeyboard({
               data-testid={`piano-key-${note}-${index}`}
               className={cn(
                 "piano-key white-key w-10 h-32 mr-0.5 flex items-end justify-center pb-2 text-xs font-medium border border-border rounded-b-md transition-all duration-100 select-none cursor-pointer",
-                "hover:transform hover:translate-y-0.5",
+                "hover:transform hover:translate-y-0.5 hover:shadow-sm",
                 {
-                  "bg-green-500 text-white border-green-600": isHighlighted(note), // Green for correct answers
-                  "bg-orange-400 text-white border-orange-500": isPlayed(note), // Orange for played sequence
-                  "bg-purple-200 border-purple-400 text-purple-800": isSelected(note), // Purple for current selections
-                  "transform translate-y-1 shadow-md": isActive(note, index),
+                  "transform translate-y-1": isActive(note, index),
                   "bg-card": !isHighlighted(note) && !isPlayed(note) && !isSelected(note),
                 }
               )}
+              style={{
+                ...getKeyColors(note),
+                boxShadow: isActive(note, index) ? `0 2px 4px hsl(var(--key-shadow))` : undefined
+              }}
               onClick={() => handleKeyPress(note, index)}
             >
               {showLabels && getEnharmonicDisplay(note)}
@@ -217,18 +250,16 @@ export function PianoKeyboard({
                 data-testid={`piano-key-${blackKey.note}-black-${index}`}
                 className={cn(
                   "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
-                  "hover:transform hover:translate-y-0.5",
+                  "hover:transform hover:translate-y-0.5 hover:shadow-lg",
                   {
-                    "bg-green-500 text-white": isHighlighted(blackKey.note), // Green for highlighted notes (test questions)
-                    "bg-yellow-600 text-yellow-100": !isHighlighted(blackKey.note) && isSharpInKey(blackKey.note), // Yellow for sharps in key
-                    "bg-orange-600 text-white": !isHighlighted(blackKey.note) && isPlayed(blackKey.note), // Orange for played sequence
-                    "bg-purple-500 text-white": !isHighlighted(blackKey.note) && isSelected(blackKey.note), // Purple for current selections
-                    "transform translate-y-1 shadow-md": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
+                    "transform translate-y-1": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
                     "bg-gray-800": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
                 style={{ 
-                  left: `${leftPosition}px`
+                  left: `${leftPosition}px`,
+                  ...getKeyColors(blackKey.note, true),
+                  boxShadow: isActive(blackKey.note, blackKey.whiteKeyIndex, true) ? `0 4px 6px hsl(var(--key-shadow))` : undefined
                 }}
                 onClick={() => handleKeyPress(blackKey.note, blackKey.whiteKeyIndex, true)}
               >

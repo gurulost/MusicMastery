@@ -6,6 +6,7 @@ import { UserSwitcher } from '@/components/UserSwitcher';
 import { useUser } from '@/contexts/UserContext';
 import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
@@ -403,59 +404,60 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Header */}
-        <header className="bg-card border-b border-border p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold">Interactive Piano Practice</h2>
-              <p className="text-muted-foreground">Learn and practice scales and intervals with step-by-step guidance</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <HelpTooltip 
-                content="Click for help with the piano interface and getting started"
-                onClick={() => setShowHelp(true)}
-              />
-              <UserSwitcher />
-              <Button 
-                variant="secondary" 
-                onClick={async () => {
-                  try {
-                    // Ensure audio is initialized on user interaction
-                    await audioEngine.initializeAudio();
-                    if (keySignature) await audioEngine.playScale(keySignature.notes);
-                  } catch (error) {
-                    console.warn('Audio playback failed:', error);
-                  }
-                }}
-                data-testid="button-play-scale"
-              >
-                <Play className="mr-2 h-4 w-4" />Play Scale
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleSwitchMode}
-                data-testid="button-switch-mode"
-              >
-                Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode
-              </Button>
-              <Button 
-                variant="secondary" 
-                onClick={handleShowHint}
-                disabled={showHint}
-                data-testid="button-show-hint"
-              >
-                Show Hint
-              </Button>
-              <Button 
-                onClick={handleCheckAnswer} 
-                disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0) || isCompleted}
-                data-testid="button-check-answer"
-              >
-                <Check className="mr-2 h-4 w-4" />Check Answer
-              </Button>
-            </div>
+        <PageHeader 
+          title="Interactive Piano Practice"
+          subtitle="Learn and practice scales and intervals with step-by-step guidance"
+        >
+          <div className="flex items-center space-x-3">
+            <HelpTooltip 
+              content="Click for help with the piano interface and getting started"
+              onClick={() => setShowHelp(true)}
+            />
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={async () => {
+                try {
+                  // Ensure audio is initialized on user interaction
+                  await audioEngine.initializeAudio();
+                  if (keySignature) await audioEngine.playScale(keySignature.notes);
+                } catch (error) {
+                  console.warn('Audio playback failed:', error);
+                }
+              }}
+              data-testid="button-play-scale"
+            >
+              <Play className="mr-2 h-4 w-4" />
+              Play Scale
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleSwitchMode}
+              data-testid="button-switch-mode"
+            >
+              Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={handleShowHint}
+              disabled={showHint}
+              data-testid="button-show-hint"
+            >
+              Show Hint
+            </Button>
+            <Button 
+              size="sm"
+              onClick={handleCheckAnswer} 
+              disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0) || isCompleted}
+              data-testid="button-check-answer"
+            >
+              <Check className="mr-2 h-4 w-4" />
+              Check Answer
+            </Button>
           </div>
-        </header>
+        </PageHeader>
         
         {/* Exercise Area */}
         <div className="flex-1 p-6 overflow-auto">

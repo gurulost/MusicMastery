@@ -3,9 +3,11 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "next-themes";
 import { useState, useEffect } from "react";
 
 import { UserProvider, useUser } from "@/contexts/UserContext";
+import { AppShell } from "@/components/AppShell";
 import { LoginScreen } from "@/components/LoginScreen";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 
@@ -48,7 +50,7 @@ function Router() {
   }
 
   return (
-    <>
+    <AppShell>
       <WelcomeDialog 
         open={showWelcome} 
         onClose={() => setShowWelcome(false)} 
@@ -63,7 +65,7 @@ function Router() {
         <Route path="/lesson/:stepId/:section" component={LessonPage} />
         <Route component={NotFound} />
       </Switch>
-    </>
+    </AppShell>
   );
 }
 
@@ -71,10 +73,17 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
       </UserProvider>
     </QueryClientProvider>
   );

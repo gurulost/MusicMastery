@@ -39,10 +39,17 @@
   --success-foreground: hsl(0 0% 100%);
   --warning: hsl(35 91% 65%);
   --warning-foreground: hsl(222.2 84% 4.9%);
-  --font-sans: "Roboto", system-ui, sans-serif;
-  --font-serif: Georgia, serif;
+  /* Piano state tokens */
+  --note-correct: 122 39% 49%;
+  --note-selected: 221 83% 53%;
+  --note-played: 27 95% 55%;
+  --note-in-key: 266 55% 52%;
+  --key-shadow: 220 9% 46% / 0.25;
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Menlo, monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
@@ -92,10 +99,17 @@
   --success-foreground: hsl(0 0% 100%);
   --warning: hsl(35 91% 65%);
   --warning-foreground: hsl(222.2 84% 4.9%);
-  --font-sans: "Roboto", system-ui, sans-serif;
-  --font-serif: Georgia, serif;
+  /* Piano state tokens (dark) */
+  --note-correct: 122 39% 49%;
+  --note-selected: 210 83% 62%;
+  --note-played: 30 96% 62%;
+  --note-in-key: 266 60% 62%;
+  --key-shadow: 0 0% 0% / 0.5;
+  /* Typography */
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Menlo, monospace;
-  --radius: 0.5rem;
+  --radius: 0.75rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
