@@ -5,7 +5,7 @@ import { ArrowLeft, Music, Play, Check, RotateCcw, ChevronRight, Lightbulb } fro
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
-import { INTERVALS, buildInterval, getIntervalExplanation } from '@/lib/musicTheory';
+import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote } from '@/lib/musicTheory';
 import { Note, IntervalType } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -194,10 +194,10 @@ export default function IntervalPracticePage() {
       // Ensure audio is initialized on user interaction
       await audioEngine.initializeAudio();
       
-      await audioEngine.playNote(currentExercise.startNote, 0.8);
+      await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
       setTimeout(async () => {
         try {
-          await audioEngine.playNote(currentExercise.targetNote, 0.8);
+          await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.8);
         } catch (error) {
           console.warn('Audio playback failed:', error);
         }

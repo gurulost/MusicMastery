@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Link, Heart, ArrowRightLeft } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { getMinorScale, getMajorScale, MINOR_SCALES, MINOR_SCALE_NAMES, getScalesByDifficulty, getScale } from '@/lib/musicTheory';
+import { getMinorScale, getMajorScale, MINOR_SCALES, MINOR_SCALE_NAMES, getScalesByDifficulty, getScale, normalizeNote } from '@/lib/musicTheory';
 
 interface MinorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -700,7 +700,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
                     onClick={() => {
                       const [tonic] = currentQuestion.scale.split(' ');
                       audioEngine.initializeAudio().then(() => {
-                        audioEngine.playNote(tonic as Note, 0.8);
+                        audioEngine.playNote(normalizeNote(tonic as Note), 0.8);
                       });
                     }}
                   >

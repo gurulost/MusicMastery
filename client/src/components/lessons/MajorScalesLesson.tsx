@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Zap, RotateCcw } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { getMajorScale, MAJOR_SCALES, MAJOR_SCALE_NAMES, getScalesByDifficulty, getScale } from '@/lib/musicTheory';
+import { getMajorScale, MAJOR_SCALES, MAJOR_SCALE_NAMES, getScalesByDifficulty, getScale, normalizeNote } from '@/lib/musicTheory';
 
 interface MajorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -77,7 +77,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
         chordTones.forEach((note, i) => {
           setTimeout(async () => {
             try {
-              await audioEngine.playNote(note, 0.7);
+              await audioEngine.playNote(normalizeNote(note), 0.7);
             } catch (error) {
               console.warn('Audio playback failed:', error);
             }
@@ -654,7 +654,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                     onClick={() => {
                       const [tonic] = currentQuestion.scale.split(' ');
                       audioEngine.initializeAudio().then(() => {
-                        audioEngine.playNote(tonic as Note, 0.8);
+                        audioEngine.playNote(normalizeNote(tonic as Note), 0.8);
                       });
                     }}
                   >

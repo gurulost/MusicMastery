@@ -112,12 +112,12 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
         await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
         setTimeout(async () => {
           try {
-            await audioEngine.playNote(currentExercise.targetNote, 0.8);
+            await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.8);
             // Play them together to hear the harmony
             setTimeout(async () => {
               try {
                 await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.6);
-                await audioEngine.playNote(currentExercise.targetNote, 0.6);
+                await audioEngine.playNote(normalizeNote(currentExercise.targetNote), 0.6);
               } catch (error) {
                 console.warn('Audio playback failed:', error);
               }
@@ -145,7 +145,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
         await audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
         setTimeout(async () => {
           try {
-            await audioEngine.playNote(answer, 0.8);
+            await audioEngine.playNote(normalizeNote(answer), 0.8);
           } catch (error) {
             console.warn('Audio playback failed:', error);
           }

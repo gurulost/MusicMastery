@@ -134,10 +134,10 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       if (example) {
         const [note1, note2] = example.notes as Note[];
         try {
-          await audioEngine.playNote(note1, 0.8);
+          await audioEngine.playNote(normalizeNote(note1), 0.8);
           setTimeout(async () => {
             try {
-              await audioEngine.playNote(note2, 0.8);
+              await audioEngine.playNote(normalizeNote(note2), 0.8);
             } catch (error) {
               console.warn('Audio playback failed:', error);
             }
@@ -666,8 +666,8 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
                         if (example) {
                           const [note1, note2] = example.notes as Note[];
                           audioEngine.initializeAudio().then(() => {
-                            audioEngine.playNote(note1, 0.8);
-                            setTimeout(() => audioEngine.playNote(note2, 0.8), 600);
+                            audioEngine.playNote(normalizeNote(note1), 0.8);
+                            setTimeout(() => audioEngine.playNote(normalizeNote(note2), 0.8), 600);
                           });
                         }
                       }}

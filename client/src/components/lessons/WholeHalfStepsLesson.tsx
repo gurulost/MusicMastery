@@ -557,7 +557,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
                     onClick={() => {
                       // Play the starting note for reference
                       audioEngine.initializeAudio().then(() => {
-                        audioEngine.playNote(currentQuestion.startNote, 0.8);
+                        audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
                       });
                     }}
                   >
