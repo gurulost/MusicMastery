@@ -18,7 +18,7 @@ class AudioEngine {
     }
   }
 
-  private getNoteFrequency(note: string): number {
+  private getNoteFrequency(note: string, octave: number = 4): number {
     const noteMap: { [key: string]: number } = {
       'C': 261.63,
       'C#': 277.18,
@@ -34,10 +34,13 @@ class AudioEngine {
       'B': 493.88,
     };
     
-    return noteMap[note] || 440;
+    const baseFrequency = noteMap[note] || 440;
+    // Calculate frequency for the specific octave (octave 4 is middle C)
+    const octaveMultiplier = Math.pow(2, octave - 4);
+    return baseFrequency * octaveMultiplier;
   }
 
-  async playNote(note: string, duration: number = 0.5): Promise<void> {
+  async playNote(note: string, duration: number = 0.5, octave: number = 4): Promise<void> {
     if (!this.audioContext || !this.gainNode) {
       await this.initAudio();
     }
@@ -52,7 +55,7 @@ class AudioEngine {
 
     oscillator.type = 'sine';
     oscillator.frequency.setValueAtTime(
-      this.getNoteFrequency(note),
+      this.getNoteFrequency(note, octave),
       this.audioContext.currentTime
     );
 

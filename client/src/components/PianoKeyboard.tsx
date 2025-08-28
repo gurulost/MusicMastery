@@ -57,11 +57,28 @@ export function PianoKeyboard({
 }: PianoKeyboardProps) {
   const [activeKeys, setActiveKeys] = useState<Set<Note>>(new Set());
 
-  const handleKeyPress = async (note: Note) => {
+  const getOctaveFromIndex = (index: number, isBlackKey: boolean = false): number => {
+    if (isBlackKey) {
+      // For black keys, determine octave based on their white key position
+      if (index <= 1) return 3; // A#, C#, D# in octave below middle C
+      if (index <= 7) return 4; // Middle C octave black keys
+      if (index <= 13) return 5; // Next octave black keys
+      return 6; // High octave black keys
+    } else {
+      // For white keys
+      if (index <= 1) return 3; // A, B below middle C
+      if (index <= 8) return 4; // Middle C octave (C-B)
+      if (index <= 15) return 5; // Next octave (C-B)
+      return 6; // High octave (C-F)
+    }
+  };
+
+  const handleKeyPress = async (note: Note, index?: number, isBlackKey: boolean = false) => {
     setActiveKeys(prev => new Set(prev).add(note));
     
-    // Play audio
-    await audioEngine.playNote(note);
+    // Play audio with correct octave
+    const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
+    await audioEngine.playNote(note, 0.5, octave);
     
     // Remove active state after animation
     setTimeout(() => {
@@ -107,7 +124,7 @@ export function PianoKeyboard({
                   "bg-card": !isHighlighted(note) && !isPlayed(note) && !isSelected(note),
                 }
               )}
-              onClick={() => handleKeyPress(note)}
+              onClick={() => handleKeyPress(note, index)}
             >
               {showLabels && note}
             </button>
@@ -140,7 +157,7 @@ export function PianoKeyboard({
                 style={{ 
                   left: `${leftPosition}px`
                 }}
-                onClick={() => handleKeyPress(blackKey.note)}
+                onClick={() => handleKeyPress(blackKey.note, blackKey.whiteKeyIndex, true)}
               >
                 {showLabels && blackKey.note}
               </button>
