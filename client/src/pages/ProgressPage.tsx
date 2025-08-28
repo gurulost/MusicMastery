@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressRing } from '@/components/ProgressRing';
 import { useUser } from '@/contexts/UserContext';
+import { PageHeader } from '@/components/PageHeader';
 
 // Use user context instead of hardcoded ID
 
@@ -60,7 +61,10 @@ export default function ProgressPage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Detailed Progress Report</h1>
+          <PageHeader 
+            title="Detailed Progress Report"
+            subtitle="Track your learning journey with detailed analytics"
+          />
           
           {/* Overall Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

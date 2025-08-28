@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { INTERVALS } from '@/lib/musicTheory';
 import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { PageHeader } from '@/components/PageHeader';
 import { useUser } from '@/contexts/UserContext';
 
 export default function IntervalsPage() {
@@ -59,20 +60,22 @@ export default function IntervalsPage() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-bold">Interval Building Progress</h1>
+          <PageHeader 
+            title="Interval Building Progress"
+            subtitle="Master all 13 musical intervals systematically"
+          >
+            <div className="flex items-center gap-3">
               <HelpTooltip 
                 content="Click for detailed instructions on how to practice intervals"
                 onClick={() => setShowHelp(true)}
               />
+              <Link href="/interval-practice">
+                <Button data-testid="button-start-practice">
+                  Start Interval Practice
+                </Button>
+              </Link>
             </div>
-            <Link href="/interval-practice">
-              <Button data-testid="button-start-practice">
-                Start Interval Practice
-              </Button>
-            </Link>
-          </div>
+          </PageHeader>
           
           <Card>
             <CardHeader>

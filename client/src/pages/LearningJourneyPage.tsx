@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useUser } from '@/contexts/UserContext';
+import { PageHeader } from '@/components/PageHeader';
 
 // Use user context instead of hardcoded ID
 
@@ -189,16 +190,15 @@ export default function LearningJourneyPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold">Your Learning Journey</h1>
+            <PageHeader 
+              title="Your Learning Journey"
+              subtitle="Master music theory step by step - from silence to scales to intervals"
+            >
               <HelpTooltip 
                 content="Click for detailed information about the 7-step learning path"
                 onClick={() => setShowHelp(true)}
               />
-            </div>
-            <p className="text-muted-foreground mb-4">
-              Master music theory step by step - from silence to scales to intervals
-            </p>
+            </PageHeader>
             
             {/* Overall Progress */}
             <div className="bg-card border rounded-lg p-4">

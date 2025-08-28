@@ -167,21 +167,21 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
             </div>
 
             {/* Core Concept - What Key Signatures Do */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h3 className="font-semibold text-green-800 mb-3">🗺️ Key Signatures: Your Musical GPS</h3>
+            <div className="bg-accent/20 border border-accent/30 rounded-lg p-4">
+              <h3 className="font-semibold text-accent-foreground mb-3">🗺️ Key Signatures: Your Musical GPS</h3>
               <div className="space-y-3">
-                <div className="bg-white p-3 rounded border">
-                  <p className="font-medium text-green-800 mb-2">What They Tell You:</p>
-                  <p className="text-green-700 text-sm mb-2">
+                <div className="bg-card p-3 rounded border">
+                  <p className="font-medium text-foreground mb-2">What They Tell You:</p>
+                  <p className="text-muted-foreground text-sm mb-2">
                     Key signatures appear right after the clef and tell you which notes to play sharp or flat <strong>throughout the entire piece</strong>.
                   </p>
-                  <p className="text-green-700 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     <strong>Think of it as:</strong> A standing instruction that affects every occurrence of those note names.
                   </p>
                 </div>
-                <div className="bg-green-100 p-3 rounded">
-                  <p className="font-medium text-green-800 mb-1">Example:</p>
-                  <p className="text-green-700 text-sm">
+                <div className="bg-accent/30 p-3 rounded">
+                  <p className="font-medium text-accent-foreground mb-1">Example:</p>
+                  <p className="text-muted-foreground text-sm">
                     If you see F# in the key signature, <strong>every F in the music</strong> becomes F# automatically.
                   </p>
                 </div>
@@ -189,84 +189,84 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
             </div>
 
             {/* Mental Model - The Two Systems */}
-            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-              <h3 className="font-semibold text-purple-800 mb-3">⚖️ Two Systems: Sharps vs Flats</h3>
+            <div className="bg-secondary/50 border border-secondary rounded-lg p-4">
+              <h3 className="font-semibold text-secondary-foreground mb-3">⚖️ Two Systems: Sharps vs Flats</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-white p-3 rounded border">
+                <div className="bg-card p-3 rounded border">
                   <div className="flex items-center mb-2">
-                    <Hash className="h-4 w-4 mr-2 text-green-600" />
-                    <p className="font-medium text-purple-800">Sharp Keys</p>
+                    <Hash className="h-4 w-4 mr-2 text-success" />
+                    <p className="font-medium text-foreground">Sharp Keys</p>
                   </div>
-                  <p className="text-purple-700 text-sm mb-2">
+                  <p className="text-muted-foreground text-sm mb-2">
                     Always appear in the same order: <strong>F# C# G# D# A# E# B#</strong>
                   </p>
-                  <p className="text-purple-700 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     Memory aid: "{SHARP_MEMORY_AID}"
                   </p>
                 </div>
-                <div className="bg-white p-3 rounded border">
+                <div className="bg-card p-3 rounded border">
                   <div className="flex items-center mb-2">
-                    <Minus className="h-4 w-4 mr-2 text-orange-600" />
-                    <p className="font-medium text-purple-800">Flat Keys</p>
+                    <Minus className="h-4 w-4 mr-2 text-warning" />
+                    <p className="font-medium text-foreground">Flat Keys</p>
                   </div>
-                  <p className="text-purple-700 text-sm mb-2">
+                  <p className="text-muted-foreground text-sm mb-2">
                     Always appear in the same order: <strong>Bb Eb Ab Db Gb Cb Fb</strong>
                   </p>
-                  <p className="text-purple-700 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     Memory aid: "{FLAT_MEMORY_AID}"
                   </p>
                 </div>
               </div>
-              <div className="mt-3 bg-purple-100 p-3 rounded text-sm">
+              <div className="mt-3 bg-secondary/70 p-3 rounded text-sm">
                 <p><strong>🧠 Key Insight:</strong> Sharps and flats NEVER mix in a key signature. It's always all sharps OR all flats!</p>
               </div>
             </div>
 
             {/* The Circle of Fifths Preview */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold text-yellow-800 mb-3">🔄 The Circle of Fifths Pattern</h3>
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+              <h3 className="font-semibold text-primary mb-3">🔄 The Circle of Fifths Pattern</h3>
               <div className="space-y-3">
-                <div className="bg-white p-3 rounded border">
-                  <p className="font-medium text-yellow-800 mb-2">The Magic Pattern:</p>
-                  <p className="text-yellow-700 text-sm mb-2">
+                <div className="bg-card p-3 rounded border">
+                  <p className="font-medium text-foreground mb-2">The Magic Pattern:</p>
+                  <p className="text-muted-foreground text-sm mb-2">
                     Moving clockwise around the circle, each key has <strong>one more sharp</strong> than the previous.
                   </p>
-                  <p className="text-yellow-700 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     Moving counter-clockwise, each key has <strong>one more flat</strong> than the previous.
                   </p>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-center text-sm">
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">C</p>
                     <p className="text-xs">0 accidentals</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">G</p>
                     <p className="text-xs">1 sharp</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">D</p>
                     <p className="text-xs">2 sharps</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">A</p>
                     <p className="text-xs">3 sharps</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 text-center text-sm">
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">C</p>
                     <p className="text-xs">0 accidentals</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">F</p>
                     <p className="text-xs">1 flat</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">Bb</p>
                     <p className="text-xs">2 flats</p>
                   </div>
-                  <div className="bg-yellow-100 p-2 rounded">
+                  <div className="bg-primary/20 p-2 rounded">
                     <p className="font-bold">Eb</p>
                     <p className="text-xs">3 flats</p>
                   </div>
@@ -275,28 +275,28 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
             </div>
 
             {/* Quick Rules for Identification */}
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <h3 className="font-semibold text-orange-800 mb-3">⚡ Quick Identification Rules</h3>
+            <div className="bg-warning/20 border border-warning/30 rounded-lg p-4">
+              <h3 className="font-semibold text-warning-foreground mb-3">⚡ Quick Identification Rules</h3>
               <div className="space-y-3">
-                <div className="bg-white p-3 rounded border">
-                  <p className="font-medium text-orange-800 mb-2">For Sharp Keys:</p>
-                  <p className="text-orange-700 text-sm">
+                <div className="bg-card p-3 rounded border">
+                  <p className="font-medium text-foreground mb-2">For Sharp Keys:</p>
+                  <p className="text-muted-foreground text-sm">
                     The key name is <strong>one semitone up</strong> from the last sharp.
                   </p>
-                  <p className="text-orange-700 text-xs mt-1">
+                  <p className="text-muted-foreground text-xs mt-1">
                     Example: Last sharp is C#, so the key is D Major.
                   </p>
                 </div>
-                <div className="bg-white p-3 rounded border">
-                  <p className="font-medium text-orange-800 mb-2">For Flat Keys:</p>
-                  <p className="text-orange-700 text-sm">
+                <div className="bg-card p-3 rounded border">
+                  <p className="font-medium text-foreground mb-2">For Flat Keys:</p>
+                  <p className="text-muted-foreground text-sm">
                     The key name is the <strong>second-to-last flat</strong>.
                   </p>
-                  <p className="text-orange-700 text-xs mt-1">
+                  <p className="text-muted-foreground text-xs mt-1">
                     Example: Flats are Bb, Eb, so the key is Bb Major.
                   </p>
                 </div>
-                <div className="bg-orange-100 p-2 rounded text-sm">
+                <div className="bg-warning/30 p-2 rounded text-sm">
                   <p className="font-medium">Special case: F Major (1 flat) - just memorize this one!</p>
                 </div>
               </div>

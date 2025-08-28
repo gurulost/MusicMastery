@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MAJOR_SCALES, MINOR_SCALES, getScale } from '@/lib/musicTheory';
 import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
+import { PageHeader } from '@/components/PageHeader';
 import { useUser } from '@/contexts/UserContext';
 
 export default function ScalesPage() {
@@ -60,16 +61,19 @@ export default function ScalesPage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold">Scale Mastery Progress</h1>
+          <PageHeader 
+            title="Scale Mastery Progress"
+            subtitle="Master major and minor scales systematically"
+          >
             <HelpTooltip 
               content="Click for detailed instructions on how to practice scales"
               onClick={() => setShowHelp(true)}
             />
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">📚 Learning Strategy</h3>
-            <p className="text-sm text-blue-700">
+          </PageHeader>
+          
+          <div className="bg-accent/30 border border-accent/50 rounded-lg p-4 mb-8">
+            <h3 className="text-sm font-semibold text-accent-foreground mb-2">📚 Learning Strategy</h3>
+            <p className="text-sm text-muted-foreground">
               <strong>Start with Major Scales:</strong> Begin with C Major (no sharps/flats), then G Major (1 sharp), and progress gradually.
               <br />
               <strong>Then Minor Scales:</strong> Learn natural minor scales - they share key signatures with their relative majors.
