@@ -114,18 +114,19 @@ export function PianoKeyboard({
     const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
     
     try {
-      // Initialize audio on first user interaction (required for iOS)
-      if (!audioInitialized) {
-        await audioEngine.initializeAudio();
-        setAudioInitialized(true);
-      }
+      // Always try to initialize audio on user interaction (required for iOS)
+      await audioEngine.initializeAudio();
+      setAudioInitialized(true);
       
-      // Play audio with correct octave - only once per actual key press
+      // Play audio with correct octave
       const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
       const normalizedNote = normalizeNote(note);
-      await audioEngine.playNote(normalizedNote, 0.5, octave);
+      
+      // Use a slightly longer duration and higher volume for better audio feedback
+      await audioEngine.playNote(normalizedNote, 0.8, octave);
     } catch (error) {
       console.warn('Audio playback failed:', error);
+      // Don't block the interaction if audio fails
     }
 
     // Handle toggle functionality if onNoteToggle is provided
@@ -289,7 +290,7 @@ export function PianoKeyboard({
                   "active:scale-[0.97] active:translate-y-1",
                   {
                     "transform translate-y-1": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
-                    "bg-gray-800": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
+                    "bg-gray-900": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
                 onPointerDown={() => handlePointerDown(blackKey.note, blackKey.whiteKeyIndex, true)}

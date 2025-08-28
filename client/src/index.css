@@ -39,11 +39,11 @@
   --success-foreground: 0 0% 100%;
   --warning: 35 91% 65%;
   --warning-foreground: 222.2 84% 4.9%;
-  /* Piano state tokens */
-  --note-correct: 122 39% 49%;
-  --note-selected: 221 83% 53%;
-  --note-played: 27 95% 55%;
-  --note-in-key: 266 55% 52%;
+  /* Piano state tokens - clearer, more distinct colors */
+  --note-correct: 142 71% 45%;    /* Green - when answer is revealed/correct */
+  --note-selected: 217 91% 60%;   /* Blue - user selections in learn mode */
+  --note-played: 32 95% 44%;      /* Orange - notes played in practice mode */
+  --note-in-key: 262 83% 58%;     /* Purple - sharps/flats in key signature */
   --key-shadow: 220 9% 46% / 0.25;
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
@@ -99,11 +99,11 @@
   --success-foreground: 0 0% 100%;
   --warning: 35 91% 65%;
   --warning-foreground: 222.2 84% 4.9%;
-  /* Piano state tokens (dark) */
-  --note-correct: 122 39% 49%;
-  --note-selected: 210 83% 62%;
-  --note-played: 30 96% 62%;
-  --note-in-key: 266 60% 62%;
+  /* Piano state tokens (dark) - adjusted for dark mode */
+  --note-correct: 142 69% 50%;    /* Slightly brighter green for dark mode */
+  --note-selected: 217 91% 65%;   /* Slightly brighter blue for dark mode */
+  --note-played: 32 95% 55%;      /* Brighter orange for dark mode */
+  --note-in-key: 262 83% 70%;     /* Brighter purple for dark mode */
   --key-shadow: 0 0% 0% / 0.5;
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;

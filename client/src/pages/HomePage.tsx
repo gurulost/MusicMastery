@@ -574,19 +574,19 @@ export default function HomePage() {
                 <div className="mt-4 text-center">
                   <div className="text-sm text-muted-foreground space-y-1">
                     <p>
-                      Keys highlighted in <span className="text-primary font-medium">blue</span> show correct answers when completed.
+                      Keys highlighted in <span className="font-medium" style={{color: 'hsl(142 71% 45%)'}}>green</span> show correct answers when completed.
                     </p>
                     <p>
-                      Keys highlighted in <span className="text-yellow-600 font-medium">yellow</span> are sharps/flats in this key signature.
+                      Keys highlighted in <span className="font-medium" style={{color: 'hsl(262 83% 58%)'}}>purple</span> are sharps/flats in this key signature.
                     </p>
                     {currentExercise?.mode === 'learn' && (
                       <p>
-                        Keys with <span className="text-blue-600 font-medium">blue background</span> are your current selections.
+                        Keys with <span className="font-medium" style={{color: 'hsl(217 91% 60%)'}}>blue background</span> are your current selections.
                       </p>
                     )}
                     {currentExercise?.mode === 'practice' && (
                       <p>
-                        Keys highlighted in <span className="text-success font-medium">green</span> show your played sequence.
+                        Keys highlighted in <span className="font-medium" style={{color: 'hsl(32 95% 44%)'}}>orange</span> show your played sequence.
                       </p>
                     )}
                   </div>
