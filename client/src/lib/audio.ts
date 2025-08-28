@@ -48,6 +48,14 @@ class AudioEngine {
   }
 
   private getNoteFrequency(note: string, octave: number = 4): number {
+    // Enharmonic mapping for audio engine
+    const enharmonicMap: { [key: string]: string } = {
+      'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
+    };
+    
+    // Normalize flat notes to sharps
+    const canonicalNote = enharmonicMap[note] || note;
+    
     const noteMap: { [key: string]: number } = {
       'C': 261.63,
       'C#': 277.18,
@@ -63,7 +71,7 @@ class AudioEngine {
       'B': 493.88,
     };
     
-    const baseFrequency = noteMap[note] || 440;
+    const baseFrequency = noteMap[canonicalNote] || 440;
     // Calculate frequency for the specific octave (octave 4 is middle C)
     const octaveMultiplier = Math.pow(2, octave - 4);
     return baseFrequency * octaveMultiplier;

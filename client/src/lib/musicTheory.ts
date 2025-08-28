@@ -2,6 +2,25 @@ import { Note, Scale, Interval, IntervalType, ScaleType, ScaleDefinition, Interv
 
 export const NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
+// Enharmonic mapping: flats to sharps (canonical form)
+const ENHARMONIC_MAP: { [key: string]: Note } = {
+  'Db': 'C#',
+  'Eb': 'D#', 
+  'Gb': 'F#',
+  'Ab': 'G#',
+  'Bb': 'A#'
+};
+
+// Normalize any note (flat or sharp) to canonical sharp form
+export function normalizeNote(note: Note): Note {
+  // Type guard to prevent interval names from being passed as notes
+  if (typeof note !== 'string' || note.includes(' ') || note.includes('th') || note.includes('nd') || note.includes('rd')) {
+    console.error(`Invalid note passed to normalizeNote: ${note}. Expected a note like 'C', 'C#', 'Bb', etc.`);
+    return 'C'; // fallback to prevent crashes
+  }
+  return ENHARMONIC_MAP[note as keyof typeof ENHARMONIC_MAP] || (note as Note);
+}
+
 export const MAJOR_SCALE_PATTERN = [2, 2, 1, 2, 2, 2, 1]; // whole and half steps
 export const MINOR_SCALE_PATTERN = [2, 1, 2, 2, 1, 2, 2]; // natural minor scale
 
@@ -125,7 +144,13 @@ export const INTERVALS: Interval[] = INTERVAL_DEFINITIONS.map(({ name, semitones
 
 // Utility functions with proper type safety
 export function getNoteIndex(note: Note): number {
-  return NOTES.indexOf(note);
+  const canonicalNote = normalizeNote(note);
+  const index = NOTES.indexOf(canonicalNote);
+  if (index === -1) {
+    console.error(`Invalid note: ${note} (normalized: ${canonicalNote})`);
+    return 0; // fallback to C to avoid crashes
+  }
+  return index;
 }
 
 export function getNote(index: number): Note {
@@ -133,8 +158,10 @@ export function getNote(index: number): Note {
 }
 
 export function buildScale(tonic: Note, pattern: number[]): Note[] {
-  const result: Note[] = [tonic];
-  let currentIndex = getNoteIndex(tonic);
+  // Normalize the tonic note first
+  const normalizedTonic = normalizeNote(tonic);
+  const result: Note[] = [normalizedTonic];
+  let currentIndex = getNoteIndex(normalizedTonic);
   
   for (let i = 0; i < pattern.length - 1; i++) {
     currentIndex += pattern[i];
@@ -146,14 +173,15 @@ export function buildScale(tonic: Note, pattern: number[]): Note[] {
 
 // Type-safe scale generation functions
 export function getMajorScale(tonic: Note): Scale {
-  const notes = buildScale(tonic, MAJOR_SCALE_PATTERN);
+  const normalizedTonic = normalizeNote(tonic);
+  const notes = buildScale(normalizedTonic, MAJOR_SCALE_PATTERN);
   const sharps = notes.filter(note => note.includes('#')) as Note[];
   const flats = notes.filter(note => note.includes('b')) as Note[];
   
   return {
-    name: `${tonic} Major`,
+    name: `${tonic} Major`, // Keep original spelling for display
     type: 'major',
-    tonic,
+    tonic: normalizedTonic, // Use canonical form for processing
     notes,
     sharps,
     flats,
@@ -161,14 +189,15 @@ export function getMajorScale(tonic: Note): Scale {
 }
 
 export function getMinorScale(tonic: Note): Scale {
-  const notes = buildScale(tonic, MINOR_SCALE_PATTERN);
+  const normalizedTonic = normalizeNote(tonic);
+  const notes = buildScale(normalizedTonic, MINOR_SCALE_PATTERN);
   const sharps = notes.filter(note => note.includes('#')) as Note[];
   const flats = notes.filter(note => note.includes('b')) as Note[];
   
   return {
-    name: `${tonic} Minor`,
+    name: `${tonic} Minor`, // Keep original spelling for display
     type: 'minor',
-    tonic,
+    tonic: normalizedTonic, // Use canonical form for processing
     notes,
     sharps,
     flats,
@@ -181,10 +210,14 @@ export function getScale(definition: ScaleDefinition): Scale {
 }
 
 export function buildInterval(startNote: Note, intervalType: IntervalType, direction: 'up' | 'down' = 'up'): Note {
+  const normalizedStartNote = normalizeNote(startNote);
   const interval = INTERVAL_DEFINITIONS.find(i => i.name === intervalType);
-  if (!interval) throw new Error(`Unknown interval: ${intervalType}`);
+  if (!interval) {
+    console.error(`Unknown interval type: ${intervalType}`);
+    return normalizedStartNote;
+  }
   
-  const startIndex = getNoteIndex(startNote);
+  const startIndex = getNoteIndex(normalizedStartNote);
   const semitones = direction === 'up' ? interval.semitones : -interval.semitones;
   
   return getNote(startIndex + semitones);
@@ -202,8 +235,10 @@ export function isNoteInScale(note: Note, definition: ScaleDefinition): boolean 
 }
 
 export function getIntervalName(startNote: Note, endNote: Note): string {
-  const startIndex = getNoteIndex(startNote);
-  const endIndex = getNoteIndex(endNote);
+  const normalizedStartNote = normalizeNote(startNote);
+  const normalizedEndNote = normalizeNote(endNote);
+  const startIndex = getNoteIndex(normalizedStartNote);
+  const endIndex = getNoteIndex(normalizedEndNote);
   const semitones = ((endIndex - startIndex) + 12) % 12;
   
   const interval = INTERVAL_DEFINITIONS.find(i => i.semitones === semitones);
