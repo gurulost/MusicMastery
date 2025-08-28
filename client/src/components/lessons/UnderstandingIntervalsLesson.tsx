@@ -62,12 +62,9 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showHint, setShowHint] = useState(false);
 
-  const handleNoteClick = async (note: Note) => {
-    try {
-      await audioEngine.playNote(note, 0.8);
-    } catch (error) {
-      console.warn('Audio playback failed:', error);
-    }
+  const handleNoteClick = (note: Note) => {
+    // Piano keyboard handles audio - no duplicate audio here
+    setSelectedNote(note);
   };
 
   const handleIntervalDemo = async (intervalName: string) => {
