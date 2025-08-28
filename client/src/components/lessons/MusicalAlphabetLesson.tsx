@@ -9,7 +9,7 @@ import { audioEngine } from '@/lib/audio';
 
 interface MusicalAlphabetLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 const NATURAL_NOTES: Note[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -245,7 +245,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-blue-600 hover:bg-blue-700">
             I Understand the Musical Alphabet
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -327,7 +327,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -365,7 +365,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
                   <p className="text-success mb-4">
                     You've mastered the musical alphabet! You can identify notes quickly and accurately.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Whole & Half Steps
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
