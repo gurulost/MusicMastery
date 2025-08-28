@@ -136,27 +136,14 @@ export default function LearningJourneyPage() {
     };
   };
 
-  // Helper function to check if a step can be accessed (non-recursive)
+  // Helper function to check if a step can be accessed (all steps are accessible)
   const canAccessStep = (stepId: number): boolean => {
-    if (stepId === 1) return true;
-    
-    // Check if previous step is completed
-    const previousStepProgress = getStepProgress(stepId - 1);
-    return previousStepProgress.isCompleted;
+    return true; // All steps are accessible - users can jump around as needed
   };
 
 
   const handleStartStep = (stepId: number, section: 'learn' | 'practice' | 'test') => {
-    if (!canAccessStep(stepId)) {
-      toast({
-        title: "Step Locked",
-        description: "Complete the previous step first to unlock this one.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Navigate directly to the lesson page
+    // Navigate directly to the lesson page - all steps are accessible
     window.location.href = `/lesson/${stepId}/${section}`;
   };
 
@@ -173,8 +160,6 @@ export default function LearningJourneyPage() {
     const stepProgress = getStepProgress(stepId);
     if (stepProgress.isCompleted) {
       return <CheckCircle className="h-6 w-6 text-success" />;
-    } else if (!canAccessStep(stepId)) {
-      return <Lock className="h-6 w-6 text-muted-foreground" />;
     } else {
       return <div className="h-6 w-6 rounded-full border-2 border-primary flex items-center justify-center text-primary font-bold text-sm">{stepId}</div>;
     }
@@ -222,18 +207,15 @@ export default function LearningJourneyPage() {
               <Stepper
                 steps={LEARNING_STEPS.map(step => {
                   const stepProgress = getStepProgress(step.id);
-                  const stepCanAccess = canAccessStep(step.id);
                   return {
                     id: step.id,
                     title: step.title,
-                    status: stepProgress.isCompleted ? "completed" :
-                           stepCanAccess ? "current" :
-                           "locked"
+                    status: stepProgress.isCompleted ? "completed" : "current"
                   };
                 })}
                 currentStep={LEARNING_STEPS.findIndex(step => {
                   const progress = getStepProgress(step.id);
-                  return canAccessStep(step.id) && !progress.isCompleted;
+                  return !progress.isCompleted;
                 }) + 1}
               />
             </div>
@@ -270,43 +252,33 @@ export default function LearningJourneyPage() {
 
                       {/* Right side: Action Buttons */}
                       <div className="flex flex-wrap lg:flex-col gap-2 lg:flex-shrink-0">
-                        {canAccessStep(step.id) ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStartStep(step.id, 'learn')}
-                              className="flex-1 lg:flex-none lg:w-24"
-                            >
-                              <BookOpen className="h-4 w-4 mr-1" />
-                              Learn
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStartStep(step.id, 'practice')}
-                              className="flex-1 lg:flex-none lg:w-24"
-                            >
-                              <Target className="h-4 w-4 mr-1" />
-                              Practice
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStartStep(step.id, 'test')}
-                              className="flex-1 lg:flex-none lg:w-24"
-                            >
-                              <Award className="h-4 w-4 mr-1" />
-                              Test
-                            </Button>
-                          </>
-                        ) : (
-                          <div className="text-sm text-muted-foreground flex items-center">
-                            <Lock className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">Complete Step {step.id - 1} First</span>
-                            <span className="sm:hidden">Locked</span>
-                          </div>
-                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStartStep(step.id, 'learn')}
+                          className="flex-1 lg:flex-none lg:w-24"
+                        >
+                          <BookOpen className="h-4 w-4 mr-1" />
+                          Learn
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStartStep(step.id, 'practice')}
+                          className="flex-1 lg:flex-none lg:w-24"
+                        >
+                          <Target className="h-4 w-4 mr-1" />
+                          Practice
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStartStep(step.id, 'test')}
+                          className="flex-1 lg:flex-none lg:w-24"
+                        >
+                          <Award className="h-4 w-4 mr-1" />
+                          Test
+                        </Button>
                       </div>
                     </div>
 
