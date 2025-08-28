@@ -241,7 +241,9 @@ export function getMinorScale(tonic: Note): Scale {
 
 // Type-safe scale generation with structured input
 export function getScale(definition: ScaleDefinition): Scale {
-  return definition.type === 'major' ? getMajorScale(definition.tonic) : getMinorScale(definition.tonic);
+  // CRITICAL: Normalize the tonic before calling scale functions to handle flat spellings
+  const normalizedTonic = normalizeNote(definition.tonic);
+  return definition.type === 'major' ? getMajorScale(normalizedTonic) : getMinorScale(normalizedTonic);
 }
 
 export function buildInterval(startNote: Note, intervalType: IntervalType, direction: 'up' | 'down' = 'up'): Note {

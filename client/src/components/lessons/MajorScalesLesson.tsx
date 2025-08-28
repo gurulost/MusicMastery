@@ -43,8 +43,8 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
     questions.push({ scale: 'G Major', type: 'notes' });
     
     // Add more from easy and medium difficulty
-    easy.slice(2, 4).forEach(scale => questions.push({ scale, type: 'notes' }));
-    medium.slice(0, 2).forEach(scale => questions.push({ scale, type: 'notes' }));
+    easy.slice(2, 4).forEach(scaleDef => questions.push({ scale: getScale(scaleDef).name, type: 'notes' }));
+    medium.slice(0, 2).forEach(scaleDef => questions.push({ scale: getScale(scaleDef).name, type: 'notes' }));
     
     // Mix in some key signature questions
     questions.push({ scale: 'D Major', type: 'key_signature' });
@@ -62,7 +62,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
   const handleScaleDemo = async (scaleName: string) => {
     setCurrentScale(scaleName);
     const [tonic] = scaleName.split(' ');
-    const scale = getMajorScale(tonic as Note);
+    const scale = getMajorScale(normalizeNote(tonic as Note));
     setSelectedNotes(scale.notes);
     setPracticeCount(prev => prev + 1);
     
@@ -97,7 +97,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
     if (currentQuestion.type === 'notes') {
       // Check if the scale notes match
       const [tonic] = currentQuestion.scale.split(' ');
-      const correctScale = getMajorScale(tonic as Note);
+      const correctScale = getMajorScale(normalizeNote(tonic as Note));
       const correctAnswer = correctScale.notes.join(', ');
       isCorrect = answer === correctAnswer;
     } else if (currentQuestion.type === 'key_signature') {
@@ -110,7 +110,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
       setCorrectAnswers(prev => prev + 1);
       // Play success audio
       const [tonic] = currentQuestion.scale.split(' ');
-      const scale = getMajorScale(tonic as Note);
+      const scale = getMajorScale(normalizeNote(tonic as Note));
       try {
         await audioEngine.playScale(scale.notes.slice(0, 3)); // Play first three notes as success
       } catch (error) {
@@ -274,7 +274,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
             <div className="grid grid-cols-2 gap-3 mb-6">
               {FOUNDATION_SCALES.map(scale => {
                 const [tonic] = scale.split(' ');
-                const scaleData = getMajorScale(tonic as Note);
+                const scaleData = getMajorScale(normalizeNote(tonic as Note));
                 const keyTrick = KEY_SIGNATURE_TRICKS.find(k => k.key === scale);
                 
                 return (
@@ -314,14 +314,14 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                   <p className="font-semibold text-lg mb-2">
                     {(() => {
                       const [tonic] = currentScale.split(' ');
-                      const scale = getMajorScale(tonic as Note);
+                      const scale = getMajorScale(normalizeNote(tonic as Note));
                       return `Notes: ${scale.notes.join(' - ')}`;
                     })()}
                   </p>
                   <p className="text-sm text-muted-foreground mb-3">
                     {(() => {
                       const [tonic] = currentScale.split(' ');
-                      const scale = getMajorScale(tonic as Note);
+                      const scale = getMajorScale(normalizeNote(tonic as Note));
                       const keySignature = scale.sharps.length > 0 ? 
                         `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` :
                         scale.flats.length > 0 ?
@@ -473,7 +473,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                 <p className="font-semibold text-lg mb-2">
                   {(() => {
                     const [tonic] = currentScale.split(' ');
-                    const scale = getMajorScale(tonic as Note);
+                    const scale = getMajorScale(normalizeNote(tonic as Note));
                     return `${scale.notes.join(' - ')}`;
                   })()}
                 </p>
@@ -483,7 +483,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                     size="sm"
                     onClick={() => {
                       const [tonic] = currentScale.split(' ');
-                      const scale = getMajorScale(tonic as Note);
+                      const scale = getMajorScale(normalizeNote(tonic as Note));
                       audioEngine.initializeAudio().then(() => {
                         audioEngine.playScale(scale.notes);
                       });
@@ -509,7 +509,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                     </p>
                     {(() => {
                       const [tonic] = currentScale.split(' ');
-                      const scale = getMajorScale(tonic as Note);
+                      const scale = getMajorScale(normalizeNote(tonic as Note));
                       if (scale.sharps.length > 0) {
                         return <p className="text-blue-700">Sharps needed: {scale.sharps.join(', ')}</p>;
                       } else if (scale.flats.length > 0) {
@@ -699,7 +699,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                   {(() => {
                     // Generate options including the correct answer and some distractors
                     const [tonic] = currentQuestion.scale.split(' ');
-                    const correctScale = getMajorScale(tonic as Note);
+                    const correctScale = getMajorScale(normalizeNote(tonic as Note));
                     const correctAnswer = correctScale.notes.join(', ');
                     
                     // Create plausible wrong answers

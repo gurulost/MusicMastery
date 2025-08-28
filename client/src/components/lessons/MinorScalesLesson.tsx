@@ -115,12 +115,12 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
       isCorrect = answer === pair?.minor;
     } else if (currentQuestion.type === 'notes') {
       const [tonic] = currentQuestion.scale.split(' ');
-      const correctScale = getMinorScale(tonic as Note);
+      const correctScale = getMinorScale(normalizeNote(tonic as Note));
       const correctAnswer = correctScale.notes.join(', ');
       isCorrect = answer === correctAnswer;
     } else if (currentQuestion.type === 'key_signature') {
       const [tonic] = currentQuestion.scale.split(' ');
-      const scale = getMinorScale(tonic as Note);
+      const scale = getMinorScale(normalizeNote(tonic as Note));
       const accidentalCount = scale.sharps.length + scale.flats.length;
       isCorrect = answer === accidentalCount.toString();
     }
@@ -131,7 +131,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
       if (currentQuestion.type.includes('relative')) {
         const [tonic] = currentQuestion.scale.split(' ');
         const scale = currentQuestion.type === 'relative_major' ? 
-          getMajorScale(tonic as Note) : getMinorScale(tonic as Note);
+          getMajorScale(normalizeNote(tonic as Note)) : getMinorScale(normalizeNote(tonic as Note));
         try {
           await audioEngine.playScale(scale.notes.slice(0, 3));
         } catch (error) {
