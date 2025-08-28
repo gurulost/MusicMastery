@@ -657,8 +657,8 @@ export default function HomePage() {
       </div>
 
       {/* Main Content - Single scrollable page */}
-      <div className="flex-1 p-2 sm:p-4 lg:p-6">
-        <div className="w-full max-w-6xl mx-auto space-y-6 px-2 sm:px-4 lg:px-6">
+      <div className="flex-1 p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
           {/* Page Header with compact stats */}
           <div className="text-center space-y-4">
             <div>
@@ -763,8 +763,8 @@ export default function HomePage() {
           </div>
           {/* Combined Exercise & Piano Section */}
           {currentExercise && (
-            <Card className="w-full">
-              <CardContent className="p-4 sm:p-6">
+            <Card>
+              <CardContent className="p-6">
                 {/* Exercise header */}
                 <div className="text-center mb-4">
                   <h2 className="text-2xl font-semibold mb-2">
@@ -782,7 +782,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Piano Keyboard */}
-                <div className="mb-4 w-full overflow-x-auto">
+                <div className="mb-4">
                   <PianoKeyboard
                     highlightedNotes={practiceMode === 'show_key' || showKeySignature ? highlightedNotes : (isCompleted ? highlightedNotes : [])}
                     sharpsInKey={keySignature?.sharps || []}
