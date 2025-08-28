@@ -90,23 +90,17 @@ export default function HomePage() {
     },
   });
 
-  // Generate exercise - can be random or specific based on URL parameters
-  const generateExercise = (specificScale?: string, specificMode?: 'learn' | 'practice') => {
+  // Generate a scale practice exercise - focused on key identification
+  const generateExercise = (specificScale?: string) => {
     // Check URL parameters for specific scale practice
     const urlParams = new URLSearchParams(window.location.search);
     const urlScale = specificScale || urlParams.get('scale');
-    const urlMode = specificMode || urlParams.get('mode') as 'learn' | 'practice' | null;
-    
-    // Update mode if specified in URL
-    if (urlMode && (urlMode === 'learn' || urlMode === 'practice')) {
-      setExerciseMode(urlMode);
-    }
     
     let exerciseData: ExerciseData;
     let instruction: string;
     let explanation: string;
     let hint: string;
-    let category: 'major_scales' | 'minor_scales' | 'intervals';
+    let category: 'major_scales' | 'minor_scales';
 
     if (urlScale) {
       // Generate specific scale exercise
@@ -120,9 +114,7 @@ export default function HomePage() {
           tonic,
           category: 'major_scales'
         };
-        instruction = (urlMode || exerciseMode) === 'learn' ? 
-          `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
-          `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+        instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
         explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
         hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${exerciseData.tonic} and follow the major scale pattern.`;
       } else if (urlScale.includes('Minor')) {
@@ -135,18 +127,16 @@ export default function HomePage() {
           tonic,
           category: 'minor_scales'
         };
-        instruction = (urlMode || exerciseMode) === 'learn' ? 
-          `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
-          `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+        instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
         explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
         hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
       } else {
         // Fallback to random if scale format not recognized
-        return generateRandomExercise();
+        return generateRandomScale();
       }
     } else {
-      // Generate random exercise
-      return generateRandomExercise();
+      // Generate random scale exercise
+      return generateRandomScale();
     }
 
     setCurrentExercise({ 
@@ -154,7 +144,7 @@ export default function HomePage() {
       itemName: exerciseData.displayName, 
       instruction, 
       correctNotes: exerciseData.correctNotes, 
-      mode: urlMode || exerciseMode,
+      mode: 'learn', // Always in learn mode for key identification
       explanation,
       hint,
       startNote: exerciseData.tonic 
@@ -173,10 +163,10 @@ export default function HomePage() {
     }
   };
 
-  // Generate a random exercise
-  const generateRandomExercise = () => {
-    const categories = ['major_scales', 'minor_scales', 'intervals'];
-    const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales' | 'intervals';
+  // Generate a random scale exercise (major or minor only)
+  const generateRandomScale = () => {
+    const categories = ['major_scales', 'minor_scales'];
+    const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales';
     
     let exerciseData: ExerciseData;
     let instruction: string;
@@ -185,26 +175,16 @@ export default function HomePage() {
 
     if (category === 'major_scales') {
       exerciseData = generateScaleExercise('major_scales');
-      instruction = exerciseMode === 'learn' ? 
-        `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
-        `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
-      explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale uses the key signature with ${Math.abs(exerciseData.correctNotes.filter(n => n.includes('#')).length)} sharps.`;
+      const scale = getMajorScale(exerciseData.tonic);
+      instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
+      explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
       hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${exerciseData.tonic} and follow the major scale pattern.`;
-    } else if (category === 'minor_scales') {
-      exerciseData = generateScaleExercise('minor_scales');
-      instruction = exerciseMode === 'learn' ? 
-        `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
-        `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
-      explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale uses the same key signature as its relative major.`;
-      hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
     } else {
-      exerciseData = generateIntervalExercise();
-      const intervalExplanation = getIntervalExplanation(exerciseData.intervalType!);
-      instruction = exerciseMode === 'learn' ? 
-        `Learn to build a ${exerciseData.intervalType} up from ${exerciseData.startNote}:` :
-        `Build a ${exerciseData.intervalType} up from ${exerciseData.startNote} by clicking both notes:`;
-      explanation = intervalExplanation.explanation;
-      hint = intervalExplanation.learningTip;
+      exerciseData = generateScaleExercise('minor_scales');
+      const scale = getMinorScale(exerciseData.tonic);
+      instruction = `Click all the notes that belong in ${exerciseData.displayName}:`;
+      explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
+      hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
     }
 
     setCurrentExercise({ 
@@ -212,10 +192,10 @@ export default function HomePage() {
       itemName: exerciseData.displayName, 
       instruction, 
       correctNotes: exerciseData.correctNotes, 
-      mode: exerciseMode,
+      mode: 'learn', // Always in learn mode for key identification
       explanation,
       hint,
-      startNote: exerciseData.startNote 
+      startNote: exerciseData.tonic 
     });
     setPlayedNotes([]);
     setSelectedNotes([]);
@@ -309,13 +289,18 @@ export default function HomePage() {
     if (isCorrect) {
       toast({
         title: "🎉 Correct!",
-        description: `You played the ${currentExercise.itemName} correctly.`,
+        description: `You identified all the notes in ${currentExercise.itemName} correctly!`,
       });
       setIsCompleted(true);
+      
+      // Auto-generate next exercise after a brief delay
+      setTimeout(() => {
+        handleNextExercise();
+      }, 2000);
     } else {
       toast({
-        title: "Try Again",
-        description: "That's not quite right. Check the key signature and try again.",
+        title: "Not quite right",
+        description: `Keep trying! Listen to the notes and think about the ${currentExercise.itemName} scale pattern.`,
         variant: "destructive",
       });
     }
@@ -332,13 +317,9 @@ export default function HomePage() {
     setShowHint(true);
   };
 
-  const handleSwitchMode = () => {
-    setExerciseMode(prev => prev === 'learn' ? 'practice' : 'learn');
-    generateRandomExercise();
-  };
 
   const handleNextExercise = () => {
-    generateRandomExercise();
+    generateRandomScale();
   };
 
   if (summaryLoading) {
@@ -556,11 +537,12 @@ export default function HomePage() {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={handleSwitchMode}
-              data-testid="button-switch-mode"
+              onClick={handleNextExercise}
+              data-testid="button-next-exercise"
             >
-              <span className="hidden lg:inline">Switch to {exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
-              <span className="lg:hidden">{exerciseMode === 'learn' ? 'Practice' : 'Learn'} Mode</span>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Next Scale</span>
+              <span className="sm:hidden">Next</span>
             </Button>
             <Button 
               variant="secondary" 
@@ -575,11 +557,11 @@ export default function HomePage() {
             <Button 
               size="sm"
               onClick={handleCheckAnswer} 
-              disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0) || isCompleted}
+              disabled={selectedNotes.length === 0 || isCompleted}
               data-testid="button-check-answer"
             >
               <Check className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Check Answer</span>
+              <span className="hidden sm:inline">Check Your Answer</span>
               <span className="sm:hidden">Check</span>
             </Button>
           </div>
@@ -596,7 +578,7 @@ export default function HomePage() {
                     <h3 className="text-xl font-semibold">Current Exercise</h3>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
-                        {currentExercise.mode === 'learn' ? 'Learning' : 'Practice'} Mode
+                        Scale Practice
                       </span>
                       <span className="inline-flex items-center justify-center px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
                         {currentExercise.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -625,18 +607,10 @@ export default function HomePage() {
                       </div>
                     )}
                   </div>
-                  {currentExercise.mode === 'learn' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-800 font-medium mb-1">📚 Learning Mode Active</p>
-                      <p className="text-sm text-blue-700">Click piano keys to select/unselect them. Focus on identifying the correct notes. Order doesn't matter - just find all the right keys!</p>
-                    </div>
-                  )}
-                  {currentExercise.mode === 'practice' && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-sm text-green-800 font-medium mb-1">🎯 Practice Mode Active</p>
-                      <p className="text-sm text-green-700">Click piano keys in the correct sequence. This simulates actually playing the scale or interval on a real piano.</p>
-                    </div>
-                  )}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm text-blue-800 font-medium mb-1">🎹 Scale Practice</p>
+                    <p className="text-sm text-blue-700">Click piano keys to select the notes you think belong in this scale. Listen to each note as you click it to help train your ear!</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
