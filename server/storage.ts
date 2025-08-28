@@ -181,10 +181,10 @@ export class InMemoryStorage implements IStorage {
 export class DatabaseStorage implements IStorage {
   private _db: any = null;
   
-  private get db() {
+  private async getDb() {
     if (!this._db) {
       try {
-        const { db } = require("./db");
+        const { db } = await import("./db.js");
         this._db = db;
       } catch (error) {
         throw new Error(`Database initialization failed: ${error.message}`);
@@ -194,17 +194,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await this.db.select().from(users).where(eq(users.id, id));
+    const db = await this.getDb();
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await this.db.select().from(users).where(eq(users.username, username));
+    const db = await this.getDb();
+    const [user] = await db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await this.db
+    const db = await this.getDb();
+    const [user] = await db
       .insert(users)
       .values({ ...insertUser, password: 'no-password' }) // Simple name-only auth
       .returning();
@@ -212,15 +215,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await this.db.select().from(users);
+    const db = await this.getDb();
+    return await db.select().from(users);
   }
 
   async getUserProgress(userId: string): Promise<Progress[]> {
-    return await this.db.select().from(progress).where(eq(progress.userId, userId));
+    const db = await this.getDb();
+    return await db.select().from(progress).where(eq(progress.userId, userId));
   }
 
   async getProgressByCategory(userId: string, category: string): Promise<Progress[]> {
-    return await this.db.select().from(progress).where(
+    const db = await this.getDb();
+    return await db.select().from(progress).where(
       and(
         eq(progress.userId, userId), 
         eq(progress.category, category)

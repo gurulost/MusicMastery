@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,6 +48,7 @@ export default function HomePage() {
   const [showHint, setShowHint] = useState(false);
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
   const [showHelp, setShowHelp] = useState(false);
+  const startTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
@@ -136,6 +137,9 @@ export default function HomePage() {
     setSelectedNotes([]);
     setIsCompleted(false);
     setShowHint(false);
+    
+    // Record exercise start time
+    startTimeRef.current = Date.now();
   };
 
   // Initialize first exercise
@@ -191,7 +195,7 @@ export default function HomePage() {
       isCorrect,
       userAnswer: userAnswer,
       correctAnswer: currentExercise.correctNotes,
-      timeToComplete: Math.floor(Date.now() / 1000) - Math.floor(Date.now() / 1000) + 30
+      timeToComplete: startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0
     });
 
     // Update progress

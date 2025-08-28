@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Music, Play, Check, RotateCcw, ChevronRight, Lightbulb } from 'lucide-react';
@@ -31,6 +31,7 @@ export default function IntervalPracticePage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
+  const startTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
@@ -81,6 +82,9 @@ export default function IntervalPracticePage() {
     setPlayedNotes([]);
     setIsCompleted(false);
     setShowExplanation(false);
+    
+    // Record exercise start time
+    startTimeRef.current = Date.now();
   };
 
   useEffect(() => {
@@ -133,7 +137,7 @@ export default function IntervalPracticePage() {
       isCorrect,
       userAnswer: userAnswer,
       correctAnswer: [currentExercise.startNote, currentExercise.targetNote],
-      timeToComplete: Math.floor(Math.random() * 60) + 15
+      timeToComplete: startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0
     });
 
     // Update progress
