@@ -115,17 +115,25 @@ export function PianoKeyboard({
     
     try {
       // Always try to initialize audio on user interaction (required for iOS)
-      await audioEngine.initializeAudio();
+      console.log(`Piano key pressed: ${note}, initializing audio...`);
+      const audioReady = await audioEngine.initializeAudio();
       setAudioInitialized(true);
+      
+      if (!audioReady) {
+        console.warn('Audio initialization failed');
+        return;
+      }
       
       // Play audio with correct octave
       const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
       const normalizedNote = normalizeNote(note);
       
-      // Use a slightly longer duration and higher volume for better audio feedback
-      await audioEngine.playNote(normalizedNote, 0.8, octave);
+      console.log(`Playing ${normalizedNote} in octave ${octave}`);
+      
+      // Use a longer duration for piano keys
+      await audioEngine.playNote(normalizedNote, 1.0, octave);
     } catch (error) {
-      console.warn('Audio playback failed:', error);
+      console.error('Audio playback failed:', error);
       // Don't block the interaction if audio fails
     }
 

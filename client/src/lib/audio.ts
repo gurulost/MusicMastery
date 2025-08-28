@@ -16,7 +16,9 @@ class AudioEngine {
     if (this.audioContext && this.gainNode && this.isInitialized) {
       if (this.audioContext.state === 'suspended') {
         try {
+          console.log('Resuming suspended audio context...');
           await this.audioContext.resume();
+          console.log('Audio context resumed, state:', this.audioContext.state);
         } catch (error) {
           console.warn('Failed to resume audio context:', error);
           return false;
@@ -27,17 +29,22 @@ class AudioEngine {
 
     // Initialize audio context for the first time
     try {
+      console.log('Initializing new audio context...');
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       this.gainNode = this.audioContext.createGain();
       this.gainNode.connect(this.audioContext.destination);
-      this.gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+      
+      // Set higher master volume for better audibility
+      this.gainNode.gain.setValueAtTime(0.7, this.audioContext.currentTime);
       this.isInitialized = true;
 
       // Try to resume if suspended (handles user interaction requirement)
       if (this.audioContext.state === 'suspended') {
+        console.log('Audio context created but suspended, resuming...');
         await this.audioContext.resume();
       }
       
+      console.log('Audio context initialized, state:', this.audioContext.state);
       return this.audioContext.state === 'running';
     } catch (error) {
       console.warn('Audio not supported:', error);
@@ -84,29 +91,36 @@ class AudioEngine {
     // Ensure audio context is ready
     const isReady = await this.ensureAudioContext();
     if (!isReady || !this.audioContext || !this.gainNode) {
-      console.warn('Audio context not ready');
+      console.warn('Audio context not ready, state:', this.audioContext?.state);
       return;
     }
 
-    const oscillator = this.audioContext.createOscillator();
-    const noteGain = this.audioContext.createGain();
+    try {
+      const oscillator = this.audioContext.createOscillator();
+      const noteGain = this.audioContext.createGain();
 
-    oscillator.connect(noteGain);
-    noteGain.connect(this.gainNode);
+      oscillator.connect(noteGain);
+      noteGain.connect(this.gainNode);
 
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(
-      this.getNoteFrequency(note, octave),
-      this.audioContext.currentTime
-    );
+      // Use a warmer sound with multiple harmonics
+      oscillator.type = 'triangle';
+      const frequency = this.getNoteFrequency(note, octave);
+      oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
 
-    // Envelope for smoother sound
-    noteGain.gain.setValueAtTime(0, this.audioContext.currentTime);
-    noteGain.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.01);
-    noteGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+      // Much more audible envelope with better attack and sustain
+      const now = this.audioContext.currentTime;
+      noteGain.gain.setValueAtTime(0, now);
+      noteGain.gain.linearRampToValueAtTime(0.4, now + 0.02);  // Quick attack to 0.4
+      noteGain.gain.linearRampToValueAtTime(0.3, now + 0.1);   // Sustain at 0.3
+      noteGain.gain.exponentialRampToValueAtTime(0.01, now + duration); // Decay to 0.01 (still audible)
 
-    oscillator.start(this.audioContext.currentTime);
-    oscillator.stop(this.audioContext.currentTime + duration);
+      oscillator.start(now);
+      oscillator.stop(now + duration);
+      
+      console.log(`Playing note ${note}${octave} at ${frequency.toFixed(2)}Hz`);
+    } catch (error) {
+      console.warn('Failed to play note:', error);
+    }
   }
 
   // Play an interval with correct octave handling
