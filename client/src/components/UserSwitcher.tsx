@@ -10,17 +10,19 @@ import {
   DialogTrigger 
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, LogOut, UserPlus } from "lucide-react";
+import { Users, LogOut, UserPlus, LogIn, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
 export function UserSwitcher() {
-  const { currentUser, logoutUser, loginUser, createUser, allUsers, isCreatingUser } = useUser();
+  const { currentUser, logoutUser, loginUser, createUser, allUsers, isCreatingUser, createUserError } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newUsername, setNewUsername] = useState("");
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+  const [duplicateUsername, setDuplicateUsername] = useState("");
   const { toast } = useToast();
 
   const handleSwitchUser = () => {
@@ -50,11 +52,16 @@ export function UserSwitcher() {
         description: `Welcome ${newUsername.trim()}! Your progress will be saved.`,
       });
     } catch (error) {
-      toast({
-        title: "Failed to Create Account",
-        description: "This name might already be taken.",
-        variant: "destructive",
-      });
+      if (createUserError === "This name is already taken") {
+        setDuplicateUsername(newUsername.trim());
+        setShowDuplicateDialog(true);
+      } else {
+        toast({
+          title: "Failed to Create Account",
+          description: createUserError || "Failed to create account. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -65,6 +72,28 @@ export function UserSwitcher() {
       title: "Logged Out",
       description: "Select or create an account to continue learning.",
     });
+  };
+
+  const handleLoginAsExisting = () => {
+    const existingUser = allUsers.find(u => u.username.toLowerCase() === duplicateUsername.toLowerCase());
+    if (existingUser) {
+      loginUser(existingUser.id);
+      setShowDuplicateDialog(false);
+      setDuplicateUsername("");
+      setNewUsername("");
+      setShowCreateForm(false);
+      setIsOpen(false);
+      toast({
+        title: "Welcome Back!",
+        description: `Switched to ${existingUser.username}. Your progress has been restored.`,
+      });
+    }
+  };
+
+  const handlePickDifferentName = () => {
+    setShowDuplicateDialog(false);
+    setDuplicateUsername("");
+    // Keep the create form open so they can enter a different name
   };
 
   return (
@@ -173,6 +202,41 @@ export function UserSwitcher() {
           </div>
         </div>
       </DialogContent>
+      
+      {/* Duplicate Name Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Name Already Exists
+            </DialogTitle>
+            <DialogDescription>
+              There's already an account with the name "{duplicateUsername}". Would you like to:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button 
+              onClick={handleLoginAsExisting} 
+              className="w-full justify-start"
+              variant="default"
+              data-testid="button-login-existing-duplicate-switcher"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Switch to {duplicateUsername}
+            </Button>
+            <Button 
+              onClick={handlePickDifferentName} 
+              className="w-full justify-start"
+              variant="outline"
+              data-testid="button-pick-different-name-switcher"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Pick a different name
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }

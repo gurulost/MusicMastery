@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, UserPlus, LogIn } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Loader2, UserPlus, LogIn, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function LoginScreen() {
@@ -13,6 +14,8 @@ export function LoginScreen() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newUsername, setNewUsername] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
+  const [duplicateUsername, setDuplicateUsername] = useState("");
   const { toast } = useToast();
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -35,11 +38,16 @@ export function LoginScreen() {
         description: `Account created for ${newUsername.trim()}. You can now start learning!`,
       });
     } catch (error) {
-      toast({
-        title: "Account Creation Failed",
-        description: createUserError || "Failed to create account. Please try again.",
-        variant: "destructive",
-      });
+      if (createUserError === "This name is already taken") {
+        setDuplicateUsername(newUsername.trim());
+        setShowDuplicateDialog(true);
+      } else {
+        toast({
+          title: "Account Creation Failed",
+          description: createUserError || "Failed to create account. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -59,6 +67,27 @@ export function LoginScreen() {
       title: "Welcome Back!",
       description: `Logged in as ${user?.username}. Your progress has been restored.`,
     });
+  };
+
+  const handleLoginAsExisting = () => {
+    const existingUser = allUsers.find(u => u.username.toLowerCase() === duplicateUsername.toLowerCase());
+    if (existingUser) {
+      loginUser(existingUser.id);
+      setShowDuplicateDialog(false);
+      setDuplicateUsername("");
+      setNewUsername("");
+      setShowCreateForm(false);
+      toast({
+        title: "Welcome Back!",
+        description: `Logged in as ${existingUser.username}. Your progress has been restored.`,
+      });
+    }
+  };
+
+  const handlePickDifferentName = () => {
+    setShowDuplicateDialog(false);
+    setDuplicateUsername("");
+    // Keep the create form open so they can enter a different name
   };
 
   return (
@@ -172,6 +201,41 @@ export function LoginScreen() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Duplicate Name Dialog */}
+      <Dialog open={showDuplicateDialog} onOpenChange={setShowDuplicateDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              Name Already Exists
+            </DialogTitle>
+            <DialogDescription>
+              There's already an account with the name "{duplicateUsername}". Would you like to:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Button 
+              onClick={handleLoginAsExisting} 
+              className="w-full justify-start"
+              variant="default"
+              data-testid="button-login-existing-duplicate"
+            >
+              <LogIn className="mr-2 h-4 w-4" />
+              Log in as {duplicateUsername}
+            </Button>
+            <Button 
+              onClick={handlePickDifferentName} 
+              className="w-full justify-start"
+              variant="outline"
+              data-testid="button-pick-different-name"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Pick a different name
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
