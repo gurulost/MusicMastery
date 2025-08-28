@@ -38,16 +38,16 @@ export function LoginScreen() {
         description: `Account created for ${newUsername.trim()}. You can now start learning!`,
       });
     } catch (error: any) {
-      if (error?.message === "This name is already taken") {
+      if (error instanceof Error && /409:/.test(error.message)) {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);
-      } else {
-        toast({
-          title: "Account Creation Failed",
-          description: error?.message || "Failed to create account. Please try again.",
-          variant: "destructive",
-        });
+        return;
       }
+      toast({
+        title: "Account Creation Failed",
+        description: error?.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

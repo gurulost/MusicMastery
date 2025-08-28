@@ -52,16 +52,16 @@ export function UserSwitcher() {
         description: `Welcome ${newUsername.trim()}! Your progress will be saved.`,
       });
     } catch (error: any) {
-      if (error?.message === "This name is already taken") {
+      if (error instanceof Error && /409:/.test(error.message)) {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);
-      } else {
-        toast({
-          title: "Failed to Create Account",
-          description: error?.message || "Failed to create account. Please try again.",
-          variant: "destructive",
-        });
+        return;
       }
+      toast({
+        title: "Failed to Create Account",
+        description: error?.message || "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

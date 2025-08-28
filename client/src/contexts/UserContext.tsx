@@ -37,15 +37,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     error: createUserError
   } = useMutation({
     mutationFn: async (username: string): Promise<User> => {
-      const response = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create user');
-      }
+      const response = await apiRequest('POST', '/api/users', { username });
       return response.json();
     },
     onSuccess: () => {
