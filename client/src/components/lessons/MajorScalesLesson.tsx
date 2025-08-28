@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Zap, RotateCcw } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { getMajorScale, MAJOR_SCALES, getScalesByDifficulty } from '@/lib/musicTheory';
+import { getMajorScale, MAJOR_SCALES, MAJOR_SCALE_NAMES, getScalesByDifficulty } from '@/lib/musicTheory';
 
 interface MajorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';

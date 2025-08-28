@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Link, Heart, ArrowRightLeft } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { getMinorScale, getMajorScale, MINOR_SCALES, getScalesByDifficulty } from '@/lib/musicTheory';
+import { getMinorScale, getMajorScale, MINOR_SCALES, MINOR_SCALE_NAMES, getScalesByDifficulty } from '@/lib/musicTheory';
 
 interface MinorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
