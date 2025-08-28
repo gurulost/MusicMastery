@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight, BookOpen, Target, Award, TrendingUp } from 'lucide-react';
 import { UserSwitcher } from '@/components/UserSwitcher';
 import { useUser } from '@/contexts/UserContext';
@@ -219,7 +220,7 @@ export default function HomePage() {
 
     if (isCorrect) {
       toast({
-        title: "Correct!",
+        title: "🎉 Correct!",
         description: `You played the ${currentExercise.itemName} correctly.`,
       });
       setIsCompleted(true);
@@ -268,12 +269,18 @@ export default function HomePage() {
       {/* Sidebar */}
       <div className="w-80 bg-card border-r border-border flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-border">
-          <h1 className="text-2xl font-bold text-primary">
-            <Music className="inline mr-2" />
-            Music Theory Prep
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">AP Exam Preparation</p>
+        <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-accent/10">
+          <div className="flex items-center mb-2">
+            <div className="p-2 bg-primary/10 rounded-lg mr-3">
+              <Music className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground font-serif">
+                Music Theory Prep
+              </h1>
+              <p className="text-sm text-muted-foreground">AP Exam Preparation</p>
+            </div>
+          </div>
         </div>
         
         {/* Overall Progress */}
@@ -306,20 +313,35 @@ export default function HomePage() {
         
         {/* Learning Navigation Menu */}
         <nav className="flex-1 p-4">
-          {/* Featured Guided Learning - Moved to Top */}
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 border-2 border-primary/20 rounded-lg">
-            <h3 className="text-sm font-bold text-primary mb-3 flex items-center">
-              <Award className="mr-2 h-4 w-4" />
-              RECOMMENDED: START HERE
-            </h3>
-            <Link href="/learning-journey">
-              <Button variant="default" className="w-full justify-start mb-2 h-12 text-base shadow-md" data-testid="nav-learning-journey">
-                <BookOpen className="mr-3 h-5 w-5" />
-                7-Step Guided Journey
+          {/* Featured Guided Learning - Hero Treatment */}
+          <div className="mb-6 p-6 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 border border-primary/20 rounded-xl shadow-sm">
+            <div className="flex items-center mb-4">
+              <div className="p-2 bg-primary/15 rounded-lg mr-3">
+                <Award className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground font-serif">
+                  Start Your Journey
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Recommended learning path for AP Music Theory
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 mb-4">
+              <Link href="/learning-journey">
+                <Button variant="default" className="w-full justify-start h-12 text-base shadow-md hover:shadow-lg transition-all duration-200" data-testid="nav-learning-journey">
+                  <BookOpen className="mr-3 h-5 w-5" />
+                  7-Step Guided Journey
+                </Button>
+              </Link>
+              <Button variant="secondary" className="w-full justify-start h-12 text-base" data-testid="nav-piano-practice">
+                <Keyboard className="mr-3 h-5 w-5" />
+                Quick Piano Practice
               </Button>
-            </Link>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Follow our structured path from basics to advanced concepts
+              Follow our structured path from musical alphabet to advanced intervals
             </p>
           </div>
 

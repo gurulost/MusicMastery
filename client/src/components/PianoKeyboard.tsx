@@ -209,17 +209,24 @@ export function PianoKeyboard({
   };
 
   return (
-    <div className={cn("flex justify-center overflow-x-auto", className)}>
+    <div className={cn("flex justify-center overflow-x-auto px-2 sm:px-4", className)}>
       <div className="relative min-w-fit">
+        {/* Mobile: Add gradient hints for scrollable piano */}
+        <div className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent pointer-events-none z-20 sm:hidden" />
+        <div className="absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent pointer-events-none z-20 sm:hidden" />
         {/* White Keys */}
         <div className="flex">
           {EXTENDED_WHITE_KEYS.map((note, index) => (
             <button
               key={`${note}-${index}`}
               data-testid={`piano-key-${note}-${index}`}
+              tabIndex={0}
+              aria-label={`Piano key ${note}`}
+              role="button"
               className={cn(
                 "piano-key white-key w-10 h-32 mr-0.5 flex items-end justify-center pb-2 text-xs font-medium border border-border rounded-b-md transition-all duration-100 select-none cursor-pointer",
-                "hover:transform hover:translate-y-0.5 hover:shadow-sm",
+                "hover:scale-[1.02] hover:translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "active:scale-[0.97] active:translate-y-1",
                 {
                   "transform translate-y-1": isActive(note, index),
                   "bg-card": !isHighlighted(note) && !isPlayed(note) && !isSelected(note),
@@ -248,9 +255,13 @@ export function PianoKeyboard({
               <button
                 key={`${blackKey.note}-black-${index}`}
                 data-testid={`piano-key-${blackKey.note}-black-${index}`}
+                tabIndex={0}
+                aria-label={`Piano key ${blackKey.note}`}
+                role="button"
                 className={cn(
                   "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
-                  "hover:transform hover:translate-y-0.5 hover:shadow-lg",
+                  "hover:scale-[1.02] hover:translate-y-0.5 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "active:scale-[0.97] active:translate-y-1",
                   {
                     "transform translate-y-1": isActive(blackKey.note, blackKey.whiteKeyIndex, true),
                     "bg-gray-800": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),

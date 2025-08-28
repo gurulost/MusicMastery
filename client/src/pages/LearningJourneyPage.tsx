@@ -11,6 +11,7 @@ import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useUser } from '@/contexts/UserContext';
 import { PageHeader } from '@/components/PageHeader';
+import { Stepper } from '@/components/Stepper';
 
 // Use user context instead of hardcoded ID
 
@@ -201,12 +202,30 @@ export default function LearningJourneyPage() {
             </PageHeader>
             
             {/* Overall Progress */}
-            <div className="bg-card border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="bg-card border rounded-lg p-4 mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <span className="text-sm font-medium">Overall Progress</span>
                 <span className="text-sm text-muted-foreground">{overallProgress}/7 Steps Completed</span>
               </div>
-              <Progress value={(overallProgress / 7) * 100} className="h-2" />
+              <Progress value={(overallProgress / 7) * 100} className="h-2 mb-4" />
+              
+              {/* Visual Step Progress */}
+              <Stepper
+                steps={LEARNING_STEPS.map(step => {
+                  const stepProgress = getStepProgress(step.id);
+                  return {
+                    id: step.id,
+                    title: step.title,
+                    status: stepProgress.isCompleted ? "completed" :
+                           stepProgress.canAccess ? "current" :
+                           "locked"
+                  };
+                })}
+                currentStep={LEARNING_STEPS.findIndex(step => {
+                  const progress = getStepProgress(step.id);
+                  return progress.canAccess && !progress.isCompleted;
+                }) + 1}
+              />
             </div>
           </div>
 
