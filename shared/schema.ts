@@ -33,6 +33,19 @@ export const exerciseSessions = pgTable("exercise_sessions", {
   createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
+export const learningProgress = pgTable("learning_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  stepId: integer("step_id").notNull(),
+  section: text("section").notNull(), // 'learn', 'practice', 'test'
+  isCompleted: boolean("is_completed").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+  score: integer("score"),
+  attempts: integer("attempts").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+  updatedAt: timestamp("updated_at").notNull().default(sql`now()`),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -47,12 +60,20 @@ export const insertExerciseSessionSchema = createInsertSchema(exerciseSessions).
   createdAt: true,
 });
 
+export const insertLearningProgressSchema = createInsertSchema(learningProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Progress = typeof progress.$inferSelect;
 export type InsertProgress = z.infer<typeof insertProgressSchema>;
 export type ExerciseSession = typeof exerciseSessions.$inferSelect;
 export type InsertExerciseSession = z.infer<typeof insertExerciseSessionSchema>;
+export type LearningProgress = typeof learningProgress.$inferSelect;
+export type InsertLearningProgress = z.infer<typeof insertLearningProgressSchema>;
 
 // Music theory types
 export type ScaleType = 'major' | 'minor';

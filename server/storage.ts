@@ -3,25 +3,19 @@ import {
   users,
   progress,
   exerciseSessions,
+  learningProgress,
   type User,
   type InsertUser,
   type Progress,
   type InsertProgress,
   type ExerciseSession,
   type InsertExerciseSession,
+  type LearningProgress,
+  type InsertLearningProgress,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
-export interface LearningProgress {
-  userId: string;
-  stepId: number;
-  section: 'learn' | 'practice' | 'test';
-  isCompleted: boolean;
-  completedAt?: Date;
-  score?: number;
-  attempts?: number;
-}
 
 export interface IStorage {
   // User methods
@@ -136,29 +130,49 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
   }
 
-  // Learning journey progress (stored in memory for now, could be added to database later)
-  private learningProgress: Map<string, LearningProgress> = new Map();
-
+  // Learning journey progress methods
   async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
-    return Array.from(this.learningProgress.values()).filter(p => p.userId === userId);
+    return await db.select().from(learningProgress).where(eq(learningProgress.userId, userId));
   }
 
   async updateLearningProgress(progressData: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress> {
-    const key = `${progressData.userId}-${progressData.stepId}-${progressData.section}`;
-    const existing = this.learningProgress.get(key);
-    
-    const updated: LearningProgress = {
-      userId: progressData.userId,
-      stepId: progressData.stepId,
-      section: progressData.section as 'learn' | 'practice' | 'test',
-      isCompleted: progressData.isCompleted ?? false,
-      completedAt: progressData.isCompleted ? new Date() : existing?.completedAt,
-      score: progressData.score ?? existing?.score,
-      attempts: (existing?.attempts ?? 0) + (progressData.attempts ?? 1),
-    };
-    
-    this.learningProgress.set(key, updated);
-    return updated;
+    const existing = await db.select().from(learningProgress)
+      .where(and(
+        eq(learningProgress.userId, progressData.userId),
+        eq(learningProgress.stepId, progressData.stepId),
+        eq(learningProgress.section, progressData.section)
+      ));
+
+    if (existing.length > 0) {
+      // Update existing record
+      const [updated] = await db
+        .update(learningProgress)
+        .set({
+          isCompleted: progressData.isCompleted ?? existing[0].isCompleted,
+          completedAt: progressData.isCompleted ? new Date() : existing[0].completedAt,
+          score: progressData.score ?? existing[0].score,
+          attempts: existing[0].attempts + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(learningProgress.id, existing[0].id))
+        .returning();
+      return updated;
+    } else {
+      // Create new record
+      const [newProgress] = await db
+        .insert(learningProgress)
+        .values({
+          userId: progressData.userId,
+          stepId: progressData.stepId,
+          section: progressData.section,
+          isCompleted: progressData.isCompleted ?? false,
+          completedAt: progressData.isCompleted ? new Date() : null,
+          score: progressData.score,
+          attempts: 1,
+        })
+        .returning();
+      return newProgress;
+    }
   }
 }
 
