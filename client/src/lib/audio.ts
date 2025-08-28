@@ -96,28 +96,82 @@ class AudioEngine {
     }
 
     try {
-      const oscillator = this.audioContext.createOscillator();
-      const noteGain = this.audioContext.createGain();
-
-      oscillator.connect(noteGain);
-      noteGain.connect(this.gainNode);
-
-      // Use a warmer sound with multiple harmonics
-      oscillator.type = 'triangle';
-      const frequency = this.getNoteFrequency(note, octave);
-      oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
-
-      // Much more audible envelope with better attack and sustain
+      // Create multiple oscillators for a richer, more piano-like sound
+      const fundamentalFreq = this.getNoteFrequency(note, octave);
       const now = this.audioContext.currentTime;
-      noteGain.gain.setValueAtTime(0, now);
-      noteGain.gain.linearRampToValueAtTime(0.4, now + 0.02);  // Quick attack to 0.4
-      noteGain.gain.linearRampToValueAtTime(0.3, now + 0.1);   // Sustain at 0.3
-      noteGain.gain.exponentialRampToValueAtTime(0.01, now + duration); // Decay to 0.01 (still audible)
-
-      oscillator.start(now);
-      oscillator.stop(now + duration);
       
-      console.log(`Playing note ${note}${octave} at ${frequency.toFixed(2)}Hz`);
+      // Main fundamental oscillator (sawtooth for harmonic content)
+      const fundamental = this.audioContext.createOscillator();
+      const fundamentalGain = this.audioContext.createGain();
+      fundamental.connect(fundamentalGain);
+      fundamentalGain.connect(this.gainNode);
+      fundamental.type = 'sawtooth';
+      fundamental.frequency.setValueAtTime(fundamentalFreq, now);
+      
+      // Second harmonic (octave higher, quieter)
+      const harmonic2 = this.audioContext.createOscillator();
+      const harmonic2Gain = this.audioContext.createGain();
+      harmonic2.connect(harmonic2Gain);
+      harmonic2Gain.connect(this.gainNode);
+      harmonic2.type = 'sawtooth';
+      harmonic2.frequency.setValueAtTime(fundamentalFreq * 2, now);
+      
+      // Third harmonic (fifth higher, even quieter)
+      const harmonic3 = this.audioContext.createOscillator();
+      const harmonic3Gain = this.audioContext.createGain();
+      harmonic3.connect(harmonic3Gain);
+      harmonic3Gain.connect(this.gainNode);
+      harmonic3.type = 'sine';
+      harmonic3.frequency.setValueAtTime(fundamentalFreq * 3, now);
+
+      // Low-pass filter to soften the harsh sawtooth edges
+      const filter = this.audioContext.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(fundamentalFreq * 4, now); // Cutoff at 4th harmonic
+      filter.Q.setValueAtTime(1, now);
+      
+      // Connect through filter
+      fundamentalGain.disconnect();
+      harmonic2Gain.disconnect();
+      fundamentalGain.connect(filter);
+      harmonic2Gain.connect(filter);
+      filter.connect(this.gainNode);
+
+      // Piano-like envelope with sharp attack and exponential decay
+      const attackTime = 0.005;  // Very quick attack like piano hammer
+      const decayTime = 0.1;     // Quick initial decay
+      const sustainLevel = 0.15; // Lower sustain level
+      const releaseTime = duration - decayTime;
+
+      // Fundamental frequency envelope (strongest)
+      fundamentalGain.gain.setValueAtTime(0, now);
+      fundamentalGain.gain.linearRampToValueAtTime(0.2, now + attackTime);
+      fundamentalGain.gain.exponentialRampToValueAtTime(sustainLevel, now + decayTime);
+      fundamentalGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      // Second harmonic envelope (medium strength)
+      harmonic2Gain.gain.setValueAtTime(0, now);
+      harmonic2Gain.gain.linearRampToValueAtTime(0.1, now + attackTime);
+      harmonic2Gain.gain.exponentialRampToValueAtTime(sustainLevel * 0.6, now + decayTime);
+      harmonic2Gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      // Third harmonic envelope (subtle)
+      harmonic3Gain.gain.setValueAtTime(0, now);
+      harmonic3Gain.gain.linearRampToValueAtTime(0.05, now + attackTime);
+      harmonic3Gain.gain.exponentialRampToValueAtTime(sustainLevel * 0.3, now + decayTime);
+      harmonic3Gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      // Start all oscillators
+      fundamental.start(now);
+      harmonic2.start(now);
+      harmonic3.start(now);
+      
+      // Stop all oscillators
+      fundamental.stop(now + duration);
+      harmonic2.stop(now + duration);
+      harmonic3.stop(now + duration);
+      
+      console.log(`Playing piano-like note ${note}${octave} at ${fundamentalFreq.toFixed(2)}Hz`);
     } catch (error) {
       console.warn('Failed to play note:', error);
     }
