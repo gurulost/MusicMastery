@@ -6,6 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Zap, Brain, Target, Star, Trophy, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
+import { normalizeNote } from '@/lib/musicTheory';
 
 interface WholeHalfStepsLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -84,15 +85,15 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
     
     // Play the interval with educational timing
     try {
-      await audioEngine.playNote(start, 0.8);
+      await audioEngine.playNote(normalizeNote(start), 0.8);
       setTimeout(async () => {
         try {
-          await audioEngine.playNote(target, 0.8);
+          await audioEngine.playNote(normalizeNote(target), 0.8);
           // Play them together for harmonic understanding
           setTimeout(async () => {
             try {
-              await audioEngine.playNote(start, 0.6);
-              await audioEngine.playNote(target, 0.6);
+              await audioEngine.playNote(normalizeNote(start), 0.6);
+              await audioEngine.playNote(normalizeNote(target), 0.6);
             } catch (error) {
               console.warn('Audio playback failed:', error);
             }
@@ -116,10 +117,10 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
       setCorrectAnswers(prev => prev + 1);
       // Play success sound
       try {
-        await audioEngine.playNote(currentQuestion.startNote, 0.8);
+        await audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
         setTimeout(async () => {
           try {
-            await audioEngine.playNote(answer, 0.8);
+            await audioEngine.playNote(normalizeNote(answer), 0.8);
           } catch (error) {
             console.warn('Audio playback failed:', error);
           }

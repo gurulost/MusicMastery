@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Volume2, Heart, Zap } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { INTERVALS, getIntervalExplanation, getIntervalsByDifficulty } from '@/lib/musicTheory';
+import { INTERVALS, getIntervalExplanation, getIntervalsByDifficulty, normalizeNote } from '@/lib/musicTheory';
 
 interface UnderstandingIntervalsLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -84,15 +84,15 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
       
       // Play melodically first (one after the other)
       try {
-        await audioEngine.playNote(note1, 0.8);
+        await audioEngine.playNote(normalizeNote(note1), 0.8);
         setTimeout(async () => {
           try {
-            await audioEngine.playNote(note2, 0.8);
+            await audioEngine.playNote(normalizeNote(note2), 0.8);
             // Then play harmonically (together) for contrast
             setTimeout(async () => {
               try {
-                await audioEngine.playNote(note1, 0.6);
-                await audioEngine.playNote(note2, 0.6);
+                await audioEngine.playNote(normalizeNote(note1), 0.6);
+                await audioEngine.playNote(normalizeNote(note2), 0.6);
               } catch (error) {
                 console.warn('Audio playback failed:', error);
               }

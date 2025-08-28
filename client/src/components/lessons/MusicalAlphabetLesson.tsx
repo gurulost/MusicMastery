@@ -6,6 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Hash, Minus, Brain, Target, Star, Trophy } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
+import { normalizeNote } from '@/lib/musicTheory';
 
 interface MusicalAlphabetLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -68,7 +69,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
       setCorrectAnswers(prev => prev + 1);
       // Provide encouraging feedback
       try {
-        await audioEngine.playNote(currentQuestion as Note, 0.8);
+        await audioEngine.playNote(normalizeNote(currentQuestion as Note), 0.8);
       } catch (error) {
         console.warn('Audio playback failed:', error);
       }

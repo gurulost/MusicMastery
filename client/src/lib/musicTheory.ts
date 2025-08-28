@@ -171,12 +171,32 @@ export function buildScale(tonic: Note, pattern: number[]): Note[] {
   return result;
 }
 
-// Type-safe scale generation functions
+// Circle of fifths key signature data
+const KEY_SIGNATURES = {
+  'C': { sharps: 0, flats: 0, accidentals: [] },
+  'G': { sharps: 1, flats: 0, accidentals: ['F#'] },
+  'D': { sharps: 2, flats: 0, accidentals: ['F#', 'C#'] },
+  'A': { sharps: 3, flats: 0, accidentals: ['F#', 'C#', 'G#'] },
+  'E': { sharps: 4, flats: 0, accidentals: ['F#', 'C#', 'G#', 'D#'] },
+  'B': { sharps: 5, flats: 0, accidentals: ['F#', 'C#', 'G#', 'D#', 'A#'] },
+  'F#': { sharps: 6, flats: 0, accidentals: ['F#', 'C#', 'G#', 'D#', 'A#', 'E#'] },
+  'F': { sharps: 0, flats: 1, accidentals: ['Bb'] },
+  'Bb': { sharps: 0, flats: 2, accidentals: ['Bb', 'Eb'] },
+  'Eb': { sharps: 0, flats: 3, accidentals: ['Bb', 'Eb', 'Ab'] },
+  'Ab': { sharps: 0, flats: 4, accidentals: ['Bb', 'Eb', 'Ab', 'Db'] },
+  'Db': { sharps: 0, flats: 5, accidentals: ['Bb', 'Eb', 'Ab', 'Db', 'Gb'] },
+  'Gb': { sharps: 0, flats: 6, accidentals: ['Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'] },
+};
+
+// Type-safe scale generation functions with proper key signature logic
 export function getMajorScale(tonic: Note): Scale {
   const normalizedTonic = normalizeNote(tonic);
   const notes = buildScale(normalizedTonic, MAJOR_SCALE_PATTERN);
-  const sharps = notes.filter(note => note.includes('#')) as Note[];
-  const flats = notes.filter(note => note.includes('b')) as Note[];
+  
+  // Get actual key signature based on original tonic name (not normalized)
+  const keyData = KEY_SIGNATURES[tonic as keyof typeof KEY_SIGNATURES];
+  const sharps = keyData?.sharps > 0 ? keyData.accidentals.filter(acc => acc.includes('#')) as Note[] : [];
+  const flats = keyData?.flats > 0 ? keyData.accidentals.filter(acc => acc.includes('b')) as Note[] : [];
   
   return {
     name: `${tonic} Major`, // Keep original spelling for display
@@ -191,8 +211,23 @@ export function getMajorScale(tonic: Note): Scale {
 export function getMinorScale(tonic: Note): Scale {
   const normalizedTonic = normalizeNote(tonic);
   const notes = buildScale(normalizedTonic, MINOR_SCALE_PATTERN);
-  const sharps = notes.filter(note => note.includes('#')) as Note[];
-  const flats = notes.filter(note => note.includes('b')) as Note[];
+  
+  // Minor scales share key signatures with their relative majors
+  // Find relative major: minor tonic + 3 semitones
+  const relativeMajorIndex = (getNoteIndex(tonic) + 3) % 12;
+  const relativeMajor = getNote(relativeMajorIndex);
+  
+  // Map to key signature using relative major
+  const keyMapping: { [key: string]: string } = {
+    'C': 'Eb', 'C#': 'E', 'D': 'F', 'D#': 'F#', 'E': 'G', 'F': 'Ab',
+    'F#': 'A', 'G': 'Bb', 'G#': 'B', 'A': 'C', 'A#': 'C#', 'B': 'D'
+  };
+  
+  const keyForSignature = keyMapping[normalizeNote(tonic)] || relativeMajor;
+  const keyData = KEY_SIGNATURES[keyForSignature as keyof typeof KEY_SIGNATURES];
+  
+  const sharps = keyData?.sharps > 0 ? keyData.accidentals.filter(acc => acc.includes('#')) as Note[] : [];
+  const flats = keyData?.flats > 0 ? keyData.accidentals.filter(acc => acc.includes('b')) as Note[] : [];
   
   return {
     name: `${tonic} Minor`, // Keep original spelling for display

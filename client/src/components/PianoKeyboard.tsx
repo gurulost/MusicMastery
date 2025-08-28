@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
+import { normalizeNote } from '@/lib/musicTheory';
 import { cn } from '@/lib/utils';
 
 interface PianoKeyboardProps {
@@ -118,7 +119,8 @@ export function PianoKeyboard({
       
       // Play audio with correct octave - only once per actual key press
       const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
-      await audioEngine.playNote(note, 0.5, octave);
+      const normalizedNote = normalizeNote(note);
+      await audioEngine.playNote(normalizedNote, 0.5, octave);
     } catch (error) {
       console.warn('Audio playback failed:', error);
     }

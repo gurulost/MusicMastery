@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, ArrowUp, ArrowDown, Calculator, Lightbulb, Brain, Target, Star, Trophy, Zap, Settings, BookOpen } from 'lucide-react';
 import { Note, IntervalType } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { INTERVALS, buildInterval, getIntervalExplanation } from '@/lib/musicTheory';
+import { INTERVALS, buildInterval, getIntervalExplanation, normalizeNote } from '@/lib/musicTheory';
 
 interface BuildingIntervalsLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -109,14 +109,14 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
       
       // Educational audio sequence
       try {
-        await audioEngine.playNote(currentExercise.startNote, 0.8);
+        await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
         setTimeout(async () => {
           try {
             await audioEngine.playNote(currentExercise.targetNote, 0.8);
             // Play them together to hear the harmony
             setTimeout(async () => {
               try {
-                await audioEngine.playNote(currentExercise.startNote, 0.6);
+                await audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.6);
                 await audioEngine.playNote(currentExercise.targetNote, 0.6);
               } catch (error) {
                 console.warn('Audio playback failed:', error);
@@ -142,7 +142,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
       setCorrectAnswers(prev => prev + 1);
       // Play success audio - the interval
       try {
-        await audioEngine.playNote(currentQuestion.startNote, 0.8);
+        await audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
         setTimeout(async () => {
           try {
             await audioEngine.playNote(answer, 0.8);
@@ -400,7 +400,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                       size="sm"
                       onClick={async () => {
                         await audioEngine.initializeAudio();
-                        audioEngine.playNote(currentExercise.startNote, 0.8);
+                        audioEngine.playNote(normalizeNote(currentExercise.startNote), 0.8);
                       }}
                     >
                       <Play className="h-4 w-4 mr-1" />
@@ -684,7 +684,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                     size="sm"
                     onClick={async () => {
                       await audioEngine.initializeAudio();
-                      audioEngine.playNote(currentQuestion.startNote, 0.8);
+                      audioEngine.playNote(normalizeNote(currentQuestion.startNote), 0.8);
                     }}
                   >
                     <Play className="h-4 w-4 mr-1" />
