@@ -648,75 +648,76 @@ export default function HomePage() {
         </nav>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <PageHeader 
-          title="Interactive Piano Practice"
-          subtitle="Learn and practice scales and intervals with step-by-step guidance"
-        >
-          <div className="flex items-center gap-4 mb-4">
-            {/* Difficulty level indicator */}
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              difficultyLevel === 'easy' ? 'bg-green-100 border border-green-300 text-green-800' :
-              difficultyLevel === 'medium' ? 'bg-yellow-100 border border-yellow-300 text-yellow-800' :
-              'bg-red-100 border border-red-300 text-red-800'
-            }`}>
-              <span className="capitalize">{difficultyLevel}</span> Level
-            </div>
-            {streakCount > 0 && (
-              <div className="bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
-                <span className="text-sm font-medium text-orange-800">
-                  🔥 {streakCount} streak!
-                </span>
-              </div>
-            )}
-            {bestTime && (
-              <div className="bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
-                <span className="text-sm font-medium text-blue-800">
-                  ⚡ Best: {bestTime}s
-                </span>
-              </div>
-            )}
-            {completionTime && isCompleted && (
-              <div className="bg-green-50 border border-green-200 px-3 py-1 rounded-full">
-                <span className="text-sm font-medium text-green-800">
-                  ⏱️ Last: {completionTime}s
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col gap-4">
-            {/* Mode Toggle - Prominently displayed */}
-            <div className="flex items-center gap-3 bg-slate-100 p-3 rounded-lg border">
-              <span className="text-sm font-medium text-slate-700">Mode:</span>
-              <div className="flex items-center bg-white rounded-lg p-1 border shadow-sm">
-                <Button
-                  variant={practiceMode === 'practice' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setPracticeMode('practice')}
-                  className="rounded-md"
-                  data-testid="button-practice-mode"
-                >
-                  <Brain className="mr-2 h-4 w-4" />
-                  Practice
-                </Button>
-                <Button
-                  variant={practiceMode === 'show_key' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setPracticeMode('show_key')}
-                  className="rounded-md"
-                  data-testid="button-show-key-mode"
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  Show The Key
-                </Button>
-              </div>
-              <span className="text-xs text-slate-500">
-                {practiceMode === 'practice' ? 'Test your knowledge' : 'Study the correct notes'}
-              </span>
+      {/* Main Content - Single scrollable page */}
+      <div className="flex-1 p-6">
+        <div className="max-w-6xl mx-auto space-y-6">
+          {/* Page Header with compact stats */}
+          <div className="text-center space-y-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Interactive Piano Practice</h1>
+              <p className="text-muted-foreground mt-1">Learn and practice scales and intervals with step-by-step guidance</p>
             </div>
             
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            {/* Compact stats row */}
+            <div className="flex flex-wrap justify-center items-center gap-3">
+              <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                difficultyLevel === 'easy' ? 'bg-green-100 border border-green-300 text-green-800' :
+                difficultyLevel === 'medium' ? 'bg-yellow-100 border border-yellow-300 text-yellow-800' :
+                'bg-red-100 border border-red-300 text-red-800'
+              }`}>
+                <span className="capitalize">{difficultyLevel}</span> Level
+              </div>
+              {streakCount > 0 && (
+                <div className="bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-orange-800">🔥 {streakCount} streak!</span>
+                </div>
+              )}
+              {bestTime && (
+                <div className="bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-blue-800">⚡ Best: {bestTime}s</span>
+                </div>
+              )}
+              {completionTime && isCompleted && (
+                <div className="bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                  <span className="text-sm font-medium text-green-800">⏱️ Last: {completionTime}s</span>
+                </div>
+              )}
+            </div>
+
+            {/* Mode Toggle */}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-3 bg-slate-100 p-3 rounded-lg border">
+                <span className="text-sm font-medium text-slate-700">Mode:</span>
+                <div className="flex items-center bg-white rounded-lg p-1 border shadow-sm">
+                  <Button
+                    variant={practiceMode === 'practice' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPracticeMode('practice')}
+                    className="rounded-md"
+                    data-testid="button-practice-mode"
+                  >
+                    <Brain className="mr-2 h-4 w-4" />
+                    Practice
+                  </Button>
+                  <Button
+                    variant={practiceMode === 'show_key' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPracticeMode('show_key')}
+                    className="rounded-md"
+                    data-testid="button-show-key-mode"
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Show The Key
+                  </Button>
+                </div>
+                <span className="text-xs text-slate-500">
+                  {practiceMode === 'practice' ? 'Test your knowledge' : 'Study the correct notes'}
+                </span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap justify-center items-center gap-2">
               <HelpTooltip 
                 content="Click for help with the piano interface and getting started"
                 onClick={() => setShowHelp(true)}
@@ -728,8 +729,7 @@ export default function HomePage() {
                 data-testid="button-play-scale"
               >
                 <Play className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Play Scale</span>
-                <span className="sm:hidden">Play</span>
+                Play Scale
               </Button>
               <Button 
                 variant="outline" 
@@ -738,8 +738,7 @@ export default function HomePage() {
                 data-testid="button-next-exercise"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Next Scale</span>
-                <span className="sm:hidden">Next</span>
+                Next Scale
               </Button>
               {practiceMode === 'practice' && (
                 <Button 
@@ -749,192 +748,148 @@ export default function HomePage() {
                   data-testid="button-check-answer"
                 >
                   <Check className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Check Your Answer</span>
-                  <span className="sm:hidden">Check</span>
+                  Check Answer
                 </Button>
               )}
             </div>
           </div>
-        </PageHeader>
-        
-        {/* Exercise Area */}
-        <div className="flex-1 p-6 overflow-auto">
-          {/* Current Exercise Info */}
+          {/* Combined Exercise & Piano Section */}
           {currentExercise && (
-            <div className="mb-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                    <h3 className="text-xl font-semibold">Current Exercise</h3>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
-                        Scale Practice
-                      </span>
-                      <span className="inline-flex items-center justify-center px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
-                        {currentExercise.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-foreground">
-                      {practiceMode === 'practice' ? currentExercise.instruction : 
-                       `Study the ${currentExercise.itemName} scale - all correct notes are highlighted on the piano`}
-                    </h2>
-                    
-                    {/* Expandable Educational Content */}
-                    <div className="border rounded-lg">
-                      <button
-                        onClick={() => setShowKeySignature(!showKeySignature)}
-                        className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 transition-colors"
-                        data-testid="button-toggle-key-info"
-                      >
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="h-4 w-4 text-slate-600" />
-                          <span className="font-medium text-slate-900">
-                            Learn about {currentExercise.itemName}
-                          </span>
-                          <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
-                            Key signature & tips
-                          </span>
-                        </div>
-                        {showKeySignature ? 
-                          <ChevronUp className="h-4 w-4 text-slate-400" /> : 
-                          <ChevronDown className="h-4 w-4 text-slate-400" />
-                        }
-                      </button>
-                      
-                      {showKeySignature && keySignature && (
-                        <div className="px-4 pb-4 border-t bg-slate-50">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3 pt-4">
-                            <div>
-                              <p className="text-sm font-medium text-slate-700 mb-1">Key Signature</p>
-                              <p className="text-sm text-slate-600">
-                                {keySignature.sharps.length > 0 && (
-                                  <span>{keySignature.sharps.length} sharp{keySignature.sharps.length > 1 ? 's' : ''}: {keySignature.sharps.join(', ')}</span>
-                                )}
-                                {keySignature.flats.length > 0 && (
-                                  <span>{keySignature.flats.length} flat{keySignature.flats.length > 1 ? 's' : ''}: {keySignature.flats.join(', ')}</span>
-                                )}
-                                {keySignature.sharps.length === 0 && keySignature.flats.length === 0 && (
-                                  <span>No sharps or flats</span>
-                                )}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-slate-700 mb-1">Purple keys on piano →</p>
-                              <p className="text-sm text-slate-600">show these accidentals</p>
-                            </div>
-                          </div>
-                          
-                          {keySignature.sharps.length > 0 && (
-                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                              <p className="text-sm text-blue-800 font-medium mb-1">💡 Memory Tip</p>
-                              <p className="text-sm text-blue-700">Sharp keys follow "Father Charles Goes Down And Ends Battle" (F#-C#-G#-D#-A#-E#-B#)</p>
-                            </div>
-                          )}
-                          
-                          {keySignature.flats.length > 0 && (
-                            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                              <p className="text-sm text-blue-800 font-medium mb-1">💡 Memory Tip</p>
-                              <p className="text-sm text-blue-700">Flat keys follow "Battle Ends And Down Goes Charles's Father" (B♭-E♭-A♭-D♭-G♭-C♭-F♭)</p>
-                            </div>
-                          )}
-                          
-                          <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
-                            <p className="text-sm text-green-800 font-medium mb-1">📚 Scale Pattern</p>
-                            <p className="text-sm text-green-700">{currentExercise.explanation}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {practiceMode === 'practice' && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p className="text-sm text-blue-800 font-medium mb-1">🎹 Practice Mode</p>
-                        <p className="text-sm text-blue-700">Click piano keys to select the notes you think belong in this scale. Listen to each note as you click it to help train your ear!</p>
-                        {completionTime && isCompleted && (
-                          <div className="mt-2 pt-2 border-t border-blue-300">
-                            <p className="text-sm text-blue-700 font-medium">
-                              ⏱️ Completed in {completionTime} seconds!
-                              {completionTime <= 3 && ' Amazing speed! ⚡'}
-                              {completionTime > 3 && completionTime <= 6 && ' Great job! 🚀'}
-                              {completionTime > 6 && completionTime <= 10 && ' Good timing! ⏰'}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    
-                    {practiceMode === 'show_key' && (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                        <p className="text-sm text-green-800 font-medium mb-1">👁️ Study Mode</p>
-                        <p className="text-sm text-green-700">All the correct notes are highlighted in green. Study the pattern and listen to the scale by clicking the Play Scale button above.</p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-          
-
-          {/* Piano Keyboard */}
-          <div className="mb-6">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Piano Keyboard</h3>
-                <PianoKeyboard
-                  highlightedNotes={practiceMode === 'show_key' || showKeySignature ? highlightedNotes : (isCompleted ? highlightedNotes : [])}
-                  sharpsInKey={keySignature?.sharps || []}
-                  playedNotes={currentExercise?.mode === 'practice' ? playedNotes : []}
-                  selectedNotes={practiceMode === 'practice' && currentExercise?.mode === 'learn' ? selectedNotes : []}
-                  onNoteClick={handleNoteClick}
-                  onNoteToggle={practiceMode === 'practice' && currentExercise?.mode === 'learn' ? handleNoteToggle : undefined}
-                />
-                <div className="mt-4 text-center">
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p>
-                      Keys highlighted in <span className="font-medium" style={{color: 'hsl(142 71% 45%)'}}>green</span> show correct answers when completed.
-                    </p>
+                {/* Exercise header */}
+                <div className="text-center mb-4">
+                  <h2 className="text-2xl font-semibold mb-2">
+                    {practiceMode === 'practice' ? currentExercise.instruction : 
+                     `Study the ${currentExercise.itemName} scale - all correct notes are highlighted below`}
+                  </h2>
+                  <div className="flex flex-wrap justify-center items-center gap-2 mb-4">
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium">
+                      Scale Practice
+                    </span>
+                    <span className="inline-flex items-center justify-center px-3 py-1 bg-warning text-warning-foreground rounded-full text-sm font-medium">
+                      {currentExercise.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Piano Keyboard */}
+                <div className="mb-4">
+                  <PianoKeyboard
+                    highlightedNotes={practiceMode === 'show_key' || showKeySignature ? highlightedNotes : (isCompleted ? highlightedNotes : [])}
+                    sharpsInKey={keySignature?.sharps || []}
+                    playedNotes={currentExercise?.mode === 'practice' ? playedNotes : []}
+                    selectedNotes={practiceMode === 'practice' && currentExercise?.mode === 'learn' ? selectedNotes : []}
+                    onNoteClick={handleNoteClick}
+                    onNoteToggle={practiceMode === 'practice' && currentExercise?.mode === 'learn' ? handleNoteToggle : undefined}
+                  />
+                </div>
+
+                {/* Mode-specific instruction */}
+                <div className="mb-4">
+                  {practiceMode === 'practice' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                      <p className="text-sm text-blue-800 font-medium mb-1">🎹 Practice Mode</p>
+                      <p className="text-sm text-blue-700">Click piano keys to select the notes you think belong in this scale.</p>
+                      {completionTime && isCompleted && (
+                        <p className="text-sm text-blue-700 font-medium mt-2">
+                          ⏱️ Completed in {completionTime} seconds!
+                          {completionTime <= 3 && ' Amazing speed! ⚡'}
+                          {completionTime > 3 && completionTime <= 6 && ' Great job! 🚀'}
+                          {completionTime > 6 && completionTime <= 10 && ' Good timing! ⏰'}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {practiceMode === 'show_key' && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <p className="text-sm text-green-800 font-medium mb-1">👁️ Study Mode</p>
+                      <p className="text-sm text-green-700">All correct notes are highlighted in green. Study the pattern!</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Expandable Educational Content */}
+                <div className="border rounded-lg mb-4">
+                  <button
+                    onClick={() => setShowKeySignature(!showKeySignature)}
+                    className="w-full flex items-center justify-center gap-2 p-3 text-left hover:bg-slate-50 transition-colors"
+                    data-testid="button-toggle-key-info"
+                  >
+                    <BookOpen className="h-4 w-4 text-slate-600" />
+                    <span className="font-medium text-slate-900">
+                      Learn about {currentExercise.itemName}
+                    </span>
+                    <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+                      Key signature & tips
+                    </span>
+                    {showKeySignature ? 
+                      <ChevronUp className="h-4 w-4 text-slate-400" /> : 
+                      <ChevronDown className="h-4 w-4 text-slate-400" />
+                    }
+                  </button>
+                  
+                  {showKeySignature && keySignature && (
+                    <div className="px-4 pb-4 border-t bg-slate-50">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3 pt-4">
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-1">Key Signature</p>
+                          <p className="text-sm text-slate-600">
+                            {keySignature.sharps.length > 0 && (
+                              <span>{keySignature.sharps.length} sharp{keySignature.sharps.length > 1 ? 's' : ''}: {keySignature.sharps.join(', ')}</span>
+                            )}
+                            {keySignature.flats.length > 0 && (
+                              <span>{keySignature.flats.length} flat{keySignature.flats.length > 1 ? 's' : ''}: {keySignature.flats.join(', ')}</span>
+                            )}
+                            {keySignature.sharps.length === 0 && keySignature.flats.length === 0 && (
+                              <span>No sharps or flats</span>
+                            )}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-700 mb-1">Purple keys above →</p>
+                          <p className="text-sm text-slate-600">show these accidentals</p>
+                        </div>
+                      </div>
+                      
+                      {keySignature.sharps.length > 0 && (
+                        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-sm text-blue-800 font-medium mb-1">💡 Memory Tip</p>
+                          <p className="text-sm text-blue-700">Sharp keys follow "Father Charles Goes Down And Ends Battle" (F#-C#-G#-D#-A#-E#-B#)</p>
+                        </div>
+                      )}
+                      
+                      {keySignature.flats.length > 0 && (
+                        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                          <p className="text-sm text-blue-800 font-medium mb-1">💡 Memory Tip</p>
+                          <p className="text-sm text-blue-700">Flat keys follow "Battle Ends And Down Goes Charles's Father" (B♭-E♭-A♭-D♭-G♭-C♭-F♭)</p>
+                        </div>
+                      )}
+                      
+                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                        <p className="text-sm text-green-800 font-medium mb-1">📚 Scale Pattern</p>
+                        <p className="text-sm text-green-700">{currentExercise.explanation}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Legend */}
+                <div className="text-center text-sm text-muted-foreground">
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <span>🟢 Correct notes</span>
                     {keySignature && (keySignature.sharps.length > 0 || keySignature.flats.length > 0) && (
-                      <p>
-                        Keys highlighted in <span className="font-medium" style={{color: 'hsl(262 83% 58%)'}}>purple</span> are the {keySignature.sharps.length > 0 ? 'sharps' : 'flats'} in {keySignature.name} key signature.
-                      </p>
+                      <span>🟣 Key signature accidentals</span>
                     )}
-                    {currentExercise?.mode === 'learn' && (
-                      <p>
-                        Keys with <span className="font-medium" style={{color: 'hsl(217 91% 60%)'}}>blue background</span> are your current selections.
-                      </p>
-                    )}
-                    {currentExercise?.mode === 'practice' && (
-                      <p>
-                        Keys highlighted in <span className="font-medium" style={{color: 'hsl(32 95% 44%)'}}>orange</span> show your played sequence.
-                      </p>
+                    {practiceMode === 'practice' && currentExercise?.mode === 'learn' && (
+                      <span>🔵 Your selections</span>
                     )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-          
-          {/* Exercise Controls */}
-          <div className="flex justify-center space-x-4">
-            <Button 
-              variant="secondary" 
-              onClick={handleTryAgain}
-              disabled={(currentExercise?.mode === 'learn' ? selectedNotes.length === 0 : playedNotes.length === 0)}
-              data-testid="button-try-again"
-            >
-              <RotateCcw className="mr-2 h-4 w-4" />Reset
-            </Button>
-            <Button 
-              onClick={handleNextExercise}
-              data-testid="button-next-exercise"
-            >
-              <ChevronRight className="mr-2 h-4 w-4" />Next Exercise
-            </Button>
-          </div>
+          )}
         </div>
       </div>
       
