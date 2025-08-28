@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { ProgressRing } from '@/components/ProgressRing';
 import { LearningPathCard } from '@/components/LearningPathCard';
-import { generateScaleExercise, generateIntervalExercise, getIntervalExplanation, getScalesByDifficulty, getIntervalsByDifficulty, getMajorScale, getMinorScale, areNotesEqual } from '@/lib/musicTheory';
+import { generateScaleExercise, generateIntervalExercise, getIntervalExplanation, getScalesByDifficulty, getIntervalsByDifficulty, getMajorScale, getMinorScale, areNotesEqual, getScale } from '@/lib/musicTheory';
 import { Note, ExerciseData } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +48,11 @@ export default function HomePage() {
   const [showHint, setShowHint] = useState(false);
   const [exerciseMode, setExerciseMode] = useState<'learn' | 'practice'>('learn');
   const [showHelp, setShowHelp] = useState(false);
+  const [streakCount, setStreakCount] = useState(0);
+  const [completionTime, setCompletionTime] = useState<number | null>(null);
+  const [bestTime, setBestTime] = useState<number | null>(null);
+  const [difficultyLevel, setDifficultyLevel] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const startTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -286,21 +291,100 @@ export default function HomePage() {
       correctAnswers: newCorrectAnswers,
     });
 
+    // Calculate completion time
+    const timeTaken = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
+    setCompletionTime(timeTaken);
+    
+    // Update best time
+    if (!bestTime || timeTaken < bestTime) {
+      setBestTime(timeTaken);
+    }
+
     if (isCorrect) {
+      const newStreak = streakCount + 1;
+      const newConsecutive = consecutiveCorrect + 1;
+      setStreakCount(newStreak);
+      setConsecutiveCorrect(newConsecutive);
+      
+      // Progressive difficulty adjustment based on performance
+      if (newConsecutive >= 5 && difficultyLevel === 'easy') {
+        setDifficultyLevel('medium');
+        setTimeout(() => {
+          toast({
+            title: "🎯 Level Up!",
+            description: "Great progress! Moving to medium difficulty with more accidentals.",
+          });
+        }, 500);
+      } else if (newConsecutive >= 8 && difficultyLevel === 'medium') {
+        setDifficultyLevel('hard');
+        setTimeout(() => {
+          toast({
+            title: "🏆 Expert Level!",
+            description: "Amazing! Now practicing the most challenging scales.",
+          });
+        }, 500);
+      }
+      
+      // Create detailed success message with educational content
+      const scale = currentExercise.category === 'major_scales' ? 
+        getMajorScale(currentExercise.itemName.split(' ')[0] as Note) : 
+        getMinorScale(currentExercise.itemName.split(' ')[0] as Note);
+      
+      let timeMessage = '';
+      if (timeTaken <= 3) timeMessage = 'Lightning fast! ⚡';
+      else if (timeTaken <= 6) timeMessage = 'Great speed! 🚀';
+      else if (timeTaken <= 10) timeMessage = 'Good pace! ⏱️';
+      else timeMessage = 'Keep practicing for speed! 📈';
+      
+      let streakMessage = newStreak >= 5 ? ` • ${newStreak} in a row! 🔥` : 
+                         newStreak >= 3 ? ` • ${newStreak} streak! 🎯` : '';
+      
+      const keyInfo = scale.sharps.length > 0 ? 
+        `Key signature: ${scale.sharps.join(', ')} sharp${scale.sharps.length > 1 ? 's' : ''}` :
+        scale.flats.length > 0 ? 
+        `Key signature: ${scale.flats.join(', ')} flat${scale.flats.length > 1 ? 's' : ''}` :
+        'Key signature: No sharps or flats';
+      
       toast({
-        title: "🎉 Correct!",
-        description: `You identified all the notes in ${currentExercise.itemName} correctly!`,
+        title: "🎉 Excellent!",
+        description: `${timeMessage} (${timeTaken}s)${streakMessage}\n${keyInfo}`,
       });
+      
       setIsCompleted(true);
       
       // Auto-generate next exercise after a brief delay
       setTimeout(() => {
         handleNextExercise();
-      }, 2000);
+      }, 2500);
     } else {
+      // Reset streak and consecutive on incorrect answer
+      setStreakCount(0);
+      setConsecutiveCorrect(0);
+      
+      // Adaptive difficulty - make it easier if struggling
+      if (difficultyLevel === 'hard') {
+        setDifficultyLevel('medium');
+      } else if (difficultyLevel === 'medium') {
+        setDifficultyLevel('easy');
+      }
+      
+      // Provide educational hints based on the scale
+      const scale = currentExercise.category === 'major_scales' ? 
+        getMajorScale(currentExercise.itemName.split(' ')[0] as Note) : 
+        getMinorScale(currentExercise.itemName.split(' ')[0] as Note);
+      
+      const pattern = currentExercise.category === 'major_scales' ? 
+        'W-W-H-W-W-W-H' : 'W-H-W-W-H-W-W';
+      
+      const hintText = scale.sharps.length > 0 ? 
+        `Remember: ${scale.sharps.join(', ')} should be sharp in this key!` :
+        scale.flats.length > 0 ? 
+        `Remember: ${scale.flats.join(', ')} should be flat in this key!` :
+        `This scale has no sharps or flats - use only white keys!`;
+      
       toast({
-        title: "Not quite right",
-        description: `Keep trying! Listen to the notes and think about the ${currentExercise.itemName} scale pattern.`,
+        title: "Keep trying! 🎵",
+        description: `${hintText}\nPattern: ${pattern} (W=Whole step, H=Half step)`,
         variant: "destructive",
       });
     }
@@ -319,7 +403,18 @@ export default function HomePage() {
 
 
   const handleNextExercise = () => {
+    setCompletionTime(null);
     generateRandomScale();
+  };
+  
+  const handlePlayScaleAscending = async () => {
+    if (!currentExercise) return;
+    try {
+      await audioEngine.initializeAudio();
+      await audioEngine.playScale(currentExercise.correctNotes);
+    } catch (error) {
+      console.warn('Scale playback failed:', error);
+    }
   };
 
   if (summaryLoading) {
@@ -511,6 +606,37 @@ export default function HomePage() {
           title="Interactive Piano Practice"
           subtitle="Learn and practice scales and intervals with step-by-step guidance"
         >
+          <div className="flex items-center gap-4 mb-4">
+            {/* Difficulty level indicator */}
+            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+              difficultyLevel === 'easy' ? 'bg-green-100 border border-green-300 text-green-800' :
+              difficultyLevel === 'medium' ? 'bg-yellow-100 border border-yellow-300 text-yellow-800' :
+              'bg-red-100 border border-red-300 text-red-800'
+            }`}>
+              <span className="capitalize">{difficultyLevel}</span> Level
+            </div>
+            {streakCount > 0 && (
+              <div className="bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-orange-800">
+                  🔥 {streakCount} streak!
+                </span>
+              </div>
+            )}
+            {bestTime && (
+              <div className="bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-blue-800">
+                  ⚡ Best: {bestTime}s
+                </span>
+              </div>
+            )}
+            {completionTime && isCompleted && (
+              <div className="bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-green-800">
+                  ⏱️ Last: {completionTime}s
+                </span>
+              </div>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <HelpTooltip 
               content="Click for help with the piano interface and getting started"
@@ -519,15 +645,7 @@ export default function HomePage() {
             <Button 
               variant="secondary" 
               size="sm"
-              onClick={async () => {
-                try {
-                  // Ensure audio is initialized on user interaction
-                  await audioEngine.initializeAudio();
-                  if (keySignature) await audioEngine.playScale(keySignature.notes);
-                } catch (error) {
-                  console.warn('Audio playback failed:', error);
-                }
-              }}
+              onClick={handlePlayScaleAscending}
               data-testid="button-play-scale"
             >
               <Play className="mr-2 h-4 w-4" />
@@ -610,6 +728,16 @@ export default function HomePage() {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <p className="text-sm text-blue-800 font-medium mb-1">🎹 Scale Practice</p>
                     <p className="text-sm text-blue-700">Click piano keys to select the notes you think belong in this scale. Listen to each note as you click it to help train your ear!</p>
+                    {completionTime && isCompleted && (
+                      <div className="mt-2 pt-2 border-t border-blue-300">
+                        <p className="text-sm text-blue-700 font-medium">
+                          ⏱️ Completed in {completionTime} seconds!
+                          {completionTime <= 3 && ' Amazing speed! ⚡'}
+                          {completionTime > 3 && completionTime <= 6 && ' Great job! 🚀'}
+                          {completionTime > 6 && completionTime <= 10 && ' Good timing! ⏰'}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

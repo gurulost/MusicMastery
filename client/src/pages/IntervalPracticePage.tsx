@@ -31,6 +31,8 @@ export default function IntervalPracticePage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [completionTime, setCompletionTime] = useState<number | null>(null);
+  const [streakCount, setStreakCount] = useState(0);
+  const [bestTime, setBestTime] = useState<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -178,11 +180,26 @@ export default function IntervalPracticePage() {
       correctAnswers: newCorrectAnswers,
     });
 
+    // Update best time and streak
+    if (!bestTime || timeTaken < bestTime) {
+      setBestTime(timeTaken);
+    }
+    
     if (isCorrect) {
+      const newStreak = streakCount + 1;
+      setStreakCount(newStreak);
+      
       const timeMessage = timeTaken <= 5 ? 'Lightning fast! ⚡' : timeTaken <= 10 ? 'Great speed! 🚀' : timeTaken <= 15 ? 'Good timing! ⏱️' : 'Keep practicing for speed! 📈';
+      
+      let streakMessage = newStreak >= 5 ? ` • ${newStreak} in a row! 🔥` : 
+                         newStreak >= 3 ? ` • ${newStreak} streak! 🎯` : '';
+      
+      // Add educational info about the interval
+      const educationalNote = `${currentExercise.explanation.split('.')[0]}.`;
+      
       toast({
-        title: "🎉 Correct!",
-        description: `${timeMessage} You built the ${currentExercise.interval} in ${timeTaken} seconds.`,
+        title: "🎉 Perfect!",
+        description: `${timeMessage} (${timeTaken}s)${streakMessage}\n${educationalNote}`,
       });
       setIsCompleted(true);
       setShowExplanation(true);
@@ -192,9 +209,15 @@ export default function IntervalPracticePage() {
         generateExercise();
       }, 2500);
     } else {
+      // Reset streak on incorrect answer
+      setStreakCount(0);
+      
+      // Provide helpful educational hints
+      const hintText = currentExercise.learningTip;
+      
       toast({
-        title: "Not quite right",
-        description: `Keep trying! Listen to the interval and think about the distance from ${currentExercise.startNote}.`,
+        title: "Keep trying! 🎵",
+        description: `${hintText}\nRemember to click both the starting note and the target note.`,
         variant: "destructive",
       });
     }
@@ -208,6 +231,7 @@ export default function IntervalPracticePage() {
   };
 
   const handleNextExercise = () => {
+    setCompletionTime(null);
     generateExercise();
   };
   
@@ -252,30 +276,56 @@ export default function IntervalPracticePage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-4">
             <h1 className="text-3xl font-bold">Interval Building Practice</h1>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              <Button 
-                variant="secondary" 
-                size="sm"
-                onClick={handlePlayInterval}
-                data-testid="button-play-interval"
-              >
-                <Play className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Play Interval</span>
-                <span className="sm:hidden">Play</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleNextExercise}
-                data-testid="button-next-exercise"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Next Interval</span>
-                <span className="sm:hidden">Next</span>
-              </Button>
-            </div>
+          </div>
+          
+          {/* Streak and timing displays */}
+          <div className="flex items-center gap-4 mb-6">
+            {streakCount > 0 && (
+              <div className="bg-orange-50 border border-orange-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-orange-800">
+                  🔥 {streakCount} streak!
+                </span>
+              </div>
+            )}
+            {bestTime && (
+              <div className="bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-blue-800">
+                  ⚡ Best: {bestTime}s
+                </span>
+              </div>
+            )}
+            {completionTime && isCompleted && (
+              <div className="bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                <span className="text-sm font-medium text-green-800">
+                  ⏱️ Last: {completionTime}s
+                </span>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6">
+            <Button 
+              variant="secondary" 
+              size="sm"
+              onClick={handlePlayInterval}
+              data-testid="button-play-interval"
+            >
+              <Play className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Play Interval</span>
+              <span className="sm:hidden">Play</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleNextExercise}
+              data-testid="button-next-exercise"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Next Interval</span>
+              <span className="sm:hidden">Next</span>
+            </Button>
           </div>
           
           {/* Exercise Card */}
