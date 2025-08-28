@@ -238,8 +238,8 @@ export function PianoKeyboard({
   };
 
   return (
-    <div className={cn("flex justify-center overflow-x-auto px-2 sm:px-4", className)}>
-      <div className="relative min-w-fit">
+    <div className={cn("w-full flex justify-center overflow-x-auto px-1 sm:px-2 lg:px-4", className)}>
+      <div className="relative flex-shrink-0" style={{ minWidth: 'max-content' }}>
         {/* Mobile: Add gradient hints for scrollable piano */}
         <div className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-background to-transparent pointer-events-none z-20 sm:hidden" />
         <div className="absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-background to-transparent pointer-events-none z-20 sm:hidden" />
@@ -253,7 +253,7 @@ export function PianoKeyboard({
               aria-label={`Piano key ${note}`}
               role="button"
               className={cn(
-                "piano-key white-key w-10 h-32 mr-0.5 flex items-end justify-center pb-2 text-xs font-medium border border-border rounded-b-md transition-all duration-100 select-none cursor-pointer",
+                "piano-key white-key w-8 sm:w-9 lg:w-10 h-24 sm:h-28 lg:h-32 mr-0.5 flex items-end justify-center pb-1 sm:pb-2 text-xs font-medium border border-border rounded-b-md transition-all duration-100 select-none cursor-pointer",
                 "hover:scale-[1.02] hover:translate-y-0.5 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 "active:scale-[0.97] active:translate-y-1",
                 {
@@ -280,8 +280,9 @@ export function PianoKeyboard({
         {/* Black Keys - Properly centered between white keys */}
         <div className="absolute top-0 left-0">
           {BLACK_KEY_POSITIONS.map((blackKey, index) => {
-            const whiteKeyWidth = 42; // 40px width + 2px margin (mr-0.5)
-            const blackKeyWidth = 28; // 7 * 4 = 28px (w-7)
+            // Responsive white key width calculation
+            const whiteKeyWidth = window.innerWidth < 640 ? 34 : window.innerWidth < 1024 ? 38 : 42; // 32px + 2px margin on mobile, 36px + 2px on tablet, 40px + 2px on desktop
+            const blackKeyWidth = window.innerWidth < 640 ? 20 : window.innerWidth < 1024 ? 24 : 28; // Responsive black key width
             // Position black key centered between two white keys
             const leftPosition = blackKey.whiteKeyIndex * whiteKeyWidth + (whiteKeyWidth - blackKeyWidth / 2);
             
@@ -293,7 +294,7 @@ export function PianoKeyboard({
                 aria-label={`Piano key ${blackKey.note}`}
                 role="button"
                 className={cn(
-                  "piano-key black-key w-7 h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
+                  "piano-key black-key w-5 sm:w-6 lg:w-7 h-14 sm:h-17 lg:h-20 text-white text-xs flex items-end justify-center pb-1 rounded-b-sm transition-all duration-100 select-none cursor-pointer z-10 absolute",
                   "hover:scale-[1.02] hover:translate-y-0.5 hover:shadow-xl focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   "active:scale-[0.97] active:translate-y-1",
                   {
