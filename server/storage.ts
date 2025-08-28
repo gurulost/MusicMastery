@@ -13,7 +13,6 @@ import {
   type LearningProgress,
   type InsertLearningProgress,
 } from "@shared/schema";
-import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
 
@@ -39,19 +38,164 @@ export interface IStorage {
   updateLearningProgress(progress: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress>;
 }
 
-export class DatabaseStorage implements IStorage {
+// In-memory storage implementation for development
+export class InMemoryStorage implements IStorage {
+  private users: User[] = [];
+  private progress: Progress[] = [];
+  private exerciseSessions: ExerciseSession[] = [];
+  private learningProgress: LearningProgress[] = [];
+
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return this.users.find(user => user.id === id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this.users.find(user => user.username === username);
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const user: User = {
+      id: randomUUID(),
+      username: insertUser.username,
+      password: 'no-password',
+    };
+    this.users.push(user);
+    return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return [...this.users];
+  }
+
+  async getUserProgress(userId: string): Promise<Progress[]> {
+    return this.progress.filter(p => p.userId === userId);
+  }
+
+  async getProgressByCategory(userId: string, category: string): Promise<Progress[]> {
+    return this.progress.filter(p => p.userId === userId && p.category === category);
+  }
+
+  async getProgressItem(userId: string, category: string, itemName: string): Promise<Progress | undefined> {
+    return this.progress.find(p => 
+      p.userId === userId && 
+      p.category === category && 
+      p.itemName === itemName
+    );
+  }
+
+  async upsertProgress(insertProgress: InsertProgress): Promise<Progress> {
+    const existingIndex = this.progress.findIndex(p => 
+      p.userId === insertProgress.userId &&
+      p.category === insertProgress.category &&
+      p.itemName === insertProgress.itemName
+    );
+
+    if (existingIndex !== -1) {
+      const updated: Progress = {
+        ...this.progress[existingIndex],
+        ...insertProgress,
+        lastPracticed: new Date(),
+        masteredAt: insertProgress.status === 'mastered' ? new Date() : this.progress[existingIndex].masteredAt,
+      };
+      this.progress[existingIndex] = updated;
+      return updated;
+    } else {
+      const newProgress: Progress = {
+        id: randomUUID(),
+        userId: insertProgress.userId,
+        category: insertProgress.category,
+        itemName: insertProgress.itemName,
+        status: insertProgress.status ?? 'not_started',
+        attempts: insertProgress.attempts ?? 0,
+        correctAnswers: insertProgress.correctAnswers ?? 0,
+        lastPracticed: new Date(),
+        masteredAt: insertProgress.status === 'mastered' ? new Date() : null,
+      };
+      this.progress.push(newProgress);
+      return newProgress;
+    }
+  }
+
+  async createExerciseSession(insertSession: InsertExerciseSession): Promise<ExerciseSession> {
+    const session: ExerciseSession = {
+      id: randomUUID(),
+      userId: insertSession.userId,
+      category: insertSession.category,
+      itemName: insertSession.itemName,
+      isCorrect: insertSession.isCorrect,
+      userAnswer: insertSession.userAnswer ?? null,
+      correctAnswer: insertSession.correctAnswer ?? null,
+      timeToComplete: insertSession.timeToComplete ?? null,
+      createdAt: new Date(),
+    };
+    this.exerciseSessions.push(session);
+    return session;
+  }
+
+  async getUserExerciseSessions(userId: string): Promise<ExerciseSession[]> {
+    return this.exerciseSessions.filter(s => s.userId === userId);
+  }
+
+  async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
+    return this.learningProgress.filter(lp => lp.userId === userId);
+  }
+
+  async updateLearningProgress(progressData: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress> {
+    const existingIndex = this.learningProgress.findIndex(lp => 
+      lp.userId === progressData.userId &&
+      lp.stepId === progressData.stepId &&
+      lp.section === progressData.section
+    );
+
+    if (existingIndex !== -1) {
+      const existing = this.learningProgress[existingIndex];
+      const updated: LearningProgress = {
+        ...existing,
+        isCompleted: progressData.isCompleted ?? existing.isCompleted,
+        completedAt: progressData.isCompleted ? new Date() : existing.completedAt,
+        score: progressData.score ?? existing.score,
+        attempts: existing.attempts + 1,
+        updatedAt: new Date(),
+      };
+      this.learningProgress[existingIndex] = updated;
+      return updated;
+    } else {
+      const newProgress: LearningProgress = {
+        id: randomUUID(),
+        userId: progressData.userId,
+        stepId: progressData.stepId,
+        section: progressData.section,
+        isCompleted: progressData.isCompleted ?? false,
+        completedAt: progressData.isCompleted ? new Date() : null,
+        score: progressData.score ?? null,
+        attempts: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.learningProgress.push(newProgress);
+      return newProgress;
+    }
+  }
+}
+
+export class DatabaseStorage implements IStorage {
+  private get db() {
+    const { db } = require("./db");
+    return db;
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await this.db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await this.db.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
+    const [user] = await this.db
       .insert(users)
       .values({ ...insertUser, password: 'no-password' }) // Simple name-only auth
       .returning();
@@ -59,15 +203,15 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
+    return await this.db.select().from(users);
   }
 
   async getUserProgress(userId: string): Promise<Progress[]> {
-    return await db.select().from(progress).where(eq(progress.userId, userId));
+    return await this.db.select().from(progress).where(eq(progress.userId, userId));
   }
 
   async getProgressByCategory(userId: string, category: string): Promise<Progress[]> {
-    return await db.select().from(progress).where(
+    return await this.db.select().from(progress).where(
       and(
         eq(progress.userId, userId), 
         eq(progress.category, category)
@@ -76,7 +220,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProgressItem(userId: string, category: string, itemName: string): Promise<Progress | undefined> {
-    const [item] = await db.select().from(progress)
+    const [item] = await this.db.select().from(progress)
       .where(
         and(
           eq(progress.userId, userId),
@@ -95,7 +239,7 @@ export class DatabaseStorage implements IStorage {
     );
 
     if (existing) {
-      const [updated] = await db
+      const [updated] = await this.db
         .update(progress)
         .set({
           ...insertProgress,
@@ -106,7 +250,7 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return updated;
     } else {
-      const [newProgress] = await db
+      const [newProgress] = await this.db
         .insert(progress)
         .values({
           ...insertProgress,
@@ -119,7 +263,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createExerciseSession(insertSession: InsertExerciseSession): Promise<ExerciseSession> {
-    const [session] = await db
+    const [session] = await this.db
       .insert(exerciseSessions)
       .values(insertSession)
       .returning();
@@ -127,16 +271,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserExerciseSessions(userId: string): Promise<ExerciseSession[]> {
-    return await db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
+    return await this.db.select().from(exerciseSessions).where(eq(exerciseSessions.userId, userId));
   }
 
   // Learning journey progress methods
   async getUserLearningProgress(userId: string): Promise<LearningProgress[]> {
-    return await db.select().from(learningProgress).where(eq(learningProgress.userId, userId));
+    return await this.db.select().from(learningProgress).where(eq(learningProgress.userId, userId));
   }
 
   async updateLearningProgress(progressData: Partial<LearningProgress> & { userId: string; stepId: number; section: string }): Promise<LearningProgress> {
-    const existing = await db.select().from(learningProgress)
+    const existing = await this.db.select().from(learningProgress)
       .where(and(
         eq(learningProgress.userId, progressData.userId),
         eq(learningProgress.stepId, progressData.stepId),
@@ -145,7 +289,7 @@ export class DatabaseStorage implements IStorage {
 
     if (existing.length > 0) {
       // Update existing record
-      const [updated] = await db
+      const [updated] = await this.db
         .update(learningProgress)
         .set({
           isCompleted: progressData.isCompleted ?? existing[0].isCompleted,
@@ -159,7 +303,7 @@ export class DatabaseStorage implements IStorage {
       return updated;
     } else {
       // Create new record
-      const [newProgress] = await db
+      const [newProgress] = await this.db
         .insert(learningProgress)
         .values({
           userId: progressData.userId,
@@ -176,4 +320,21 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Conditional storage selection based on environment
+function createStorage(): IStorage {
+  if (process.env.DATABASE_URL) {
+    try {
+      // Just test if we can require the db module
+      require("./db");
+      return new DatabaseStorage();
+    } catch (error) {
+      console.warn("Database connection failed, falling back to in-memory storage:", error);
+      return new InMemoryStorage();
+    }
+  } else {
+    console.log("No DATABASE_URL found, using in-memory storage for development");
+    return new InMemoryStorage();
+  }
+}
+
+export const storage = createStorage();
