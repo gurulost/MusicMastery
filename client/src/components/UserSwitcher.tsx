@@ -51,14 +51,14 @@ export function UserSwitcher() {
         title: "Account Created",
         description: `Welcome ${newUsername.trim()}! Your progress will be saved.`,
       });
-    } catch (error) {
-      if (createUserError === "This name is already taken") {
+    } catch (error: any) {
+      if (error?.message === "This name is already taken") {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);
       } else {
         toast({
           title: "Failed to Create Account",
-          description: createUserError || "Failed to create account. Please try again.",
+          description: error?.message || "Failed to create account. Please try again.",
           variant: "destructive",
         });
       }

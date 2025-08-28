@@ -37,14 +37,14 @@ export function LoginScreen() {
         title: "Welcome!",
         description: `Account created for ${newUsername.trim()}. You can now start learning!`,
       });
-    } catch (error) {
-      if (createUserError === "This name is already taken") {
+    } catch (error: any) {
+      if (error?.message === "This name is already taken") {
         setDuplicateUsername(newUsername.trim());
         setShowDuplicateDialog(true);
       } else {
         toast({
           title: "Account Creation Failed",
-          description: createUserError || "Failed to create account. Please try again.",
+          description: error?.message || "Failed to create account. Please try again.",
           variant: "destructive",
         });
       }
