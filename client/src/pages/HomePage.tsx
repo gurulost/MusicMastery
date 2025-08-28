@@ -346,11 +346,21 @@ export default function HomePage() {
           </div>
 
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-2">INTERACTIVE PRACTICE</h3>
-            <Button variant="default" className="w-full justify-start" data-testid="nav-piano-practice">
-              <Keyboard className="mr-3 h-4 w-4" />
-              Piano Practice
-            </Button>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-2">QUICK LINKS</h3>
+            <div className="space-y-1">
+              <Link href="/scales">
+                <Button variant="ghost" className="w-full justify-start" data-testid="nav-scales-quick">
+                  <Music className="mr-3 h-4 w-4" />
+                  Scales Practice
+                </Button>
+              </Link>
+              <Link href="/intervals">
+                <Button variant="ghost" className="w-full justify-start" data-testid="nav-intervals-quick">
+                  <CornerLeftUp className="mr-3 h-4 w-4" />
+                  Intervals Practice
+                </Button>
+              </Link>
+            </div>
           </div>
           
           <div className="mb-4">
@@ -363,7 +373,7 @@ export default function HomePage() {
                       <Music className="mr-3 h-4 w-4" />
                       Major Scales
                     </div>
-                    <span className="bg-success text-success-foreground text-xs px-2 py-1 rounded-full">
+                    <span className="border border-success/20 text-success text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'major_scales' && p.status === 'mastered').length || 0}/12
                     </span>
                   </Button>
@@ -376,7 +386,7 @@ export default function HomePage() {
                       <Music className="mr-3 h-4 w-4" />
                       Minor Scales
                     </div>
-                    <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
+                    <span className="border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'minor_scales' && p.status === 'mastered').length || 0}/12
                     </span>
                   </Button>
@@ -395,7 +405,7 @@ export default function HomePage() {
                       <BookOpen className="mr-3 h-4 w-4" />
                       Learn Intervals
                     </div>
-                    <span className="bg-warning text-warning-foreground text-xs px-2 py-1 rounded-full">
+                    <span className="border border-warning/20 text-warning text-xs px-2 py-1 rounded-full">
                       {allProgress?.filter(p => p.category === 'intervals' && p.status === 'mastered').length || 0}/13
                     </span>
                   </Button>

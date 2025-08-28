@@ -37,11 +37,26 @@ export default function ScalesPage() {
     
     switch (progress?.status) {
       case 'mastered':
-        return <span className="text-xs bg-success text-success-foreground px-2 py-1 rounded-full">Mastered</span>;
+        return (
+          <span className="text-xs border border-success/20 text-success px-2 py-1 rounded-full flex items-center gap-1">
+            <div className="w-1.5 h-1.5 bg-success rounded-full" />
+            Mastered
+          </span>
+        );
       case 'in_progress':
-        return <span className="text-xs bg-warning text-warning-foreground px-2 py-1 rounded-full">In Progress</span>;
+        return (
+          <span className="text-xs border border-warning/20 text-warning px-2 py-1 rounded-full flex items-center gap-1">
+            <div className="w-1.5 h-1.5 bg-warning rounded-full" />
+            In Progress
+          </span>
+        );
       default:
-        return <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full">Not Started</span>;
+        return (
+          <span className="text-xs border border-muted text-muted-foreground px-2 py-1 rounded-full flex items-center gap-1">
+            <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full" />
+            Not Started
+          </span>
+        );
     }
   };
 
