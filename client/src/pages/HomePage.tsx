@@ -11,8 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { ProgressRing } from '@/components/ProgressRing';
 import { LearningPathCard } from '@/components/LearningPathCard';
-import { MAJOR_SCALES, MINOR_SCALES, INTERVALS, getMajorScale, getMinorScale, buildInterval, getScalesByDifficulty, getIntervalsByDifficulty } from '@/lib/musicTheory';
-import { Note } from '@shared/schema';
+import { generateScaleExercise, generateIntervalExercise, getIntervalExplanation, getScalesByDifficulty, getIntervalsByDifficulty } from '@/lib/musicTheory';
+import { Note, ExerciseData } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { audioEngine } from '@/lib/audio';
@@ -86,61 +86,49 @@ export default function HomePage() {
     },
   });
 
-  // Generate a random exercise
+  // Generate a random exercise using type-safe functions
   const generateExercise = () => {
     const categories = ['major_scales', 'minor_scales', 'intervals'];
     const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales' | 'intervals';
     
-    let itemName: string;
-    let correctNotes: Note[];
+    let exerciseData: ExerciseData;
     let instruction: string;
     let explanation: string;
     let hint: string;
-    let startNote: Note | undefined;
 
     if (category === 'major_scales') {
-      itemName = MAJOR_SCALES[Math.floor(Math.random() * MAJOR_SCALES.length)];
-      const [tonic] = itemName.split(' ');
-      const scale = getMajorScale(tonic as Note);
-      correctNotes = scale.notes;
+      exerciseData = generateScaleExercise('major_scales');
       instruction = exerciseMode === 'learn' ? 
-        `Learn the ${itemName} scale by clicking the correct notes:` :
-        `Play the ${itemName} scale by clicking the keys in order:`;
-      explanation = `The ${itemName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. It has ${scale.sharps.length === 0 ? 'no sharps or flats' : `${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`}.`;
-      hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${tonic} and follow the major scale pattern.`;
+        `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
+        `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+      explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale uses the key signature with ${Math.abs(exerciseData.correctNotes.filter(n => n.includes('#')).length)} sharps.`;
+      hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${exerciseData.tonic} and follow the major scale pattern.`;
     } else if (category === 'minor_scales') {
-      itemName = MINOR_SCALES[Math.floor(Math.random() * MINOR_SCALES.length)];
-      const [tonic] = itemName.split(' ');
-      const scale = getMinorScale(tonic as Note);
-      correctNotes = scale.notes;
+      exerciseData = generateScaleExercise('minor_scales');
       instruction = exerciseMode === 'learn' ? 
-        `Learn the ${itemName} scale by clicking the correct notes:` :
-        `Play the ${itemName} scale by clicking the keys in order:`;
-      explanation = `The ${itemName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. It has ${scale.sharps.length === 0 ? 'no sharps or flats' : `${scale.sharps.length} sharps: ${scale.sharps.join(', ')}`}.`;
-      hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${tonic} minor scale has the same key signature as its relative major.`;
+        `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
+        `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+      explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale uses the same key signature as its relative major.`;
+      hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
     } else {
-      const interval = INTERVALS[Math.floor(Math.random() * INTERVALS.length)];
-      const startNotes: Note[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-      startNote = startNotes[Math.floor(Math.random() * startNotes.length)];
-      const endNote = buildInterval(startNote, interval.name, 'up');
-      itemName = `${interval.name} from ${startNote}`;
-      correctNotes = [startNote, endNote];
+      exerciseData = generateIntervalExercise();
+      const intervalExplanation = getIntervalExplanation(exerciseData.intervalType!);
       instruction = exerciseMode === 'learn' ? 
-        `Learn to build a ${interval.name} up from ${startNote}:` :
-        `Build a ${interval.name} up from ${startNote} by clicking both notes:`;
-      explanation = `A ${interval.name} (${interval.shortName}) spans ${interval.semitones} semitones. From ${startNote}, count up ${interval.semitones} half steps to reach ${endNote}.`;
-      hint = `Count the semitones: ${interval.semitones} half steps up from ${startNote} gives you ${endNote}.`;
+        `Learn to build a ${exerciseData.intervalType} up from ${exerciseData.startNote}:` :
+        `Build a ${exerciseData.intervalType} up from ${exerciseData.startNote} by clicking both notes:`;
+      explanation = intervalExplanation.explanation;
+      hint = intervalExplanation.learningTip;
     }
 
     setCurrentExercise({ 
       category, 
-      itemName, 
+      itemName: exerciseData.displayName, 
       instruction, 
-      correctNotes, 
+      correctNotes: exerciseData.correctNotes, 
       mode: exerciseMode,
       explanation,
       hint,
-      startNote 
+      startNote: exerciseData.startNote 
     });
     setPlayedNotes([]);
     setSelectedNotes([]);

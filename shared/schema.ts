@@ -82,6 +82,24 @@ export type IntervalType = 'Perfect Unison' | 'Minor 2nd' | 'Major 2nd' | 'Minor
 
 export type Note = 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
 
+// New structured scale definition
+export interface ScaleDefinition {
+  tonic: Note;
+  type: ScaleType;
+  accidentals: number; // negative for flats, positive for sharps
+  order: number; // circle of fifths order
+}
+
+// New structured interval definition with educational data
+export interface IntervalDefinition {
+  name: IntervalType;
+  semitones: number;
+  shortName: string;
+  explanation: string;
+  learningTip: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+}
+
 export interface Scale {
   name: string;
   type: ScaleType;
@@ -95,4 +113,15 @@ export interface Interval {
   name: IntervalType;
   semitones: number;
   shortName: string;
+}
+
+// Exercise data structure (type-safe alternative to string parsing)
+export interface ExerciseData {
+  category: 'major_scales' | 'minor_scales' | 'intervals';
+  tonic: Note;
+  type?: ScaleType;
+  intervalType?: IntervalType;
+  displayName: string;
+  correctNotes: Note[];
+  startNote?: Note; // for intervals
 }
