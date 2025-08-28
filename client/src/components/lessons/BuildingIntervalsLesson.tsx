@@ -398,7 +398,10 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => audioEngine.playNote(currentExercise.startNote, 0.8)}
+                      onClick={async () => {
+                        await audioEngine.initializeAudio();
+                        audioEngine.playNote(currentExercise.startNote, 0.8);
+                      }}
                     >
                       <Play className="h-4 w-4 mr-1" />
                       Play Start
@@ -679,7 +682,10 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => audioEngine.playNote(currentQuestion.startNote, 0.8)}
+                    onClick={async () => {
+                      await audioEngine.initializeAudio();
+                      audioEngine.playNote(currentQuestion.startNote, 0.8);
+                    }}
                   >
                     <Play className="h-4 w-4 mr-1" />
                     Hear Starting Note

@@ -64,7 +64,7 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
 
   const handleNoteClick = (note: Note) => {
     // Piano keyboard handles audio - no duplicate audio here
-    setSelectedNote(note);
+    setSelectedNotes(prev => [...prev, note]);
   };
 
   const handleIntervalDemo = async (intervalName: string) => {
@@ -665,8 +665,10 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
                         const example = INTERVAL_EXAMPLES.find(ex => ex.interval === currentQuestion.interval);
                         if (example) {
                           const [note1, note2] = example.notes as Note[];
-                          audioEngine.playNote(note1, 0.8);
-                          setTimeout(() => audioEngine.playNote(note2, 0.8), 600);
+                          audioEngine.initializeAudio().then(() => {
+                            audioEngine.playNote(note1, 0.8);
+                            setTimeout(() => audioEngine.playNote(note2, 0.8), 600);
+                          });
                         }
                       }}
                       className="mb-4"

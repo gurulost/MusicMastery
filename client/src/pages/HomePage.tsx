@@ -432,6 +432,8 @@ export default function HomePage() {
                 variant="secondary" 
                 onClick={async () => {
                   try {
+                    // Ensure audio is initialized on user interaction
+                    await audioEngine.initializeAudio();
                     if (keySignature) await audioEngine.playScale(keySignature.notes);
                   } catch (error) {
                     console.warn('Audio playback failed:', error);

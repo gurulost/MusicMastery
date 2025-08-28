@@ -113,6 +113,9 @@ export function PianoKeyboard({
     setActiveKeys(prev => new Set(prev).add(keyId));
     
     try {
+      // Ensure audio is initialized on first user interaction
+      await audioEngine.initializeAudio();
+      
       // Play audio with correct octave - only once per actual key press
       const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
       await audioEngine.playNote(note, 0.5, octave);

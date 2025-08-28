@@ -191,6 +191,9 @@ export default function IntervalPracticePage() {
     if (!currentExercise) return;
     
     try {
+      // Ensure audio is initialized on user interaction
+      await audioEngine.initializeAudio();
+      
       await audioEngine.playNote(currentExercise.startNote, 0.8);
       setTimeout(async () => {
         try {

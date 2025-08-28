@@ -550,7 +550,9 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
                     onClick={() => {
                       const [tonic] = currentScale.split(' ');
                       const scale = getMinorScale(tonic as Note);
-                      audioEngine.playScale(scale.notes);
+                      audioEngine.initializeAudio().then(() => {
+                        audioEngine.playScale(scale.notes);
+                      });
                     }}
                   >
                     <Play className="h-4 w-4 mr-1" />
@@ -694,7 +696,9 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
                     size="sm"
                     onClick={() => {
                       const [tonic] = currentQuestion.scale.split(' ');
-                      audioEngine.playNote(tonic as Note, 0.8);
+                      audioEngine.initializeAudio().then(() => {
+                        audioEngine.playNote(tonic as Note, 0.8);
+                      });
                     }}
                   >
                     <Play className="h-4 w-4 mr-1" />
