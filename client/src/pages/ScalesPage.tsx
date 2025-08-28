@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Music, Check, Clock, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MAJOR_SCALES, MINOR_SCALES } from '@/lib/musicTheory';
+import { MAJOR_SCALES, MINOR_SCALES, getScale } from '@/lib/musicTheory';
 import { HelpDialog } from '@/components/HelpDialog';
 import { HelpTooltip } from '@/components/HelpTooltip';
 import { useUser } from '@/contexts/UserContext';
@@ -92,17 +92,20 @@ export default function ScalesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {MAJOR_SCALES.map((scale) => (
-                    <div key={scale} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <div className="flex items-center">
-                        {getProgressIcon('major_scales', scale)}
-                        <span className="ml-3" data-testid={`scale-${scale.replace(' ', '-').toLowerCase()}`}>
-                          {scale}
-                        </span>
+                  {MAJOR_SCALES.map((scale) => {
+                    const scaleName = getScale(scale).name;
+                    return (
+                      <div key={`${scale.tonic}-${scale.type}`} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div className="flex items-center">
+                          {getProgressIcon('major_scales', scaleName)}
+                          <span className="ml-3" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                            {scaleName}
+                          </span>
+                        </div>
+                        {getProgressBadge('major_scales', scaleName)}
                       </div>
-                      {getProgressBadge('major_scales', scale)}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -122,17 +125,20 @@ export default function ScalesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {MINOR_SCALES.map((scale) => (
-                    <div key={scale} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <div className="flex items-center">
-                        {getProgressIcon('minor_scales', scale)}
-                        <span className="ml-3" data-testid={`scale-${scale.replace(' ', '-').toLowerCase()}`}>
-                          {scale}
-                        </span>
+                  {MINOR_SCALES.map((scale) => {
+                    const scaleName = getScale(scale).name;
+                    return (
+                      <div key={`${scale.tonic}-${scale.type}`} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div className="flex items-center">
+                          {getProgressIcon('minor_scales', scaleName)}
+                          <span className="ml-3" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                            {scaleName}
+                          </span>
+                        </div>
+                        {getProgressBadge('minor_scales', scaleName)}
                       </div>
-                      {getProgressBadge('minor_scales', scale)}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

@@ -16,10 +16,10 @@ export const SCALE_DEFINITIONS: ScaleDefinition[] = [
   { tonic: 'B', type: 'major', accidentals: 5, order: 5 },
   { tonic: 'F#', type: 'major', accidentals: 6, order: 6 },
   { tonic: 'F', type: 'major', accidentals: -1, order: 7 },
-  { tonic: 'Bb', type: 'major', accidentals: -2, order: 8 } as ScaleDefinition,
-  { tonic: 'Eb', type: 'major', accidentals: -3, order: 9 } as ScaleDefinition,
-  { tonic: 'Ab', type: 'major', accidentals: -4, order: 10 } as ScaleDefinition,
-  { tonic: 'Db', type: 'major', accidentals: -5, order: 11 } as ScaleDefinition,
+  { tonic: 'Bb', type: 'major', accidentals: -2, order: 8 },
+  { tonic: 'Eb', type: 'major', accidentals: -3, order: 9 },
+  { tonic: 'Ab', type: 'major', accidentals: -4, order: 10 },
+  { tonic: 'Db', type: 'major', accidentals: -5, order: 11 },
   
   // Minor scales (relative to major scales)
   { tonic: 'A', type: 'minor', accidentals: 0, order: 0 },
@@ -33,7 +33,7 @@ export const SCALE_DEFINITIONS: ScaleDefinition[] = [
   { tonic: 'G', type: 'minor', accidentals: -2, order: 8 },
   { tonic: 'C', type: 'minor', accidentals: -3, order: 9 },
   { tonic: 'F', type: 'minor', accidentals: -4, order: 10 },
-  { tonic: 'Bb', type: 'minor', accidentals: -5, order: 11 } as ScaleDefinition,
+  { tonic: 'Bb', type: 'minor', accidentals: -5, order: 11 },
 ];
 
 // Single source of truth: Structured interval definitions

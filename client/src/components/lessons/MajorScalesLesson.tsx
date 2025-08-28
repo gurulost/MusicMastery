@@ -6,7 +6,7 @@ import { PianoKeyboard } from '@/components/PianoKeyboard';
 import { CheckCircle, ArrowRight, Music, Play, Lightbulb, Brain, Target, Star, Trophy, Calculator, Zap, RotateCcw } from 'lucide-react';
 import { Note } from '@shared/schema';
 import { audioEngine } from '@/lib/audio';
-import { getMajorScale, MAJOR_SCALES, MAJOR_SCALE_NAMES, getScalesByDifficulty } from '@/lib/musicTheory';
+import { getMajorScale, MAJOR_SCALES, MAJOR_SCALE_NAMES, getScalesByDifficulty, getScale } from '@/lib/musicTheory';
 
 interface MajorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
@@ -445,16 +445,19 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
             </div>
             
             <div className="grid grid-cols-3 gap-2 mb-6">
-              {MAJOR_SCALES.slice(0, 9).map(scale => (
-                <Button
-                  key={scale}
-                  variant="outline"
-                  onClick={() => handleScaleDemo(scale)}
-                  className="h-12 text-sm"
-                >
-                  {scale}
-                </Button>
-              ))}
+              {MAJOR_SCALES.slice(0, 9).map(scale => {
+                const scaleName = getScale(scale).name;
+                return (
+                  <Button
+                    key={`${scale.tonic}-${scale.type}`}
+                    variant="outline"
+                    onClick={() => handleScaleDemo(scaleName)}
+                    className="h-12 text-sm"
+                  >
+                    {scaleName}
+                  </Button>
+                );
+              })}
             </div>
             
             <PianoKeyboard
