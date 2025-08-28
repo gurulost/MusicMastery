@@ -13,13 +13,11 @@ export function TopBar() {
       <div className="container flex h-16 max-w-screen-2xl items-center">
         {/* Brand */}
         <div className="mr-4 hidden md:flex">
-          <Link href="/">
-            <a className="mr-4 flex items-center space-x-2 lg:mr-6">
-              <Music className="h-6 w-6" />
-              <span className="hidden font-serif font-semibold lg:inline-block">
-                Music Mastery
-              </span>
-            </a>
+          <Link href="/" className="mr-4 flex items-center space-x-2 lg:mr-6">
+            <Music className="h-6 w-6" />
+            <span className="hidden font-serif font-semibold lg:inline-block">
+              Music Mastery
+            </span>
           </Link>
         </div>
 
