@@ -413,7 +413,7 @@ export function MusicalAlphabetLesson({ section, onComplete }: MusicalAlphabetLe
                   What note is highlighted on the piano?
                 </p>
                 <PianoKeyboard
-                  highlightedNotes={[currentQuestion]}
+                  highlightedNotes={currentQuestion ? [currentQuestion] : []}
                   onNoteClick={() => {}} // Disabled during test
                 />
                 <div className="mt-4">

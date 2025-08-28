@@ -10,7 +10,7 @@ import { getMinorScale, getMajorScale, MINOR_SCALES, getScalesByDifficulty } fro
 
 interface MinorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 const MINOR_SCALE_PATTERN = ['W', 'H', 'W', 'W', 'H', 'W', 'W'];
@@ -439,7 +439,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-purple-600 hover:bg-purple-700">
             I Understand Minor Scales
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -558,7 +558,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -596,7 +596,7 @@ export function MinorScalesLesson({ section, onComplete }: MinorScalesLessonProp
                   <p className="text-success mb-4">
                     You've mastered minor scales and their relationships to major scales!
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Key Signatures
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>

@@ -6,7 +6,7 @@ import { CheckCircle, ArrowRight, Music, Hash, Minus, Brain, Target, Star, Troph
 
 interface KeySignaturesLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 // Order of sharps and flats with memory aids
@@ -86,7 +86,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
     setAttempts(prev => prev + 1);
     
     if (currentQuestion.type === 'count') {
-      const correctAnswer = 'sharps' in keyData ? keyData.sharps : keyData.flats;
+      const correctAnswer = keyData ? (keyData.sharps > 0 ? keyData.sharps : keyData.flats) : 0;
       isCorrect = answer === correctAnswer;
     } else if (currentQuestion.type === 'relative') {
       // For now, simplified to just count accidentals
@@ -431,7 +431,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-blue-600 hover:bg-blue-700">
             I Understand Key Signatures
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -540,7 +540,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -578,7 +578,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
                   <p className="text-success mb-4">
                     You've mastered key signatures! You can now identify keys quickly and accurately.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Understanding Intervals
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -647,7 +647,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
                     <div className="text-left">
                       {(() => {
                         const keyData = KEY_SIGNATURES.find(k => k.key === currentQuestion.key);
-                        if (keyData?.sharps > 0) {
+                        if (keyData && keyData.sharps > 0) {
                           return (
                             <div>
                               <p className="text-blue-700 mb-1">
@@ -658,7 +658,7 @@ export function KeySignaturesLesson({ section, onComplete }: KeySignaturesLesson
                               </p>
                             </div>
                           );
-                        } else if (keyData?.flats > 0) {
+                        } else if (keyData && keyData.flats > 0) {
                           return (
                             <div>
                               <p className="text-blue-700 mb-1">

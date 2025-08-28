@@ -10,7 +10,7 @@ import { getMajorScale, MAJOR_SCALES, getScalesByDifficulty } from '@/lib/musicT
 
 interface MajorScalesLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 const MAJOR_SCALE_PATTERN = ['W', 'W', 'H', 'W', 'W', 'W', 'H'];
@@ -375,7 +375,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-blue-600 hover:bg-blue-700">
             I Understand Major Scales
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -507,7 +507,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -545,7 +545,7 @@ export function MajorScalesLesson({ section, onComplete }: MajorScalesLessonProp
                   <p className="text-success mb-4">
                     You've mastered major scale construction! You can build any major scale using the pattern.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Minor Scales
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>

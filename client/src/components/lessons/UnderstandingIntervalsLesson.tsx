@@ -10,7 +10,7 @@ import { INTERVALS, getIntervalExplanation, getIntervalsByDifficulty } from '@/l
 
 interface UnderstandingIntervalsLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 // Educational interval examples with familiar songs
@@ -431,7 +431,7 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-blue-600 hover:bg-blue-700">
             I Understand Intervals
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -548,7 +548,7 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -586,7 +586,7 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
                   <p className="text-success mb-4">
                     You understand intervals and their emotional qualities! Ready for the final challenge.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Building Intervals
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
@@ -714,8 +714,8 @@ export function UnderstandingIntervalsLesson({ section, onComplete }: Understand
                     const correctAnswer = currentQuestion.interval;
                     
                     // Ensure correct answer is included
-                    if (!allOptions.includes(correctAnswer)) {
-                      allOptions[0] = correctAnswer;
+                    if (!allOptions.includes(correctAnswer as any)) {
+                      allOptions[0] = correctAnswer as any;
                     }
                     
                     return allOptions.sort(() => Math.random() - 0.5).map((interval, index) => (

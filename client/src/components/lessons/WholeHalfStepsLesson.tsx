@@ -9,7 +9,7 @@ import { audioEngine } from '@/lib/audio';
 
 interface WholeHalfStepsLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 const CHROMATIC_NOTES: Note[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -281,7 +281,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-blue-600 hover:bg-blue-700">
             I Understand Whole and Half Steps
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -417,7 +417,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete()} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for the Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -455,7 +455,7 @@ export function WholeHalfStepsLesson({ section, onComplete }: WholeHalfStepsLess
                   <p className="text-success mb-4">
                     You've mastered whole and half steps! This foundation will make scales much easier.
                   </p>
-                  <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
                     Continue to Major Scales
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>

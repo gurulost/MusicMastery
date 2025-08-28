@@ -10,7 +10,7 @@ import { INTERVALS, buildInterval, getIntervalExplanation } from '@/lib/musicThe
 
 interface BuildingIntervalsLessonProps {
   section: 'learn' | 'practice' | 'test';
-  onComplete: () => void;
+  onComplete: (score?: number) => void;
 }
 
 // Progressive difficulty intervals for practice
@@ -23,6 +23,7 @@ const PRACTICE_NOTES: Note[] = ['C', 'D', 'E', 'F', 'G', 'A'];
 
 // Interval construction strategies
 const CONSTRUCTION_STRATEGIES = {
+  'Perfect Unison': 'Same note - no counting needed, 0 half steps',
   'Major 2nd': 'Count 2 half steps (1 whole step) up from the starting note',
   'Minor 2nd': 'Count 1 half step up - the very next key on piano',
   'Major 3rd': 'Count 4 half steps - this creates the "happy" sound in major chords',
@@ -395,7 +396,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-purple-600 hover:bg-purple-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-purple-600 hover:bg-purple-700">
             I Can Build Intervals
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -523,7 +524,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={onComplete} size="lg" className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-green-600 hover:bg-green-700">
             Ready for Final Test
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -574,7 +575,7 @@ export function BuildingIntervalsLesson({ section, onComplete }: BuildingInterva
                       <li>✓ Interval construction from any starting note</li>
                     </ul>
                   </div>
-                  <Button onClick={onComplete} size="lg" className="bg-yellow-600 hover:bg-yellow-700">
+                  <Button onClick={() => onComplete(Math.round((correctAnswers / testQuestions.length) * 100))} size="lg" className="bg-yellow-600 hover:bg-yellow-700">
                     Complete Learning Journey 🎵
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
