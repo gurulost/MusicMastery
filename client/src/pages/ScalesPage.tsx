@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Music, Check, Clock, Circle } from 'lucide-react';
+import { ArrowLeft, Music, Check, Clock, Circle, Play, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MAJOR_SCALES, MINOR_SCALES, getScale } from '@/lib/musicTheory';
@@ -113,15 +113,40 @@ export default function ScalesPage() {
                 <div className="space-y-3">
                   {MAJOR_SCALES.map((scale) => {
                     const scaleName = getScale(scale).name;
+                    const scaleInfo = getScale(scale);
                     return (
                       <div key={`${scale.tonic}-${scale.type}`} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-1">
                           {getProgressIcon('major_scales', scaleName)}
-                          <span className="ml-3" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
-                            {scaleName}
-                          </span>
+                          <div className="ml-3 flex-1">
+                            <span className="font-medium" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              {scaleName}
+                            </span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {scaleInfo.sharps.length > 0 
+                                ? `${scaleInfo.sharps.length} sharp${scaleInfo.sharps.length > 1 ? 's' : ''}: ${scaleInfo.sharps.join(', ')}`
+                                : scaleInfo.flats.length > 0 
+                                ? `${scaleInfo.flats.length} flat${scaleInfo.flats.length > 1 ? 's' : ''}: ${scaleInfo.flats.join(', ')}`
+                                : 'No sharps or flats'
+                              }
+                            </div>
+                          </div>
                         </div>
-                        {getProgressBadge('major_scales', scaleName)}
+                        <div className="flex items-center gap-2">
+                          {getProgressBadge('major_scales', scaleName)}
+                          <Link href={`/?scale=${encodeURIComponent(scaleName)}&mode=learn`}>
+                            <Button size="sm" variant="outline" data-testid={`practice-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              <Target className="h-3 w-3 mr-1" />
+                              Learn
+                            </Button>
+                          </Link>
+                          <Link href={`/?scale=${encodeURIComponent(scaleName)}&mode=practice`}>
+                            <Button size="sm" data-testid={`practice-sequence-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              <Play className="h-3 w-3 mr-1" />
+                              Practice
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     );
                   })}
@@ -146,15 +171,40 @@ export default function ScalesPage() {
                 <div className="space-y-3">
                   {MINOR_SCALES.map((scale) => {
                     const scaleName = getScale(scale).name;
+                    const scaleInfo = getScale(scale);
                     return (
                       <div key={`${scale.tonic}-${scale.type}`} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-1">
                           {getProgressIcon('minor_scales', scaleName)}
-                          <span className="ml-3" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
-                            {scaleName}
-                          </span>
+                          <div className="ml-3 flex-1">
+                            <span className="font-medium" data-testid={`scale-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              {scaleName}
+                            </span>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {scaleInfo.sharps.length > 0 
+                                ? `${scaleInfo.sharps.length} sharp${scaleInfo.sharps.length > 1 ? 's' : ''}: ${scaleInfo.sharps.join(', ')}`
+                                : scaleInfo.flats.length > 0 
+                                ? `${scaleInfo.flats.length} flat${scaleInfo.flats.length > 1 ? 's' : ''}: ${scaleInfo.flats.join(', ')}`
+                                : 'No sharps or flats'
+                              }
+                            </div>
+                          </div>
                         </div>
-                        {getProgressBadge('minor_scales', scaleName)}
+                        <div className="flex items-center gap-2">
+                          {getProgressBadge('minor_scales', scaleName)}
+                          <Link href={`/?scale=${encodeURIComponent(scaleName)}&mode=learn`}>
+                            <Button size="sm" variant="outline" data-testid={`practice-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              <Target className="h-3 w-3 mr-1" />
+                              Learn
+                            </Button>
+                          </Link>
+                          <Link href={`/?scale=${encodeURIComponent(scaleName)}&mode=practice`}>
+                            <Button size="sm" data-testid={`practice-sequence-${scaleName.replace(' ', '-').toLowerCase()}`}>
+                              <Play className="h-3 w-3 mr-1" />
+                              Practice
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     );
                   })}

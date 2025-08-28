@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Keyboard, CornerLeftUp, ChartLine, Settings, Play, Check, RotateCcw, ChevronLeft, ChevronRight, BookOpen, Target, Award, TrendingUp } from 'lucide-react';
@@ -52,6 +52,7 @@ export default function HomePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { currentUser } = useUser();
+  const [location] = useLocation();
 
   // Fetch progress summary
   const { data: progressSummary, isLoading: summaryLoading } = useQuery<ProgressSummary>({
@@ -89,8 +90,91 @@ export default function HomePage() {
     },
   });
 
-  // Generate a random exercise using type-safe functions
-  const generateExercise = () => {
+  // Generate exercise - can be random or specific based on URL parameters
+  const generateExercise = (specificScale?: string, specificMode?: 'learn' | 'practice') => {
+    // Check URL parameters for specific scale practice
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlScale = specificScale || urlParams.get('scale');
+    const urlMode = specificMode || urlParams.get('mode') as 'learn' | 'practice' | null;
+    
+    // Update mode if specified in URL
+    if (urlMode && (urlMode === 'learn' || urlMode === 'practice')) {
+      setExerciseMode(urlMode);
+    }
+    
+    let exerciseData: ExerciseData;
+    let instruction: string;
+    let explanation: string;
+    let hint: string;
+    let category: 'major_scales' | 'minor_scales' | 'intervals';
+
+    if (urlScale) {
+      // Generate specific scale exercise
+      if (urlScale.includes('Major')) {
+        category = 'major_scales';
+        const tonic = urlScale.replace(' Major', '') as Note;
+        const scale = getMajorScale(tonic);
+        exerciseData = {
+          displayName: urlScale,
+          correctNotes: scale.notes,
+          tonic,
+          category: 'major_scales'
+        };
+        instruction = (urlMode || exerciseMode) === 'learn' ? 
+          `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
+          `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+        explanation = `The ${exerciseData.displayName} scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
+        hint = `Remember: Major scales have sharps in this order: F#, C#, G#, D#, A#, E#, B#. Start on ${exerciseData.tonic} and follow the major scale pattern.`;
+      } else if (urlScale.includes('Minor')) {
+        category = 'minor_scales';
+        const tonic = urlScale.replace(' Minor', '') as Note;
+        const scale = getMinorScale(tonic);
+        exerciseData = {
+          displayName: urlScale,
+          correctNotes: scale.notes,
+          tonic,
+          category: 'minor_scales'
+        };
+        instruction = (urlMode || exerciseMode) === 'learn' ? 
+          `Learn the ${exerciseData.displayName} scale by clicking the correct notes:` :
+          `Play the ${exerciseData.displayName} scale by clicking the keys in order:`;
+        explanation = `The ${exerciseData.displayName} scale follows the natural minor pattern: Whole-Half-Whole-Whole-Half-Whole-Whole steps. This scale has ${scale.sharps.length > 0 ? `${scale.sharps.length} sharp${scale.sharps.length > 1 ? 's' : ''}: ${scale.sharps.join(', ')}` : scale.flats.length > 0 ? `${scale.flats.length} flat${scale.flats.length > 1 ? 's' : ''}: ${scale.flats.join(', ')}` : 'no sharps or flats'}.`;
+        hint = `Minor scales start a minor 3rd (3 semitones) below their relative major. The ${exerciseData.tonic} minor scale has the same key signature as its relative major.`;
+      } else {
+        // Fallback to random if scale format not recognized
+        return generateRandomExercise();
+      }
+    } else {
+      // Generate random exercise
+      return generateRandomExercise();
+    }
+
+    setCurrentExercise({ 
+      category, 
+      itemName: exerciseData.displayName, 
+      instruction, 
+      correctNotes: exerciseData.correctNotes, 
+      mode: urlMode || exerciseMode,
+      explanation,
+      hint,
+      startNote: exerciseData.tonic 
+    });
+    setPlayedNotes([]);
+    setSelectedNotes([]);
+    setIsCompleted(false);
+    setShowHint(false);
+    
+    // Record exercise start time
+    startTimeRef.current = Date.now();
+    
+    // Clear URL parameters after loading specific exercise
+    if (urlScale) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  };
+
+  // Generate a random exercise
+  const generateRandomExercise = () => {
     const categories = ['major_scales', 'minor_scales', 'intervals'];
     const category = categories[Math.floor(Math.random() * categories.length)] as 'major_scales' | 'minor_scales' | 'intervals';
     
@@ -250,11 +334,11 @@ export default function HomePage() {
 
   const handleSwitchMode = () => {
     setExerciseMode(prev => prev === 'learn' ? 'practice' : 'learn');
-    generateExercise();
+    generateRandomExercise();
   };
 
   const handleNextExercise = () => {
-    generateExercise();
+    generateRandomExercise();
   };
 
   if (summaryLoading) {
