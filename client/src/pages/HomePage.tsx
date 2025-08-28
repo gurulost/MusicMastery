@@ -485,11 +485,11 @@ export default function HomePage() {
     ) : null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <div className="w-80 bg-card border-r border-border flex flex-col">
+      <div className="w-80 bg-card border-r border-border flex flex-col h-screen sticky top-0">
         {/* Header */}
-        <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-accent/10">
+        <div className="p-6 border-b border-border bg-gradient-to-br from-primary/5 to-accent/10 flex-shrink-0">
           <div className="flex items-center mb-2">
             <div className="p-2 bg-primary/10 rounded-lg mr-3">
               <Music className="h-6 w-6 text-primary" />
@@ -504,7 +504,7 @@ export default function HomePage() {
         </div>
         
         {/* Overall Progress */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border flex-shrink-0">
           <h2 className="text-lg font-semibold mb-4">Overall Progress</h2>
           <div className="flex items-center justify-center mb-4">
             <ProgressRing progress={progressSummary?.overallProgress || 0} />
@@ -532,7 +532,7 @@ export default function HomePage() {
         </div>
         
         {/* Learning Navigation Menu */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4 overflow-y-auto">
           {/* Featured Guided Learning - Hero Treatment */}
           <div className="mb-6 p-6 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 border border-primary/20 rounded-xl shadow-sm">
             <div className="flex items-center mb-4">
@@ -657,8 +657,9 @@ export default function HomePage() {
       </div>
 
       {/* Main Content - Single scrollable page */}
-      <div className="flex-1 p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 md:p-6 lg:p-8">
+          <div className="max-w-6xl mx-auto space-y-6">
           {/* Page Header with compact stats */}
           <div className="text-center space-y-4">
             <div>
@@ -898,6 +899,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
       </div>
       
