@@ -75,6 +75,11 @@ export default {
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
       },
+      fontSize: {
+        // subtle, safe bumps for readability
+        sm: ['0.95rem', { lineHeight: '1.6' }],      // was 0.875rem
+        base: ['1.0625rem', { lineHeight: '1.7' }],  // 17px, was 1rem
+      },
       keyframes: {
         "accordion-down": {
           from: {

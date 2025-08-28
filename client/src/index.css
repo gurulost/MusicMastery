@@ -14,7 +14,7 @@
   --secondary: 210 40% 96%;
   --secondary-foreground: 222.2 84% 4.9%;
   --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted-foreground: 215 16% 35%;
   --accent: 210 40% 96%;
   --accent-foreground: 222.2 84% 4.9%;
   --destructive: 0 84.2% 60.2%;
@@ -46,7 +46,7 @@
   --note-in-key: 266 55% 52%;
   --key-shadow: 220 9% 46% / 0.25;
   /* Typography */
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   --font-serif: "Source Serif 4", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.75rem;
@@ -74,7 +74,7 @@
   --secondary: 195.0000 15.3846% 94.9020%;
   --secondary-foreground: 210 25% 7.8431%;
   --muted: 0 0% 9.4118%;
-  --muted-foreground: 210 3.3898% 46.2745%;
+  --muted-foreground: 210 6% 72%;
   --accent: 205.7143 70% 7.8431%;
   --accent-foreground: 203.7736 87.6033% 52.5490%;
   --destructive: 356.3033 90.5579% 54.3137%;
@@ -106,7 +106,7 @@
   --note-in-key: 266 60% 62%;
   --key-shadow: 0 0% 0% / 0.5;
   /* Typography */
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   --font-serif: "Source Serif 4", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.75rem;
@@ -126,8 +126,13 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans subpixel-antialiased bg-background text-foreground;
   }
+}
+
+/* Variable font weight for better readability */
+@supports (font-variation-settings: normal) {
+  body { font-weight: 450; } /* subtle bump for variable fonts */
 }
 
 .piano-key {
