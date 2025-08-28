@@ -91,6 +91,7 @@ export function PianoKeyboard({
   showLabels = true
 }: PianoKeyboardProps) {
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
+  const [audioInitialized, setAudioInitialized] = useState(false);
 
   const getOctaveFromIndex = (index: number, isBlackKey: boolean = false): number => {
     if (isBlackKey) {
@@ -111,11 +112,13 @@ export function PianoKeyboard({
   const handleKeyPress = async (note: Note, index?: number, isBlackKey: boolean = false) => {
     // Create unique key identifier that includes position
     const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
-    setActiveKeys(prev => new Set(prev).add(keyId));
     
     try {
-      // Ensure audio is initialized on first user interaction
-      await audioEngine.initializeAudio();
+      // Initialize audio on first user interaction (required for iOS)
+      if (!audioInitialized) {
+        await audioEngine.initializeAudio();
+        setAudioInitialized(true);
+      }
       
       // Play audio with correct octave - only once per actual key press
       const octave = index !== undefined ? getOctaveFromIndex(index, isBlackKey) : 4;
@@ -124,15 +127,6 @@ export function PianoKeyboard({
     } catch (error) {
       console.warn('Audio playback failed:', error);
     }
-    
-    // Remove active state after animation
-    setTimeout(() => {
-      setActiveKeys(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(keyId);
-        return newSet;
-      });
-    }, 150);
 
     // Handle toggle functionality if onNoteToggle is provided
     if (onNoteToggle) {
@@ -141,6 +135,32 @@ export function PianoKeyboard({
 
     // Notify parent component
     onNoteClick?.(note);
+  };
+
+  const handlePointerDown = (note: Note, index?: number, isBlackKey: boolean = false) => {
+    const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
+    setActiveKeys(prev => new Set(prev).add(keyId));
+    handleKeyPress(note, index, isBlackKey);
+  };
+
+  const handlePointerUp = (note: Note, index?: number, isBlackKey: boolean = false) => {
+    const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
+    setTimeout(() => {
+      setActiveKeys(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(keyId);
+        return newSet;
+      });
+    }, 100);
+  };
+
+  const handlePointerLeave = (note: Note, index?: number, isBlackKey: boolean = false) => {
+    const keyId = `${note}-${index}-${isBlackKey ? 'black' : 'white'}`;
+    setActiveKeys(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(keyId);
+      return newSet;
+    });
   };
 
   // Helper functions that normalize note comparisons to handle enharmonic equivalents
@@ -234,9 +254,14 @@ export function PianoKeyboard({
               )}
               style={{
                 ...getKeyColors(note),
-                boxShadow: isActive(note, index) ? `0 2px 4px hsl(var(--key-shadow))` : undefined
+                boxShadow: isActive(note, index) ? `0 2px 4px hsl(var(--key-shadow))` : undefined,
+                touchAction: 'manipulation', // Prevent default touch behaviors
+                userSelect: 'none',
+                WebkitUserSelect: 'none'
               }}
-              onClick={() => handleKeyPress(note, index)}
+              onPointerDown={() => handlePointerDown(note, index)}
+              onPointerUp={() => handlePointerUp(note, index)}
+              onPointerLeave={() => handlePointerLeave(note, index)}
             >
               {showLabels && getEnharmonicDisplay(note)}
             </button>
@@ -267,12 +292,17 @@ export function PianoKeyboard({
                     "bg-gray-800": !isHighlighted(blackKey.note) && !isSharpInKey(blackKey.note) && !isPlayed(blackKey.note) && !isSelected(blackKey.note),
                   }
                 )}
-                style={{ 
+                onPointerDown={() => handlePointerDown(blackKey.note, blackKey.whiteKeyIndex, true)}
+                onPointerUp={() => handlePointerUp(blackKey.note, blackKey.whiteKeyIndex, true)}
+                onPointerLeave={() => handlePointerLeave(blackKey.note, blackKey.whiteKeyIndex, true)}
+                style={{
                   left: `${leftPosition}px`,
+                  touchAction: 'manipulation', // Prevent default touch behaviors
+                  userSelect: 'none',
+                  WebkitUserSelect: 'none',
                   ...getKeyColors(blackKey.note, true),
                   boxShadow: isActive(blackKey.note, blackKey.whiteKeyIndex, true) ? `0 4px 6px hsl(var(--key-shadow))` : undefined
                 }}
-                onClick={() => handleKeyPress(blackKey.note, blackKey.whiteKeyIndex, true)}
               >
                 {showLabels && getVerticalEnharmonicDisplay(blackKey.note)}
               </button>

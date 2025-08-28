@@ -125,7 +125,7 @@ class AudioEngine {
     // Schedule scale playback with cancellation tracking
     for (let i = 0; i < notes.length; i++) {
       const timeout = setTimeout(() => {
-        this.playNote(normalizeNote(notes[i]), noteDuration * 0.8);
+        this.playNote(normalizeNote(notes[i] as any), noteDuration * 0.8);
       }, i * noteDuration * 1000);
       
       this.currentScaleTimeouts.push(timeout);
