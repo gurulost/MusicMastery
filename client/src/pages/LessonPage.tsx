@@ -76,6 +76,14 @@ export default function LessonPage() {
         throw new Error('No user logged in');
       }
       
+      console.log('Saving progress with:', {
+        userId: currentUser.id,
+        stepId,
+        section,
+        isCompleted: true,
+        ...data
+      });
+      
       const response = await apiRequest('POST', '/api/learning-progress', {
         userId: currentUser.id,
         stepId,
@@ -83,7 +91,10 @@ export default function LessonPage() {
         isCompleted: true,
         ...data
       });
-      return response.json();
+      
+      const result = await response.json();
+      console.log('Progress saved:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/learning-progress'] });
@@ -92,11 +103,11 @@ export default function LessonPage() {
         description: `${section.charAt(0).toUpperCase() + section.slice(1)} section completed.`,
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Learning progress mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to save progress. Please try again.",
+        description: error?.message || "Failed to save progress. Please try again.",
         variant: "destructive"
       });
     },
@@ -113,6 +124,8 @@ export default function LessonPage() {
       return;
     }
 
+    console.log('handleCompleteSection called with currentUser:', currentUser);
+    
     // Save progress to database FIRST
     try {
       await updateProgress.mutateAsync({ score });
@@ -130,9 +143,14 @@ export default function LessonPage() {
           navigate('/learning-journey');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Complete section error:', error);
-      // Don't show additional error toast here since the mutation onError already handles it
+      // Show the actual error message for debugging
+      toast({
+        title: "Error",
+        description: `Debug: ${error?.message || JSON.stringify(error)}`,
+        variant: "destructive"
+      });
     }
   };
 
