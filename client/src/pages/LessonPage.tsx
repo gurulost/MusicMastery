@@ -62,7 +62,7 @@ export default function LessonPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentUser } = useUser();
+  const { currentUser, isLoadingUser } = useUser();
   
   const stepId = parseInt(params.stepId || '1');
   const section = (params.section as 'learn' | 'practice' | 'test') || 'learn';
@@ -153,6 +153,37 @@ export default function LessonPage() {
     };
     return icons[section];
   };
+
+  // Show loading screen while user context is loading
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show login screen if no user is selected
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-bold mb-2">Please Select a User</h2>
+            <p className="text-muted-foreground mb-4">You need to be logged in to access lessons.</p>
+            <Link href="/">
+              <Button>Go to Home</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!LessonComponent) {
     return (
